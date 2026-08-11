@@ -1,0 +1,32 @@
+{
+    "name": "medtrack/medtrack",
+    "description": "Plateforme de gestion des stages des étudiants en médecine et sciences de la santé",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Gregory Kayembe"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "vlucas/phpdotenv": "^5.6",
+        "monolog/monolog": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MedTrack\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MedTrack\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
