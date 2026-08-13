@@ -4,14 +4,27 @@ declare(strict_types=1);
 
 use Dotenv\Dotenv;
 use MedTrack\Core\Application;
+use MedTrack\Core\Auth\Session;
 use MedTrack\Core\Config;
 use MedTrack\Core\Database\Database;
 use MedTrack\Core\Exceptions\ExceptionHandler;
 use MedTrack\Core\Http\View;
 use MedTrack\Core\Routing\Router;
+use MedTrack\Modules\Identity\Controllers\AuthController;
+use MedTrack\Modules\Identity\Repositories\UserRepository;
+use MedTrack\Modules\Identity\Services\AuthService;
+use MedTrack\Modules\Identity\Controllers\PasswordResetController;
+use MedTrack\Modules\Identity\Repositories\PasswordResetRepository;
+use MedTrack\Modules\Identity\Services\PasswordResetService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
+
+/*
+|--------------------------------------------------------------------------
+| Root path
+|--------------------------------------------------------------------------
+*/
 
 $root = dirname(__DIR__);
 
@@ -47,6 +60,49 @@ $router = new Router();
 
 $view = new View(
     $root . '/resources/views'
+);
+
+/*
+|--------------------------------------------------------------------------
+| Session
+|--------------------------------------------------------------------------
+*/
+
+$session = new Session();
+$session->start();
+
+/*
+|--------------------------------------------------------------------------
+| Identity / Authentication
+|--------------------------------------------------------------------------
+*/
+
+$userRepository = new UserRepository(
+    $database->connection()
+);
+
+$authService = new AuthService(
+    $userRepository,
+    $session
+);
+
+$authController = new AuthController(
+    $authService,
+    $view
+);
+
+$passwordResetRepository = new PasswordResetRepository(
+    $database->connection()
+);
+
+$passwordResetService = new PasswordResetService(
+    $userRepository,
+    $passwordResetRepository
+);
+
+$passwordResetController = new PasswordResetController(
+    $passwordResetService,
+    $view
 );
 
 /*
@@ -92,7 +148,9 @@ $registerRoutes = require $root . '/routes/web.php';
 $registerRoutes(
     $router,
     $database,
-    $view
+    $view,
+    $authController,
+    $passwordResetController
 );
 
 /*
