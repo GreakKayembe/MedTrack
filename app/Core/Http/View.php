@@ -8,10 +8,26 @@ use RuntimeException;
 
 final class View
 {
+    private array $sharedData = [];
+
+    public function share(
+        string $key,
+        mixed $value
+    ): void {
+        $this->sharedData[$key] = $value;
+    }
+
+
     public function __construct(
         private readonly string $viewsPath
     ) {
     }
+
+    /**
+     * Rend une variable disponible dans toutes les vues.
+     */
+    
+    
 
     public function render(
         string $view,
@@ -21,20 +37,48 @@ final class View
         $viewFile = $this->resolve($view);
         $layoutFile = $this->resolve($layout);
 
-        extract($data, EXTR_SKIP);
+        /*
+         * Les données spécifiques à la vue ont priorité
+         * sur les données partagées.
+         */
+        $data = array_merge(
+            $this->sharedData,
+            $data
+        );
+
+        extract(
+            $data,
+            EXTR_SKIP
+        );
 
         ob_start();
-        require $viewFile;
-        $content = (string) ob_get_clean();
+
+        try {
+            require $viewFile;
+
+            $content = (string) ob_get_clean();
+        } catch (\Throwable $exception) {
+            ob_end_clean();
+
+            throw $exception;
+        }
 
         ob_start();
-        require $layoutFile;
 
-        return (string) ob_get_clean();
+        try {
+            require $layoutFile;
+
+            return (string) ob_get_clean();
+        } catch (\Throwable $exception) {
+            ob_end_clean();
+
+            throw $exception;
+        }
     }
 
-    private function resolve(string $view): string
-    {
+    private function resolve(
+        string $view
+    ): string {
         $path = $this->viewsPath
             . '/'
             . str_replace('.', '/', $view)
@@ -42,7 +86,10 @@ final class View
 
         if (!is_file($path)) {
             throw new RuntimeException(
-                sprintf('Vue introuvable : %s', $view)
+                sprintf(
+                    'Vue introuvable : %s',
+                    $view
+                )
             );
         }
 

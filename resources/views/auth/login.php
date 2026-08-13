@@ -1,3 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var string $csrfToken */
+
+?>
+
 <div class="mt-auth-shell">
 
     <!-- =========================
@@ -157,8 +165,19 @@
                 </div>
             </div>
 
-
             <form id="login-form" novalidate>
+
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="<?= htmlspecialchars(
+                        $csrfToken,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
+
+
 
                 <!-- LOGIN -->
                 <div class="mt-form-group">

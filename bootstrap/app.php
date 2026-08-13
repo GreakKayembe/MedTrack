@@ -17,6 +17,10 @@ use MedTrack\Modules\Identity\Controllers\PasswordResetController;
 use MedTrack\Modules\Identity\Repositories\PasswordResetRepository;
 use MedTrack\Modules\Identity\Services\PasswordResetService;
 use Monolog\Handler\StreamHandler;
+use MedTrack\Core\Security\Csrf;
+use MedTrack\Core\Http\Middleware\CsrfMiddleware;
+use MedTrack\Core\Http\Middleware\AuthMiddleware;
+use MedTrack\Core\Http\Middleware\GuestMiddleware;
 use Monolog\Level;
 use Monolog\Logger;
 
@@ -70,6 +74,23 @@ $view = new View(
 
 $session = new Session();
 $session->start();
+$csrf = new Csrf(
+    $session
+);
+
+$csrfMiddleware = new CsrfMiddleware(
+    $csrf
+);
+
+
+
+/*
+ * Disponible dans toutes les vues.
+ */
+$view->share(
+    'csrfToken',
+    $csrf->token()
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +100,32 @@ $session->start();
 
 $userRepository = new UserRepository(
     $database->connection()
+);
+
+$authService = new AuthService(
+    $userRepository,
+    $session
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Authentication middleware
+|--------------------------------------------------------------------------
+*/
+
+$authMiddleware = new AuthMiddleware(
+    $authService
+);
+
+$guestMiddleware = new GuestMiddleware(
+    $authService
+);
+
+
+$authController = new AuthController(
+    $authService,
+    $view
 );
 
 $authService = new AuthService(
@@ -150,7 +197,10 @@ $registerRoutes(
     $database,
     $view,
     $authController,
-    $passwordResetController
+    $passwordResetController,
+    $csrfMiddleware,
+    $authMiddleware,
+    $guestMiddleware
 );
 
 /*

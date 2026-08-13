@@ -1,3 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var string $csrfToken */
+
+?>
 <header id="header" class="header fixed-top d-flex align-items-center">
 
     <div class="d-flex align-items-center justify-content-between">
@@ -71,20 +78,30 @@
                         </a>
                     </li>
 
-                    <li><form
-                                method="POST"
-                                action="/logout"
-                                class="m-0"
-                            >
-                                <button
-                                    type="submit"
-                                    class="dropdown-item d-flex align-items-center border-0 bg-transparent w-100"
-                                >
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    <span>Déconnexion</span>
-                                </button>
-                            </form>
+                    <li>
+                        <form
+                        action="/logout"
+                        method="POST"
+                        id="logout-form"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                        >
 
+                        <button
+                            type="submit"
+                            class="dropdown-item"
+                        >
+                            <i class="bi bi-box-arrow-right"></i>
+                            Déconnexion
+                        </button>
+                    </form>
                         
                     </li>
 
