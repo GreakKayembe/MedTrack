@@ -6,9 +6,11 @@ use MedTrack\Core\Database\Database;
 use MedTrack\Core\Http\Middleware\AuthMiddleware;
 use MedTrack\Core\Http\Middleware\CsrfMiddleware;
 use MedTrack\Core\Http\Middleware\GuestMiddleware;
+use MedTrack\Core\Http\Middleware\PasswordChangeMiddleware;
 use MedTrack\Core\Http\View;
 use MedTrack\Core\Routing\Router;
 use MedTrack\Modules\Identity\Controllers\AuthController;
+use MedTrack\Modules\Identity\Controllers\PasswordChangeController;
 use MedTrack\Modules\Identity\Controllers\PasswordResetController;
 
 
@@ -18,9 +20,11 @@ return static function (
     View $view,
     AuthController $authController,
     PasswordResetController $passwordResetController,
+    PasswordChangeController $passwordChangeController,
     CsrfMiddleware $csrfMiddleware,
     AuthMiddleware $authMiddleware,
-    GuestMiddleware $guestMiddleware
+    GuestMiddleware $guestMiddleware,
+    PasswordChangeMiddleware $passwordChangeMiddleware
 ): void {
 
     /*
@@ -41,6 +45,11 @@ return static function (
 
     $guestProtection = [
         $guestMiddleware,
+        'handle',
+    ];
+
+    $passwordChangeProtection = [
+        $passwordChangeMiddleware,
         'handle',
     ];
 
@@ -68,10 +77,6 @@ return static function (
         [$authController, 'login']
     );
 
-    /*
-     * L'utilisateur doit être un visiteur
-     * et le formulaire doit posséder un token CSRF valide.
-     */
     $router->middleware(
         'POST',
         '/login',
@@ -97,7 +102,9 @@ return static function (
     );
 
     /*
-     * Seul un utilisateur authentifié peut se déconnecter.
+     * La déconnexion reste toujours autorisée pour un utilisateur
+     * authentifié, même lorsqu'un changement de mot de passe
+     * est obligatoire.
      */
     $router->middleware(
         'POST',
@@ -186,6 +193,49 @@ return static function (
 
     /*
     |--------------------------------------------------------------------------
+    | Password change
+    |--------------------------------------------------------------------------
+    */
+
+    $router->get(
+        '/change-password',
+        [$passwordChangeController, 'show']
+    );
+
+    /*
+     * L'utilisateur doit être authentifié.
+     *
+     * PasswordChangeMiddleware n'est volontairement pas nécessaire ici :
+     * cette route doit rester accessible lorsque
+     * must_change_password = 1.
+     */
+    $router->middleware(
+        'GET',
+        '/change-password',
+        $authProtection
+    );
+
+
+    $router->post(
+        '/change-password',
+        [$passwordChangeController, 'update']
+    );
+
+    $router->middleware(
+        'POST',
+        '/change-password',
+        $authProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/change-password',
+        $csrfProtection
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Dashboard
     |--------------------------------------------------------------------------
     */
@@ -203,12 +253,22 @@ return static function (
     );
 
     /*
-     * Le dashboard nécessite une authentification.
+     * Ordre logique :
+     *
+     * 1. vérifier l'authentification ;
+     * 2. vérifier si un changement de mot de passe est obligatoire ;
+     * 3. seulement ensuite exécuter le dashboard.
      */
     $router->middleware(
         'GET',
         '/',
         $authProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/',
+        $passwordChangeProtection
     );
 
 
@@ -225,13 +285,19 @@ return static function (
 
             return [
                 'status' => 'ok',
-                'application' => $_ENV['APP_NAME'] ?? 'MedTrack',
+
+                'application' =>
+                    $_ENV['APP_NAME'] ?? 'MedTrack',
+
                 'database' => [
                     'status' => 'connected',
+
                     'name' => $pdo
                         ->query('SELECT DATABASE()')
                         ->fetchColumn(),
+
                     'server' => 'MySQL',
+
                     'version' => $pdo
                         ->query('SELECT VERSION()')
                         ->fetchColumn(),

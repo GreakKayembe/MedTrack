@@ -23,10 +23,14 @@ final class CsrfMiddleware
             return $next($request);
         }
 
-        $token =
-            $_POST['_token']
-            ?? $_SERVER['HTTP_X_CSRF_TOKEN']
-            ?? null;
+
+                $token = $request->input(
+            '_token',
+            $request->header(
+                'X-CSRF-Token'
+            )
+        );
+
 
         if (
             !is_string($token)

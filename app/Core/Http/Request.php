@@ -17,7 +17,9 @@ final class Request
 
     public static function capture(): self
     {
-        $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+        $method = strtoupper(
+            $_SERVER['REQUEST_METHOD'] ?? 'GET'
+        );
 
         $path = parse_url(
             $_SERVER['REQUEST_URI'] ?? '/',
@@ -40,21 +42,73 @@ final class Request
 
     public function path(): string
     {
-        return $this->path === '/' ? '/' : rtrim($this->path, '/');
+        return $this->path === '/'
+            ? '/'
+            : rtrim($this->path, '/');
     }
 
-    public function query(string $key, mixed $default = null): mixed
-    {
-        return $this->query[$key] ?? $default;
+    public function query(
+        string $key,
+        mixed $default = null
+    ): mixed {
+        return $this->query[$key]
+            ?? $default;
     }
 
-    public function input(string $key, mixed $default = null): mixed
-    {
-        return $this->body[$key] ?? $default;
+    public function input(
+        string $key,
+        mixed $default = null
+    ): mixed {
+        return $this->body[$key]
+            ?? $default;
     }
 
     public function all(): array
     {
         return $this->body;
+    }
+
+    public function header(
+        string $name,
+        mixed $default = null
+    ): mixed {
+        $key = 'HTTP_' . strtoupper(
+            str_replace('-', '_', $name)
+        );
+
+        return $this->server[$key]
+            ?? $default;
+    }
+
+    public function ip(): string
+    {
+        $ip = $this->server['REMOTE_ADDR']
+            ?? '0.0.0.0';
+
+        return is_string($ip)
+            ? $ip
+            : '0.0.0.0';
+    }
+
+    public function expectsJson(): bool
+    {
+        $accept = strtolower(
+            (string) $this->header(
+                'Accept',
+                ''
+            )
+        );
+
+        $requestedWith = strtolower(
+            (string) $this->header(
+                'X-Requested-With',
+                ''
+            )
+        );
+
+        return str_contains(
+            $accept,
+            'application/json'
+        ) || $requestedWith === 'xmlhttprequest';
     }
 }

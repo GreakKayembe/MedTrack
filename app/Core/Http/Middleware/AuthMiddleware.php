@@ -19,14 +19,27 @@ final class AuthMiddleware
         Request $request,
         callable $next
     ): mixed {
+        /*
+        |--------------------------------------------------------------------------
+        | Utilisateur authentifié
+        |--------------------------------------------------------------------------
+        */
+
         if ($this->auth->check()) {
             return $next($request);
         }
 
         /*
-         * Une requête AJAX/API reçoit une réponse JSON.
-         */
-        if ($this->expectsJson()) {
+        |--------------------------------------------------------------------------
+        | Requête AJAX / API
+        |--------------------------------------------------------------------------
+        |
+        | Pour AJAX ou une future API MedTrack, nous ne renvoyons pas
+        | une page HTML de connexion. Le client reçoit un HTTP 401.
+        |
+        */
+
+        if ($request->expectsJson()) {
             Response::json(
                 [
                     'status' => 'error',
@@ -39,8 +52,11 @@ final class AuthMiddleware
         }
 
         /*
-         * Navigation web classique.
-         */
+        |--------------------------------------------------------------------------
+        | Navigation web classique
+        |--------------------------------------------------------------------------
+        */
+
         header(
             'Location: /login',
             true,
@@ -48,23 +64,5 @@ final class AuthMiddleware
         );
 
         exit;
-    }
-
-    private function expectsJson(): bool
-    {
-        $accept =
-            $_SERVER['HTTP_ACCEPT']
-            ?? '';
-
-        $requestedWith =
-            $_SERVER['HTTP_X_REQUESTED_WITH']
-            ?? '';
-
-        return str_contains(
-            strtolower($accept),
-            'application/json'
-        )
-            || strtolower($requestedWith)
-                === 'xmlhttprequest';
     }
 }

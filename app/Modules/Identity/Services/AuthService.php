@@ -15,50 +15,136 @@ final class AuthService
     ) {
     }
 
-    public function attempt(string $login, string $password): bool
-    {
-        $user = $this->users->findByLogin($login);
+    /**
+     * Tente d'authentifier un utilisateur.
+     *
+     * Le service retourne un résultat détaillé destiné
+     * uniquement à la logique interne de MedTrack.
+     *
+     * Le contrôleur devra continuer à utiliser un message
+     * générique côté client afin d'éviter l'énumération
+     * des comptes.
+     */
+    public function attempt(
+        string $login,
+        string $password
+    ): AuthenticationResult {
+        /*
+        |--------------------------------------------------------------------------
+        | Recherche utilisateur
+        |--------------------------------------------------------------------------
+        */
+
+        $user = $this->users->findByLogin(
+            $login
+        );
 
         if ($user === null) {
-            return false;
+            return AuthenticationResult::failure(
+                AuthenticationResult::USER_NOT_FOUND
+            );
         }
+
+        $userId = (int) $user['id'];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Vérification du statut
+        |--------------------------------------------------------------------------
+        */
 
         if ($user['status'] !== 'ACTIVE') {
-            return false;
+            return AuthenticationResult::failure(
+                AuthenticationResult::ACCOUNT_UNAVAILABLE,
+                $userId
+            );
         }
 
-        if (!password_verify($password, $user['password_hash'])) {
-            return false;
+        /*
+        |--------------------------------------------------------------------------
+        | Vérification du mot de passe
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !password_verify(
+                $password,
+                $user['password_hash']
+            )
+        ) {
+            return AuthenticationResult::failure(
+                AuthenticationResult::INVALID_PASSWORD,
+                $userId
+            );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Protection contre la fixation de session
+        |--------------------------------------------------------------------------
+        */
 
         $this->session->regenerate();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Création de la session authentifiée
+        |--------------------------------------------------------------------------
+        */
+
         $this->session->put(
             'auth_user_id',
-            (int) $user['id']
+            $userId
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dernière connexion
+        |--------------------------------------------------------------------------
+        */
 
         $this->users->updateLastLogin(
-            (int) $user['id']
+            $userId
         );
 
-        return true;
+        /*
+        |--------------------------------------------------------------------------
+        | Succès
+        |--------------------------------------------------------------------------
+        */
+
+        return AuthenticationResult::success(
+            $userId
+        );
     }
 
+    /**
+     * Indique si un utilisateur est actuellement authentifié.
+     */
     public function check(): bool
     {
-        return $this->session->has('auth_user_id');
+        return $this->session->has(
+            'auth_user_id'
+        );
     }
 
+    /**
+     * Retourne l'identifiant de l'utilisateur authentifié.
+     */
     public function id(): ?int
     {
-        $id = $this->session->get('auth_user_id');
+        $id = $this->session->get(
+            'auth_user_id'
+        );
 
         return $id !== null
             ? (int) $id
             : null;
     }
 
+    /**
+     * Retourne l'utilisateur actuellement authentifié.
+     */
     public function user(): ?array
     {
         $id = $this->id();
@@ -67,9 +153,14 @@ final class AuthService
             return null;
         }
 
-        return $this->users->findById($id);
+        return $this->users->findById(
+            $id
+        );
     }
 
+    /**
+     * Déconnecte l'utilisateur.
+     */
     public function logout(): void
     {
         $this->session->invalidate();

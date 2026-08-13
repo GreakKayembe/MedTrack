@@ -11,14 +11,40 @@ final class Router
 {
     private array $routes = [];
 
-    public function get(string $path, callable $handler): void
-    {
-        $this->add('GET', $path, $handler);
+    private array $middlewares = [];
+
+    public function get(
+        string $path,
+        callable $handler
+    ): void {
+        $this->add(
+            'GET',
+            $path,
+            $handler
+        );
     }
 
-    public function post(string $path, callable $handler): void
-    {
-        $this->add('POST', $path, $handler);
+    public function post(
+        string $path,
+        callable $handler
+    ): void {
+        $this->add(
+            'POST',
+            $path,
+            $handler
+        );
+    }
+
+    public function middleware(
+        string $method,
+        string $path,
+        callable $middleware
+    ): void {
+        $method = strtoupper($method);
+        $path = $this->normalize($path);
+
+        $this->middlewares[$method][$path][] =
+            $middleware;
     }
 
     private function add(
@@ -26,24 +52,79 @@ final class Router
         string $path,
         callable $handler
     ): void {
-        $this->routes[$method][$this->normalize($path)] = $handler;
+        $this->routes[$method][
+            $this->normalize($path)
+        ] = $handler;
     }
 
-    public function dispatch(Request $request): never
-    {
+    public function dispatch(
+        Request $request
+    ): never {
         $method = $request->method();
-        $path = $this->normalize($request->path());
 
-        $handler = $this->routes[$method][$path] ?? null;
+        $path = $this->normalize(
+            $request->path()
+        );
+
+        $handler =
+            $this->routes[$method][$path]
+            ?? null;
 
         if ($handler === null) {
-            Response::json([
-                'status' => 'error',
-                'message' => 'Route not found.',
-            ], 404);
+            Response::json(
+                [
+                    'status' => 'error',
+                    'message' => 'Route not found.',
+                ],
+                404
+            );
         }
 
-        $result = $handler($request);
+        /*
+        |--------------------------------------------------------------------------
+        | Middleware pipeline
+        |--------------------------------------------------------------------------
+        */
+
+        $middlewares =
+            $this->middlewares[$method][$path]
+            ?? [];
+
+        $pipeline = array_reduce(
+            array_reverse($middlewares),
+
+            static function (
+                callable $next,
+                callable $middleware
+            ): callable {
+                return static function (
+                    Request $request
+                ) use (
+                    $middleware,
+                    $next
+                ): mixed {
+                    return $middleware(
+                        $request,
+                        $next
+                    );
+                };
+            },
+
+            static function (
+                Request $request
+            ) use ($handler): mixed {
+                return $handler($request);
+            }
+        );
+
+        $result = $pipeline($request);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
 
         if (is_array($result)) {
             Response::json($result);
@@ -53,16 +134,23 @@ final class Router
             Response::html($result);
         }
 
-        Response::json([
-            'status' => 'error',
-            'message' => 'Invalid response.',
-        ], 500);
+        Response::json(
+            [
+                'status' => 'error',
+                'message' => 'Invalid response.',
+            ],
+            500
+        );
     }
 
-    private function normalize(string $path): string
-    {
-        $path = '/' . trim($path, '/');
+    private function normalize(
+        string $path
+    ): string {
+        $path =
+            '/' . trim($path, '/');
 
-        return $path === '/' ? '/' : rtrim($path, '/');
+        return $path === '/'
+            ? '/'
+            : rtrim($path, '/');
     }
 }
