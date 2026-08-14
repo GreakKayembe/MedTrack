@@ -41,6 +41,7 @@ final class Router
         callable $middleware
     ): void {
         $method = strtoupper($method);
+
         $path = $this->normalize($path);
 
         $this->middlewares[$method][$path][] =
@@ -52,9 +53,12 @@ final class Router
         string $path,
         callable $handler
     ): void {
-        $this->routes[$method][
-            $this->normalize($path)
-        ] = $handler;
+        $method = strtoupper($method);
+
+        $path = $this->normalize($path);
+
+        $this->routes[$method][$path] =
+            $handler;
     }
 
     public function dispatch(
@@ -66,11 +70,12 @@ final class Router
             $request->path()
         );
 
-        $handler =
-            $this->routes[$method][$path]
-            ?? null;
+        $matchedRoute = $this->matchRoute(
+            $method,
+            $path
+        );
 
-        if ($handler === null) {
+        if ($matchedRoute === null) {
             Response::json(
                 [
                     'status' => 'error',
@@ -80,6 +85,25 @@ final class Router
             );
         }
 
+        $routePath =
+            $matchedRoute['route'];
+
+        $handler =
+            $matchedRoute['handler'];
+
+        $attributes =
+            $matchedRoute['attributes'];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Route attributes
+        |--------------------------------------------------------------------------
+        */
+
+        $request->setRouteAttributes(
+            $attributes
+        );
+
         /*
         |--------------------------------------------------------------------------
         | Middleware pipeline
@@ -87,7 +111,7 @@ final class Router
         */
 
         $middlewares =
-            $this->middlewares[$method][$path]
+            $this->middlewares[$method][$routePath]
             ?? [];
 
         $pipeline = array_reduce(
@@ -117,8 +141,9 @@ final class Router
             }
         );
 
-        $result = $pipeline($request);
-
+        $result = $pipeline(
+            $request
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -127,11 +152,15 @@ final class Router
         */
 
         if (is_array($result)) {
-            Response::json($result);
+            Response::json(
+                $result
+            );
         }
 
         if (is_string($result)) {
-            Response::html($result);
+            Response::html(
+                $result
+            );
         }
 
         Response::json(
@@ -143,14 +172,195 @@ final class Router
         );
     }
 
+    /**
+     * Recherche une route correspondant à la requête.
+     *
+     * Supporte :
+     *
+     * /universities
+     * /universities/{id}
+     * /universities/{id}/edit
+     */
+    private function matchRoute(
+        string $method,
+        string $requestPath
+    ): ?array {
+        $routes =
+            $this->routes[$method]
+            ?? [];
+
+        /*
+         * Recherche exacte en priorité.
+         */
+        if (
+            array_key_exists(
+                $requestPath,
+                $routes
+            )
+        ) {
+            return [
+                'route' => $requestPath,
+                'handler' => $routes[$requestPath],
+                'attributes' => [],
+            ];
+        }
+
+        /*
+         * Recherche des routes dynamiques.
+         */
+        foreach (
+            $routes as
+            $routePath => $handler
+        ) {
+            if (
+                !str_contains(
+                    $routePath,
+                    '{'
+                )
+            ) {
+                continue;
+            }
+
+            $attributes =
+                $this->matchDynamicRoute(
+                    $routePath,
+                    $requestPath
+                );
+
+            if ($attributes === null) {
+                continue;
+            }
+
+            return [
+                'route' => $routePath,
+                'handler' => $handler,
+                'attributes' => $attributes,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Compare une route dynamique avec l'URL demandée.
+     */
+    private function matchDynamicRoute(
+        string $routePath,
+        string $requestPath
+    ): ?array {
+        $routeSegments =
+            $this->segments(
+                $routePath
+            );
+
+        $requestSegments =
+            $this->segments(
+                $requestPath
+            );
+
+        if (
+            count($routeSegments)
+            !== count($requestSegments)
+        ) {
+            return null;
+        }
+
+        $attributes = [];
+
+        foreach (
+            $routeSegments as
+            $index => $routeSegment
+        ) {
+            $requestSegment =
+                $requestSegments[$index];
+
+            if (
+                $this->isParameter(
+                    $routeSegment
+                )
+            ) {
+                $parameterName =
+                    substr(
+                        $routeSegment,
+                        1,
+                        -1
+                    );
+
+                if (
+                    $parameterName === ''
+                    || $requestSegment === ''
+                ) {
+                    return null;
+                }
+
+                $attributes[$parameterName] =
+                    rawurldecode(
+                        $requestSegment
+                    );
+
+                continue;
+            }
+
+            if (
+                $routeSegment
+                !== $requestSegment
+            ) {
+                return null;
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Détermine si un segment représente
+     * un paramètre dynamique.
+     */
+    private function isParameter(
+        string $segment
+    ): bool {
+        return strlen($segment) >= 3
+            && $segment[0] === '{'
+            && $segment[
+                strlen($segment) - 1
+            ] === '}';
+    }
+
+    /**
+     * Découpe une route en segments.
+     */
+    private function segments(
+        string $path
+    ): array {
+        $path = trim(
+            $path,
+            '/'
+        );
+
+        if ($path === '') {
+            return [];
+        }
+
+        return explode(
+            '/',
+            $path
+        );
+    }
+
     private function normalize(
         string $path
     ): string {
         $path =
-            '/' . trim($path, '/');
+            '/' . trim(
+                $path,
+                '/'
+            );
 
         return $path === '/'
             ? '/'
-            : rtrim($path, '/');
+            : rtrim(
+                $path,
+                '/'
+            );
     }
 }

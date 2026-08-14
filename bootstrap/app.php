@@ -17,6 +17,26 @@ use MedTrack\Core\Routing\Router;
 use MedTrack\Core\Security\Csrf;
 use MedTrack\Core\Security\RateLimit\RateLimiter;
 use MedTrack\Core\Security\RateLimit\RateLimitRepository;
+
+use MedTrack\Modules\Academic\Controllers\AcademicProgramController;
+use MedTrack\Modules\Academic\Controllers\AcademicYearController;
+use MedTrack\Modules\Academic\Controllers\CohortController;
+use MedTrack\Modules\Academic\Controllers\FacultyController;
+use MedTrack\Modules\Academic\Controllers\StudyLevelController;
+use MedTrack\Modules\Academic\Controllers\UniversityController;
+use MedTrack\Modules\Academic\Repositories\AcademicProgramRepository;
+use MedTrack\Modules\Academic\Repositories\AcademicYearRepository;
+use MedTrack\Modules\Academic\Repositories\CohortRepository;
+use MedTrack\Modules\Academic\Repositories\FacultyRepository;
+use MedTrack\Modules\Academic\Repositories\StudyLevelRepository;
+use MedTrack\Modules\Academic\Repositories\UniversityRepository;
+use MedTrack\Modules\Academic\Services\AcademicProgramService;
+use MedTrack\Modules\Academic\Services\AcademicYearService;
+use MedTrack\Modules\Academic\Services\CohortService;
+use MedTrack\Modules\Academic\Services\FacultyService;
+use MedTrack\Modules\Academic\Services\StudyLevelService;
+use MedTrack\Modules\Academic\Services\UniversityService;
+
 use MedTrack\Modules\Identity\Controllers\AuthController;
 use MedTrack\Modules\Identity\Controllers\PasswordChangeController;
 use MedTrack\Modules\Identity\Controllers\PasswordResetController;
@@ -26,6 +46,7 @@ use MedTrack\Modules\Identity\Repositories\UserRepository;
 use MedTrack\Modules\Identity\Services\AuthService;
 use MedTrack\Modules\Identity\Services\PasswordChangeService;
 use MedTrack\Modules\Identity\Services\PasswordResetService;
+
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
@@ -226,6 +247,110 @@ $passwordResetController = new PasswordResetController(
 
 /*
 |--------------------------------------------------------------------------
+| Academic repositories
+|--------------------------------------------------------------------------
+*/
+
+$universityRepository = new UniversityRepository(
+    $database->connection()
+);
+
+$facultyRepository = new FacultyRepository(
+    $database->connection()
+);
+
+$academicProgramRepository = new AcademicProgramRepository(
+    $database->connection()
+);
+
+$academicYearRepository = new AcademicYearRepository(
+    $database->connection()
+);
+
+$studyLevelRepository = new StudyLevelRepository(
+    $database->connection()
+);
+
+$cohortRepository = new CohortRepository(
+    $database->connection()
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Academic services
+|--------------------------------------------------------------------------
+*/
+
+$universityService = new UniversityService(
+    $universityRepository
+);
+
+$facultyService = new FacultyService(
+    $facultyRepository
+);
+
+$academicProgramService = new AcademicProgramService(
+    $academicProgramRepository
+);
+
+$academicYearService = new AcademicYearService(
+    $academicYearRepository
+);
+
+$studyLevelService = new StudyLevelService(
+    $studyLevelRepository
+);
+
+$cohortService = new CohortService(
+    $cohortRepository
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Academic controllers
+|--------------------------------------------------------------------------
+*/
+
+$universityController = new UniversityController(
+    $universityService,
+    $view
+);
+
+$facultyController = new FacultyController(
+    $facultyService,
+    $universityService,
+    $view
+);
+
+$academicProgramController = new AcademicProgramController(
+    $academicProgramService,
+    $universityService,
+    $facultyService,
+    $view
+);
+
+$academicYearController = new AcademicYearController(
+    $academicYearService,
+    $view
+);
+
+$studyLevelController = new StudyLevelController(
+    $studyLevelService,
+    $view
+);
+
+$cohortController = new CohortController(
+    $cohortService,
+    $academicProgramService,
+    $academicYearService,
+    $view
+);
+
+
+/*
+|--------------------------------------------------------------------------
 | Logging
 |--------------------------------------------------------------------------
 */
@@ -282,6 +407,12 @@ $registerRoutes(
     $authController,
     $passwordResetController,
     $passwordChangeController,
+    $universityController,
+    $facultyController,
+    $academicProgramController,
+    $academicYearController,
+    $studyLevelController,
+    $cohortController,
     $csrfMiddleware,
     $authMiddleware,
     $guestMiddleware,

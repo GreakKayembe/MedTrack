@@ -6,6 +6,8 @@ namespace MedTrack\Core\Http;
 
 final class Request
 {
+    private array $attributes = [];
+
     public function __construct(
         private readonly string $method,
         private readonly string $path,
@@ -110,5 +112,43 @@ final class Request
             $accept,
             'application/json'
         ) || $requestedWith === 'xmlhttprequest';
+    }
+
+    /**
+     * Ajoute les paramètres extraits de la route.
+     *
+     * Exemple :
+     *
+     * /universities/{id}
+     *
+     * devient :
+     *
+     * [
+     *     'id' => '12',
+     * ]
+     */
+    public function setRouteAttributes(
+        array $attributes
+    ): void {
+        $this->attributes = $attributes;
+    }
+
+    /**
+     * Retourne un paramètre de route.
+     */
+    public function attribute(
+        string $key,
+        mixed $default = null
+    ): mixed {
+        return $this->attributes[$key]
+            ?? $default;
+    }
+
+    /**
+     * Retourne tous les paramètres de route.
+     */
+    public function attributes(): array
+    {
+        return $this->attributes;
     }
 }
