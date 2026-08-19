@@ -504,4 +504,458 @@ final class UserManagementRepository
             ? $metrics
             : [];
     }
+
+    /**
+ * Met à jour le statut d'un utilisateur.
+ */
+public function updateStatus(
+    int $userId,
+    string $status
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                UPDATE users
+                SET status = :status
+                WHERE id = :user_id
+            SQL
+        );
+
+    $statement->execute([
+        'status' =>
+            $status,
+
+        'user_id' =>
+            $userId,
+    ]);
+}
+
+/**
+ * Active ou désactive l'obligation
+ * de changement de mot de passe.
+ */
+public function setMustChangePassword(
+    int $userId,
+    bool $required
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                UPDATE users
+                SET must_change_password = :required
+                WHERE id = :user_id
+            SQL
+        );
+
+    $statement->execute([
+        'required' =>
+            $required ? 1 : 0,
+
+        'user_id' =>
+            $userId,
+    ]);
+}
+
+/**
+ * Retourne un rôle par identifiant.
+ */
+public function findRoleById(
+    int $roleId
+): ?array {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT
+                    id,
+                    code,
+                    name,
+                    organization_type,
+                    is_system
+
+                FROM roles
+
+                WHERE id = :id
+
+                LIMIT 1
+            SQL
+        );
+
+    $statement->execute([
+        'id' =>
+            $roleId,
+    ]);
+
+    $role =
+        $statement->fetch(
+            PDO::FETCH_ASSOC
+        );
+
+    return $role !== false
+        ? $role
+        : null;
+}
+
+/**
+ * Retourne tous les rôles utilisables
+ * au niveau plateforme.
+ *
+ * Un rôle plateforme n'est rattaché
+ * à aucun organization_type.
+ */
+public function availablePlatformRoles(): array
+{
+    $statement =
+        $this->pdo->query(
+            <<<'SQL'
+                SELECT
+                    id,
+                    code,
+                    name,
+                    organization_type,
+                    is_system
+
+                FROM roles
+
+                WHERE organization_type IS NULL
+
+                ORDER BY name ASC
+            SQL
+        );
+
+    return $statement->fetchAll(
+        PDO::FETCH_ASSOC
+    );
+}
+
+/**
+ * Vérifie si l'utilisateur possède déjà
+ * un rôle plateforme.
+ */
+public function hasPlatformRole(
+    int $userId,
+    int $roleId
+): bool {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT 1
+
+                FROM platform_user_roles
+
+                WHERE user_id = :user_id
+                  AND role_id = :role_id
+
+                LIMIT 1
+            SQL
+        );
+
+    $statement->execute([
+        'user_id' =>
+            $userId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+
+    return $statement->fetchColumn()
+        !== false;
+}
+
+/**
+ * Attribue un rôle plateforme.
+ */
+public function assignPlatformRole(
+    int $userId,
+    int $roleId
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                INSERT INTO platform_user_roles (
+                    user_id,
+                    role_id
+                )
+                VALUES (
+                    :user_id,
+                    :role_id
+                )
+            SQL
+        );
+
+    $statement->execute([
+        'user_id' =>
+            $userId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+}
+
+/**
+ * Retire un rôle plateforme.
+ */
+public function removePlatformRole(
+    int $userId,
+    int $roleId
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                DELETE FROM platform_user_roles
+
+                WHERE user_id = :user_id
+                  AND role_id = :role_id
+            SQL
+        );
+
+    $statement->execute([
+        'user_id' =>
+            $userId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+}
+
+/**
+ * Compte le nombre d'utilisateurs
+ * possédant un rôle plateforme donné.
+ */
+public function countUsersWithPlatformRole(
+    int $roleId
+): int {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT COUNT(*)
+
+                FROM platform_user_roles
+
+                WHERE role_id = :role_id
+            SQL
+        );
+
+    $statement->execute([
+        'role_id' =>
+            $roleId,
+    ]);
+
+    return (int) $statement->fetchColumn();
+}
+
+/**
+ * Recherche un rôle plateforme par code.
+ */
+public function findPlatformRoleByCode(
+    string $code
+): ?array {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT
+                    id,
+                    code,
+                    name,
+                    organization_type,
+                    is_system
+
+                FROM roles
+
+                WHERE code = :code
+                  AND organization_type IS NULL
+
+                LIMIT 1
+            SQL
+        );
+
+    $statement->execute([
+        'code' =>
+            $code,
+    ]);
+
+    $role =
+        $statement->fetch(
+            PDO::FETCH_ASSOC
+        );
+
+    return $role !== false
+        ? $role
+        : null;
+}
+
+/**
+ * Recherche un membership par ID.
+ */
+public function findMembershipById(
+    int $membershipId
+): ?array {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT
+                    om.id,
+                    om.organization_id,
+                    om.user_id,
+                    om.status,
+                    om.joined_at,
+                    om.ended_at,
+                    om.created_at,
+
+                    o.code AS organization_code,
+                    o.name AS organization_name,
+                    o.type AS organization_type
+
+                FROM organization_memberships om
+
+                INNER JOIN organizations o
+                    ON o.id = om.organization_id
+
+                WHERE om.id = :id
+
+                LIMIT 1
+            SQL
+        );
+
+    $statement->execute([
+        'id' =>
+            $membershipId,
+    ]);
+
+    $membership =
+        $statement->fetch(
+            PDO::FETCH_ASSOC
+        );
+
+    return $membership !== false
+        ? $membership
+        : null;
+}
+
+/**
+ * Retourne les rôles compatibles avec
+ * un type d'organisation.
+ */
+public function availableRolesForOrganizationType(
+    string $organizationType
+): array {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT
+                    id,
+                    code,
+                    name,
+                    organization_type,
+                    is_system
+
+                FROM roles
+
+                WHERE organization_type = :organization_type
+
+                ORDER BY name ASC
+            SQL
+        );
+
+    $statement->execute([
+        'organization_type' =>
+            $organizationType,
+    ]);
+
+    return $statement->fetchAll(
+        PDO::FETCH_ASSOC
+    );
+}
+
+/**
+ * Vérifie si un membership possède déjà
+ * un rôle donné.
+ */
+public function membershipHasRole(
+    int $membershipId,
+    int $roleId
+): bool {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                SELECT 1
+
+                FROM membership_roles
+
+                WHERE membership_id = :membership_id
+                  AND role_id = :role_id
+
+                LIMIT 1
+            SQL
+        );
+
+    $statement->execute([
+        'membership_id' =>
+            $membershipId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+
+    return $statement->fetchColumn()
+        !== false;
+}
+
+/**
+ * Attribue un rôle à un membership.
+ */
+public function assignMembershipRole(
+    int $membershipId,
+    int $roleId
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                INSERT INTO membership_roles (
+                    membership_id,
+                    role_id
+                )
+                VALUES (
+                    :membership_id,
+                    :role_id
+                )
+            SQL
+        );
+
+    $statement->execute([
+        'membership_id' =>
+            $membershipId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+}
+
+/**
+ * Retire un rôle d'un membership.
+ */
+public function removeMembershipRole(
+    int $membershipId,
+    int $roleId
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                DELETE FROM membership_roles
+
+                WHERE membership_id = :membership_id
+                  AND role_id = :role_id
+            SQL
+        );
+
+    $statement->execute([
+        'membership_id' =>
+            $membershipId,
+
+        'role_id' =>
+            $roleId,
+    ]);
+}
+
+
+
 }

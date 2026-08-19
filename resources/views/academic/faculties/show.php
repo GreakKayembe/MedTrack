@@ -3,50 +3,54 @@
 declare(strict_types=1);
 
 /**
- * @var array $faculty
+ * @var array<string, mixed> $faculty
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
  */
 
-$faculty = $faculty ?? [];
+$faculty =
+    is_array($faculty ?? null)
+        ? $faculty
+        : [];
 
-$id = (int) (
-    $faculty['id']
-    ?? 0
-);
+$isPlatform =
+    (bool) ($isPlatform ?? false);
 
-$name = (string) (
-    $faculty['name']
-    ?? ''
-);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
 
-$code = (string) (
-    $faculty['code']
-    ?? ''
-);
+$id =
+    (int) ($faculty['id'] ?? 0);
 
-$status = (string) (
-    $faculty['status']
-    ?? 'INACTIVE'
-);
+$name =
+    trim((string) ($faculty['name'] ?? ''));
 
-$universityId = (int) (
-    $faculty['university_id']
-    ?? 0
-);
+$code =
+    trim((string) ($faculty['code'] ?? ''));
 
-$universityName = (string) (
-    $faculty['university_name']
-    ?? ''
-);
+$status =
+    strtoupper(
+        trim(
+            (string) ($faculty['status'] ?? 'INACTIVE')
+        )
+    );
 
-$universityCode = (string) (
-    $faculty['university_code']
-    ?? ''
-);
+$universityId =
+    (int) ($faculty['university_id'] ?? 0);
+
+$universityName =
+    trim(
+        (string) ($faculty['university_name'] ?? '')
+    );
+
+$universityCode =
+    trim(
+        (string) ($faculty['university_code'] ?? '')
+    );
 
 $isActive =
     $status === 'ACTIVE';
 ?>
-
 
 <div class="container-fluid px-0">
 
@@ -54,41 +58,44 @@ $isActive =
          Header
          ========================================================= -->
 
-    <div class="d-flex flex-column flex-lg-row
-                justify-content-between
-                align-items-lg-center
-                gap-3 mb-4">
+    <div
+        class="d-flex flex-column flex-lg-row
+               justify-content-between
+               align-items-lg-center
+               gap-3 mb-4"
+    >
 
-        <div>
+        <div class="d-flex align-items-center gap-3">
 
-            <div class="d-flex align-items-center gap-3 mb-2">
+            <div
+                class="rounded-circle
+                       bg-primary-subtle
+                       text-primary
+                       d-flex
+                       align-items-center
+                       justify-content-center
+                       flex-shrink-0"
+                style="width:56px;height:56px;"
+            >
+                <i class="bi bi-diagram-3 fs-4"></i>
+            </div>
 
-                <div
-                    class="rounded-circle
-                           bg-primary-subtle
-                           text-primary
-                           d-flex
-                           align-items-center
-                           justify-content-center"
-                    style="width:52px;height:52px;"
-                >
-                    <i class="bi bi-diagram-3 fs-4"></i>
-                </div>
+            <div>
 
-                <div>
+                <h2 class="fw-bold mb-1">
+                    <?= htmlspecialchars(
+                        $name,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+                </h2>
 
-                    <h2 class="fw-bold mb-1">
-                        <?= htmlspecialchars(
-                            $name,
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </h2>
-
-                    <div class="text-muted">
+                <div class="text-muted">
+                    <?php if ($isUniversityContext): ?>
+                        Faculté de votre université
+                    <?php else: ?>
                         Faculté universitaire
-                    </div>
-
+                    <?php endif; ?>
                 </div>
 
             </div>
@@ -120,12 +127,12 @@ $isActive =
 
 
     <!-- =========================================================
-         Status
+         Metrics
          ========================================================= -->
 
     <div class="row g-4 mb-4">
 
-        <div class="col-lg-4">
+        <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
 
@@ -138,10 +145,8 @@ $isActive =
                     <?php if ($isActive): ?>
 
                         <span
-                            class="badge
-                                   rounded-pill
-                                   text-bg-success
-                                   px-3 py-2"
+                            class="badge rounded-pill
+                                   text-bg-success px-3 py-2"
                         >
                             <i class="bi bi-check-circle me-1"></i>
                             Active
@@ -150,10 +155,8 @@ $isActive =
                     <?php else: ?>
 
                         <span
-                            class="badge
-                                   rounded-pill
-                                   text-bg-secondary
-                                   px-3 py-2"
+                            class="badge rounded-pill
+                                   text-bg-secondary px-3 py-2"
                         >
                             <i class="bi bi-pause-circle me-1"></i>
                             Inactive
@@ -168,7 +171,7 @@ $isActive =
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
 
@@ -203,7 +206,7 @@ $isActive =
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
 
@@ -232,8 +235,6 @@ $isActive =
 
     <div class="row g-4">
 
-        <!-- Faculty information -->
-
         <div class="col-xl-7">
 
             <div class="card border-0 shadow-sm h-100">
@@ -241,14 +242,11 @@ $isActive =
                 <div class="card-header bg-white py-3">
 
                     <h5 class="fw-bold mb-0">
-
                         <i
                             class="bi bi-info-circle
                                    text-primary me-2"
                         ></i>
-
                         Informations de la faculté
-
                     </h5>
 
                 </div>
@@ -282,7 +280,6 @@ $isActive =
                             </div>
 
                             <div class="fw-semibold">
-
                                 <?= $code !== ''
                                     ? htmlspecialchars(
                                         $code,
@@ -291,7 +288,6 @@ $isActive =
                                     )
                                     : '—'
                                 ?>
-
                             </div>
 
                         </div>
@@ -304,12 +300,10 @@ $isActive =
                             </div>
 
                             <div class="fw-semibold">
-
                                 <?= $isActive
                                     ? 'Active'
                                     : 'Inactive'
                                 ?>
-
                             </div>
 
                         </div>
@@ -336,7 +330,9 @@ $isActive =
         </div>
 
 
-        <!-- University -->
+        <!-- =====================================================
+             Institutional relationship
+             ===================================================== -->
 
         <div class="col-xl-5">
 
@@ -351,7 +347,11 @@ $isActive =
                                    text-primary me-2"
                         ></i>
 
-                        Université de rattachement
+                        <?php if ($isUniversityContext): ?>
+                            Rattachement institutionnel
+                        <?php else: ?>
+                            Université de rattachement
+                        <?php endif; ?>
 
                     </h5>
 
@@ -364,8 +364,8 @@ $isActive =
 
                         <div
                             class="rounded-circle
-                                   bg-info-subtle
-                                   text-info
+                                   bg-primary-subtle
+                                   text-primary
                                    d-flex
                                    align-items-center
                                    justify-content-center
@@ -376,42 +376,88 @@ $isActive =
                         </div>
 
 
-                        <div>
+                        <div class="flex-grow-1">
 
-                            <div class="fw-bold fs-5">
+                            <?php if ($universityName !== ''): ?>
 
-                                <?= htmlspecialchars(
-                                    $universityName,
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
+                                <div class="fw-bold fs-5">
+                                    <?= htmlspecialchars(
+                                        $universityName,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </div>
 
-                            </div>
+                            <?php elseif ($isUniversityContext): ?>
+
+                                <div class="fw-bold fs-5">
+                                    Votre université
+                                </div>
+
+                            <?php else: ?>
+
+                                <div class="fw-bold fs-5 text-muted">
+                                    Université non renseignée
+                                </div>
+
+                            <?php endif; ?>
 
 
                             <?php if ($universityCode !== ''): ?>
 
                                 <div class="text-muted mb-3">
-
                                     Code :
                                     <?= htmlspecialchars(
                                         $universityCode,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>
-
                                 </div>
 
                             <?php endif; ?>
 
 
-                            <?php if ($universityId > 0): ?>
+                            <?php if ($isUniversityContext): ?>
+
+                                <div
+                                    class="alert alert-light border
+                                           py-2 px-3 mb-0 mt-3"
+                                >
+                                    <div
+                                        class="d-flex
+                                               align-items-start
+                                               gap-2"
+                                    >
+                                        <i
+                                            class="bi bi-shield-lock
+                                                   text-primary"
+                                        ></i>
+
+                                        <small class="text-muted">
+                                            Cette faculté est rattachée
+                                            à votre université active.
+                                            Ce rattachement est protégé
+                                            et ne peut pas être modifié
+                                            depuis l’espace Université.
+                                        </small>
+                                    </div>
+                                </div>
+
+                            <?php elseif (
+                                $isPlatform
+                                && $universityId > 0
+                            ): ?>
 
                                 <a
                                     href="/universities/<?= $universityId ?>"
-                                    class="btn btn-sm btn-outline-primary"
+                                    class="btn btn-sm
+                                           btn-outline-primary"
                                 >
-                                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                                    <i
+                                        class="bi
+                                               bi-box-arrow-up-right
+                                               me-1"
+                                    ></i>
                                     Voir l'université
                                 </a>
 
@@ -431,43 +477,48 @@ $isActive =
 
 
     <!-- =========================================================
-         Future academic relationships
+         Academic relationships
          ========================================================= -->
 
     <div class="card border-0 shadow-sm mt-4">
 
         <div class="card-body p-4">
 
-            <div class="d-flex
-                        flex-column
-                        flex-md-row
-                        justify-content-between
-                        align-items-md-center
-                        gap-3">
+            <div
+                class="d-flex flex-column flex-md-row
+                       justify-content-between
+                       align-items-md-center
+                       gap-3"
+            >
 
                 <div>
 
                     <h5 class="fw-bold mb-1">
-
                         <i
                             class="bi bi-journal-medical
                                    text-primary me-2"
                         ></i>
-
                         Programmes académiques
-
                     </h5>
 
                     <p class="text-muted mb-0">
-                        Les programmes rattachés à cette faculté
-                        seront disponibles ici.
+                        <?php if ($isUniversityContext): ?>
+                            Gérez les programmes académiques
+                            rattachés à cette faculté.
+                        <?php else: ?>
+                            Les programmes académiques rattachés
+                            à cette faculté seront disponibles ici.
+                        <?php endif; ?>
                     </p>
 
                 </div>
 
 
-                <span class="badge text-bg-light border px-3 py-2">
-                    Module à venir
+                <span
+                    class="badge text-bg-light
+                           border px-3 py-2"
+                >
+                    Module suivant
                 </span>
 
             </div>

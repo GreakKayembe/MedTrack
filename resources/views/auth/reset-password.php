@@ -7,6 +7,16 @@ declare(strict_types=1);
  * @var bool $tokenValid
  */
 
+/**
+ * @var string $csrfToken
+ */
+
+$csrfToken =
+    (string) (
+        $csrfToken
+        ?? ''
+    );
+
 ?>
 
 <div class="mt-auth-shell">
@@ -21,7 +31,11 @@ declare(strict_types=1);
 
             <a href="/login" class="mt-brand">
                 <div class="mt-brand-symbol">
-                    <i class="bi bi-heart-pulse-fill"></i>
+                    <img
+                        src="/assets/img/logo.png"
+                        alt="MedTrack"
+                        class="mt-brand-logo"
+                    >
                 </div>
 
                 <div>
@@ -29,6 +43,14 @@ declare(strict_types=1);
                     <small>Health Training Platform</small>
                 </div>
             </a>
+
+            <div class="mt-auth-illustration" aria-hidden="true">
+                <img
+                    src="/assets/img/illustration_login.png"
+                    alt=""
+                    class="mt-auth-illustration__image"
+                >
+            </div>
 
             <div class="mt-auth-presentation">
 
@@ -112,6 +134,18 @@ declare(strict_types=1);
 
 
     <section class="mt-auth-form-panel">
+
+        <div class="mt-mobile-brand">
+            <div class="mt-brand-symbol">
+                <img
+                    src="/assets/img/logo.png"
+                    alt="MedTrack"
+                    class="mt-brand-logo"
+                >
+            </div>
+
+            <strong>MedTrack</strong>
+        </div>
 
         <div class="mt-login-container">
 
@@ -224,12 +258,11 @@ declare(strict_types=1);
                     id="reset-password-form"
                     novalidate
                 >
-
                     <input
                         type="hidden"
-                        name="token"
+                        name="_token"
                         value="<?= htmlspecialchars(
-                            $token,
+                            $csrfToken,
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>"
@@ -427,7 +460,7 @@ declare(strict_types=1);
 
 
             <footer class="mt-login-footer">
-                © <?= date('Y') ?> MedTrack · Tous droits réservés
+                © <?= date('Y') ?> MedTrack · Tous droits réservés · Groupe SNADARPE
             </footer>
 
         </div>

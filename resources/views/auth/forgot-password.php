@@ -1,3 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @var string $csrfToken
+ */
+
+$csrfToken =
+    (string) (
+        $csrfToken
+        ?? ''
+    );
+?>
+
 <div class="mt-auth-shell">
 
     <section class="mt-auth-brand-panel">
@@ -10,7 +25,11 @@
 
             <a href="/login" class="mt-brand">
                 <div class="mt-brand-symbol">
-                    <i class="bi bi-heart-pulse-fill"></i>
+                    <img
+                        src="/assets/img/logo.png"
+                        alt="MedTrack"
+                        class="mt-brand-logo"
+                    >
                 </div>
 
                 <div>
@@ -18,6 +37,14 @@
                     <small>Health Training Platform</small>
                 </div>
             </a>
+
+            <div class="mt-auth-illustration" aria-hidden="true">
+                <img
+                    src="/assets/img/illustration_login.png"
+                    alt=""
+                    class="mt-auth-illustration__image"
+                >
+            </div>
 
             <div class="mt-auth-presentation">
 
@@ -71,9 +98,7 @@
             <div class="mt-auth-brand-footer">
                 <i class="bi bi-shield-check"></i>
                 <span>Réinitialisation sécurisée</span>
-
                 <span class="mt-dot"></span>
-
                 <span>Lien à usage unique</span>
             </div>
 
@@ -81,8 +106,18 @@
 
     </section>
 
-
     <section class="mt-auth-form-panel">
+
+        <div class="mt-mobile-brand">
+            <div class="mt-brand-symbol">
+                <img
+                    src="/assets/img/logo.png"
+                    alt="MedTrack"
+                    class="mt-brand-logo"
+                >
+            </div>
+            <strong>MedTrack</strong>
+        </div>
 
         <div class="mt-login-container">
 
@@ -96,21 +131,14 @@
             </div>
 
             <div class="mt-login-heading">
-
-                <span class="mt-section-label">
-                    RÉCUPÉRATION DU COMPTE
-                </span>
-
+                <span class="mt-section-label">RÉCUPÉRATION DU COMPTE</span>
                 <h2>Mot de passe oublié ?</h2>
-
                 <p>
                     Saisissez l'adresse email associée à votre compte.
                     Si elle correspond à un compte MedTrack actif,
                     vous recevrez les instructions de réinitialisation.
                 </p>
-
             </div>
-
 
             <div
                 id="forgot-alert"
@@ -119,13 +147,11 @@
                 aria-live="polite"
             >
                 <i class="bi bi-exclamation-circle-fill"></i>
-
                 <div>
                     <strong>Demande impossible</strong>
                     <span id="forgot-alert-message"></span>
                 </div>
             </div>
-
 
             <div
                 id="forgot-success"
@@ -139,7 +165,6 @@
 
                 <div>
                     <strong>Vérifiez votre messagerie</strong>
-
                     <p id="forgot-success-message">
                         Si un compte correspond à cette adresse,
                         les instructions ont été envoyées.
@@ -156,17 +181,22 @@
                 </div>
             </div>
 
-
             <form id="forgot-password-form" novalidate>
 
-                <div class="mt-form-group">
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="<?= htmlspecialchars(
+                        $csrfToken,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
 
-                    <label for="identifier">
-                        Adresse email
-                    </label>
+                <div class="mt-form-group">
+                    <label for="identifier">Adresse email</label>
 
                     <div class="mt-input-wrapper">
-
                         <span class="mt-input-icon">
                             <i class="bi bi-envelope"></i>
                         </span>
@@ -179,23 +209,19 @@
                             autocomplete="email"
                             required
                         >
-
                     </div>
 
                     <small
                         class="mt-field-error"
                         data-error-for="identifier"
                     ></small>
-
                 </div>
-
 
                 <button
                     type="submit"
                     id="forgot-submit"
                     class="mt-login-button"
                 >
-
                     <span class="mt-button-default">
                         Envoyer les instructions
                         <i class="bi bi-arrow-right"></i>
@@ -205,31 +231,26 @@
                         <span class="mt-spinner"></span>
                         Vérification...
                     </span>
-
                 </button>
 
             </form>
 
-
             <div class="mt-security-info">
-
                 <div class="mt-security-icon">
                     <i class="bi bi-shield-lock-fill"></i>
                 </div>
 
                 <div>
                     <strong>Protection de votre identité</strong>
-
                     <p>
                         MedTrack ne révèle jamais publiquement
                         si une adresse possède ou non un compte.
                     </p>
                 </div>
-
             </div>
 
             <footer class="mt-login-footer">
-                © <?= date('Y') ?> MedTrack · Tous droits réservés
+                © <?= date('Y') ?> MedTrack · Tous droits réservés · Groupe SNADARPE
             </footer>
 
         </div>

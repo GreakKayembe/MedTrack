@@ -7,6 +7,10 @@
 ></script>
 
 <script
+    src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"
+></script>
+
+<script
     src="/assets/js/main.js"
 ></script>
 

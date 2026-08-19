@@ -22,7 +22,11 @@ declare(strict_types=1);
 
             <a href="/login" class="mt-brand">
                 <div class="mt-brand-symbol">
-                    <i class="bi bi-heart-pulse-fill"></i>
+                    <img
+                        src="/assets/img/logo.png"
+                        alt="MedTrack"
+                        class="mt-brand-logo"
+                    >
                 </div>
 
                 <div>
@@ -30,6 +34,14 @@ declare(strict_types=1);
                     <small>Health Training Platform</small>
                 </div>
             </a>
+
+            <div class="mt-auth-illustration" aria-hidden="true">
+                <img
+                    src="/assets/img/illustration_login.png"
+                    alt=""
+                    class="mt-auth-illustration__image"
+                >
+            </div>
 
             <div class="mt-auth-presentation">
 
@@ -126,7 +138,11 @@ declare(strict_types=1);
 
         <div class="mt-mobile-brand">
             <div class="mt-brand-symbol">
-                <i class="bi bi-heart-pulse-fill"></i>
+                <img
+                    src="/assets/img/logo.png"
+                    alt="MedTrack"
+                    class="mt-brand-logo"
+                >
             </div>
 
             <strong>MedTrack</strong>
@@ -347,7 +363,7 @@ declare(strict_types=1);
 
 
             <footer class="mt-login-footer">
-                © <?= date('Y') ?> MedTrack · Tous droits réservés By Groupe SNADARPE
+                © <?= date('Y') ?> MedTrack · Tous droits réservés · Groupe SNADARPE
             </footer>
 
         </div>

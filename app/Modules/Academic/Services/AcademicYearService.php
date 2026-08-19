@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MedTrack\Modules\Academic\Services;
 
 use DateTimeImmutable;
+use MedTrack\Core\Context\AccessContextResolver;
 use MedTrack\Modules\Academic\Repositories\AcademicYearRepository;
 use RuntimeException;
 
@@ -17,21 +18,36 @@ final class AcademicYearService
     ];
 
     public function __construct(
-        private readonly AcademicYearRepository $academicYears
+        private readonly AcademicYearRepository $academicYears,
+        private readonly AccessContextResolver $accessContextResolver
     ) {
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Read
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Retourne toutes les années académiques.
+     *
+     * Accessible notamment :
+     * - à la plateforme ;
+     * - aux universités en lecture seule.
      */
     public function all(): array
     {
-        return $this->academicYears->all();
+        return $this->academicYears
+            ->all();
     }
 
     /**
      * Recherche une année académique
      * à partir de son identifiant.
+     *
+     * Cette opération reste accessible
+     * en contexte Université.
      */
     public function findById(
         int $id
@@ -40,43 +56,70 @@ final class AcademicYearService
             return null;
         }
 
-        return $this->academicYears->findById(
-            $id
-        );
+        return $this->academicYears
+            ->findById(
+                $id
+            );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Crée une nouvelle année académique.
+     *
+     * Le référentiel academic_years est global.
+     * Seule l'administration centrale MedTrack
+     * peut donc effectuer cette opération.
      */
     public function create(
         array $data
     ): int {
-        $validated = $this->validate(
-            $data
-        );
+        $this->assertPlatformWriteAccess();
+
+        $validated =
+            $this->validate(
+                $data
+            );
 
         if (
-            $this->academicYears->labelExists(
-                $validated['label']
-            )
+            $this->academicYears
+                ->labelExists(
+                    $validated['label']
+                )
         ) {
             throw new RuntimeException(
-                'Une année académique avec ce libellé existe déjà.'
+                'Une année académique avec ce '
+                . 'libellé existe déjà.'
             );
         }
 
-        return $this->academicYears->create(
-            $validated
-        );
+        return $this->academicYears
+            ->create(
+                $validated
+            );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Met à jour une année académique existante.
+     *
+     * Réservé exclusivement à la plateforme.
      */
     public function update(
         int $id,
         array $data
     ): void {
+        $this->assertPlatformWriteAccess();
+
         if ($id <= 0) {
             throw new RuntimeException(
                 'Identifiant d’année académique invalide.'
@@ -84,9 +127,10 @@ final class AcademicYearService
         }
 
         $existing =
-            $this->academicYears->findById(
-                $id
-            );
+            $this->academicYears
+                ->findById(
+                    $id
+                );
 
         if ($existing === null) {
             throw new RuntimeException(
@@ -94,53 +138,107 @@ final class AcademicYearService
             );
         }
 
-        $validated = $this->validate(
-            $data
-        );
+        $validated =
+            $this->validate(
+                $data
+            );
 
         if (
-            $this->academicYears->labelExists(
-                $validated['label'],
-                $id
-            )
+            $this->academicYears
+                ->labelExists(
+                    $validated['label'],
+                    $id
+                )
         ) {
             throw new RuntimeException(
-                'Une autre année académique utilise déjà ce libellé.'
+                'Une autre année académique '
+                . 'utilise déjà ce libellé.'
             );
         }
 
-        $this->academicYears->update(
-            $id,
-            $validated
-        );
+        $this->academicYears
+            ->update(
+                $id,
+                $validated
+            );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Statistics
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Retourne les statistiques utilisées
-     * par l'interface des années académiques.
+     * Retourne les statistiques globales
+     * du référentiel académique.
+     *
+     * Ces informations peuvent être consultées
+     * par une université mais restent globales
+     * à MedTrack.
      */
     public function statistics(): array
     {
         return [
             'total' =>
-                $this->academicYears->count(),
+                $this->academicYears
+                    ->count(),
 
             'planned' =>
-                $this->academicYears->countByStatus(
-                    'PLANNED'
-                ),
+                $this->academicYears
+                    ->countByStatus(
+                        'PLANNED'
+                    ),
 
             'open' =>
-                $this->academicYears->countByStatus(
-                    'OPEN'
-                ),
+                $this->academicYears
+                    ->countByStatus(
+                        'OPEN'
+                    ),
 
             'closed' =>
-                $this->academicYears->countByStatus(
-                    'CLOSED'
-                ),
+                $this->academicYears
+                    ->countByStatus(
+                        'CLOSED'
+                    ),
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Access control
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Protège les mutations du référentiel global.
+     *
+     * Une université peut consulter les années
+     * académiques mais ne peut jamais en créer
+     * ou en modifier.
+     */
+    private function assertPlatformWriteAccess(): void
+    {
+        $context =
+            $this->accessContextResolver
+                ->resolve();
+
+        if ($context->isPlatform()) {
+            return;
+        }
+
+        throw new RuntimeException(
+            'La gestion des années académiques '
+            . 'est réservée à l’administration '
+            . 'centrale MedTrack.'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validation
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Valide et normalise les données
@@ -149,36 +247,39 @@ final class AcademicYearService
     private function validate(
         array $data
     ): array {
-        $label = trim(
-            (string) (
-                $data['label']
-                ?? ''
-            )
-        );
-
-        $startsOn = trim(
-            (string) (
-                $data['starts_on']
-                ?? ''
-            )
-        );
-
-        $endsOn = trim(
-            (string) (
-                $data['ends_on']
-                ?? ''
-            )
-        );
-
-        $status = strtoupper(
+        $label =
             trim(
                 (string) (
-                    $data['status']
-                    ?? 'PLANNED'
+                    $data['label']
+                    ?? ''
                 )
-            )
-        );
+            );
 
+        $startsOn =
+            trim(
+                (string) (
+                    $data['starts_on']
+                    ?? ''
+                )
+            );
+
+        $endsOn =
+            trim(
+                (string) (
+                    $data['ends_on']
+                    ?? ''
+                )
+            );
+
+        $status =
+            strtoupper(
+                trim(
+                    (string) (
+                        $data['status']
+                        ?? 'PLANNED'
+                    )
+                )
+            );
 
         /*
         |--------------------------------------------------------------------------
@@ -188,16 +289,17 @@ final class AcademicYearService
 
         if ($label === '') {
             throw new RuntimeException(
-                'Le libellé de l’année académique est obligatoire.'
+                'Le libellé de l’année académique '
+                . 'est obligatoire.'
             );
         }
 
         if (mb_strlen($label) > 50) {
             throw new RuntimeException(
-                'Le libellé de l’année académique ne peut pas dépasser 50 caractères.'
+                'Le libellé de l’année académique '
+                . 'ne peut pas dépasser 50 caractères.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -231,10 +333,10 @@ final class AcademicYearService
 
         if ($endDate <= $startDate) {
             throw new RuntimeException(
-                'La date de fin doit être postérieure à la date de début.'
+                'La date de fin doit être '
+                . 'postérieure à la date de début.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -250,10 +352,10 @@ final class AcademicYearService
             )
         ) {
             throw new RuntimeException(
-                'Le statut de l’année académique est invalide.'
+                'Le statut de l’année académique '
+                . 'est invalide.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -262,7 +364,8 @@ final class AcademicYearService
         */
 
         return [
-            'label' => $label,
+            'label' =>
+                $label,
 
             'starts_on' =>
                 $startDate->format(
@@ -274,12 +377,14 @@ final class AcademicYearService
                     'Y-m-d'
                 ),
 
-            'status' => $status,
+            'status' =>
+                $status,
         ];
     }
 
     /**
-     * Parse strictement une date au format YYYY-MM-DD.
+     * Parse strictement une date
+     * au format YYYY-MM-DD.
      */
     private function parseDate(
         string $value,
@@ -295,8 +400,9 @@ final class AcademicYearService
             DateTimeImmutable::getLastErrors();
 
         /*
-         * getLastErrors() retourne false lorsqu'aucune
-         * erreur ni aucun avertissement n'est détecté.
+         * getLastErrors() retourne false
+         * lorsqu'aucune erreur ni aucun
+         * avertissement n'est détecté.
          */
         $hasErrors =
             is_array($errors)
@@ -308,7 +414,9 @@ final class AcademicYearService
         if (
             $date === false
             || $hasErrors
-            || $date->format('Y-m-d') !== $value
+            || $date->format(
+                'Y-m-d'
+            ) !== $value
         ) {
             throw new RuntimeException(
                 $errorMessage

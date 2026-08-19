@@ -3,76 +3,90 @@
 declare(strict_types=1);
 
 /**
- * @var array $faculty
- * @var array $universities
+ * @var array<string, mixed> $faculty
+ * @var array<int, array<string, mixed>> $universities
  * @var string $csrfToken
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
-$faculty = $faculty ?? [];
-$universities = $universities ?? [];
+$faculty =
+    is_array($faculty ?? null)
+        ? $faculty
+        : [];
 
-$id = (int) (
-    $faculty['id']
-    ?? 0
-);
+$universities =
+    is_array($universities ?? null)
+        ? $universities
+        : [];
 
-$currentUniversityId = (int) (
-    $faculty['university_id']
-    ?? 0
-);
+$isPlatform =
+    (bool) ($isPlatform ?? false);
 
-$name = (string) (
-    $faculty['name']
-    ?? ''
-);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
 
-$code = (string) (
-    $faculty['code']
-    ?? ''
-);
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
 
-$status = (string) (
-    $faculty['status']
-    ?? 'ACTIVE'
-);
+$csrfToken =
+    (string) ($csrfToken ?? '');
+
+$id =
+    (int) ($faculty['id'] ?? 0);
+
+$currentUniversityId =
+    (int) ($faculty['university_id'] ?? 0);
+
+$name =
+    trim((string) ($faculty['name'] ?? ''));
+
+$code =
+    trim((string) ($faculty['code'] ?? ''));
+
+$status =
+    strtoupper(
+        trim(
+            (string) ($faculty['status'] ?? 'ACTIVE')
+        )
+    );
 ?>
 
 <div class="container-fluid px-0">
 
-    <!-- =========================================================
-         Header
-         ========================================================= -->
-
-    <div class="d-flex flex-column flex-lg-row
-                justify-content-between
-                align-items-lg-center
-                gap-3 mb-4">
-
+    <div
+        class="d-flex flex-column flex-lg-row
+               justify-content-between
+               align-items-lg-center
+               gap-3 mb-4"
+    >
         <div>
-
             <h2 class="fw-bold mb-1">
                 Modifier la faculté
             </h2>
 
             <p class="text-muted mb-0">
-                Modifiez les informations académiques
-                de cette faculté.
+                <?php if ($isUniversityContext): ?>
+                    Modifiez les informations de cette faculté.
+                    Son rattachement à votre université est protégé
+                    par le contexte MedTrack.
+                <?php else: ?>
+                    Modifiez les informations académiques
+                    et le rattachement de cette faculté.
+                <?php endif; ?>
             </p>
-
         </div>
 
-        <div class="d-flex gap-2">
-
-            <a
-                href="/faculties/<?= $id ?>"
-                class="btn btn-outline-secondary"
-            >
-                <i class="bi bi-arrow-left me-1"></i>
-                Retour
-            </a>
-
-        </div>
-
+        <a
+            href="/faculties/<?= $id ?>"
+            class="btn btn-outline-secondary"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Retour
+        </a>
     </div>
 
 
@@ -82,148 +96,206 @@ $status = (string) (
         method="post"
         novalidate
     >
-
         <input
             type="hidden"
             name="_token"
             value="<?= htmlspecialchars(
-                $csrfToken ?? '',
+                $csrfToken,
                 ENT_QUOTES,
                 'UTF-8'
             ) ?>"
         >
 
-
-        <!-- Alert -->
+        <?php if (
+            $isUniversityContext
+            && $activeUniversityId !== null
+            && $activeUniversityId > 0
+        ): ?>
+            <input
+                type="hidden"
+                name="university_id"
+                value="<?= $activeUniversityId ?>"
+            >
+        <?php endif; ?>
 
         <div
             id="facultyFormAlert"
             class="alert d-none"
             role="alert"
+            aria-live="polite"
         ></div>
 
 
         <div class="row g-4">
-
-            <!-- =====================================================
-                 Main form
-                 ===================================================== -->
 
             <div class="col-xl-8">
 
                 <div class="card border-0 shadow-sm">
 
                     <div class="card-header bg-white py-3">
-
                         <h5 class="fw-bold mb-0">
-
                             <i
                                 class="bi bi-pencil-square
                                        text-primary me-2"
                             ></i>
-
                             Informations de la faculté
-
                         </h5>
-
                     </div>
-
 
                     <div class="card-body p-4">
 
                         <div class="row g-4">
 
-                            <!-- University -->
+                            <?php if ($isPlatform): ?>
 
-                            <div class="col-12">
+                                <div class="col-12">
 
-                                <label
-                                    for="university_id"
-                                    class="form-label fw-semibold"
-                                >
-                                    Université
-                                    <span class="text-danger">*</span>
-                                </label>
+                                    <label
+                                        for="university_id"
+                                        class="form-label fw-semibold"
+                                    >
+                                        Université
+                                        <span class="text-danger">*</span>
+                                    </label>
 
-                                <select
-                                    id="university_id"
-                                    name="university_id"
-                                    class="form-select"
-                                    required
-                                >
-
-                                    <option value="">
-                                        Sélectionnez une université
-                                    </option>
-
-
-                                    <?php foreach ($universities as $university): ?>
-
-                                        <?php
-                                        $universityId = (int) (
-                                            $university['id']
-                                            ?? $university['organization_id']
-                                            ?? 0
-                                        );
-
-                                        $universityName = (string) (
-                                            $university['name']
-                                            ?? ''
-                                        );
-
-                                        $universityCode = (string) (
-                                            $university['code']
-                                            ?? ''
-                                        );
-
-                                        $selected =
-                                            $universityId ===
-                                            $currentUniversityId;
-                                        ?>
-
-                                        <option
-                                            value="<?= $universityId ?>"
-                                            <?= $selected
-                                                ? 'selected'
-                                                : ''
-                                            ?>
-                                        >
-
-                                            <?= htmlspecialchars(
-                                                $universityName,
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>
-
-                                            <?php if ($universityCode !== ''): ?>
-
-                                                (<?= htmlspecialchars(
-                                                    $universityCode,
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>)
-
-                                            <?php endif; ?>
-
+                                    <select
+                                        id="university_id"
+                                        name="university_id"
+                                        class="form-select"
+                                        required
+                                    >
+                                        <option value="">
+                                            Sélectionnez une université
                                         </option>
 
-                                    <?php endforeach; ?>
+                                        <?php foreach (
+                                            $universities
+                                            as $university
+                                        ): ?>
 
-                                </select>
+                                            <?php
+                                            $universityId =
+                                                (int) (
+                                                    $university['id']
+                                                    ?? $university['organization_id']
+                                                    ?? 0
+                                                );
 
-                                <div class="invalid-feedback">
-                                    Veuillez sélectionner une université.
+                                            $universityName =
+                                                trim(
+                                                    (string) (
+                                                        $university['name']
+                                                        ?? ''
+                                                    )
+                                                );
+
+                                            $universityCode =
+                                                trim(
+                                                    (string) (
+                                                        $university['code']
+                                                        ?? ''
+                                                    )
+                                                );
+
+                                            $selected =
+                                                $universityId
+                                                === $currentUniversityId;
+                                            ?>
+
+                                            <?php if ($universityId > 0): ?>
+                                                <option
+                                                    value="<?= $universityId ?>"
+                                                    <?= $selected
+                                                        ? 'selected'
+                                                        : ''
+                                                    ?>
+                                                >
+                                                    <?= htmlspecialchars(
+                                                        $universityName,
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>
+
+                                                    <?php if (
+                                                        $universityCode !== ''
+                                                    ): ?>
+                                                        (<?= htmlspecialchars(
+                                                            $universityCode,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>)
+                                                    <?php endif; ?>
+                                                </option>
+                                            <?php endif; ?>
+
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <div class="invalid-feedback">
+                                        Veuillez sélectionner une université.
+                                    </div>
+
+                                    <div class="form-text">
+                                        Le Super Admin peut modifier
+                                        le rattachement institutionnel.
+                                    </div>
+
                                 </div>
 
-                                <div class="form-text">
-                                    Université à laquelle cette faculté
-                                    est rattachée.
+                            <?php elseif ($isUniversityContext): ?>
+
+                                <div class="col-12">
+
+                                    <div
+                                        class="alert alert-light border
+                                               d-flex align-items-start
+                                               gap-3 mb-0"
+                                    >
+                                        <span
+                                            class="rounded-circle
+                                                   bg-primary-subtle
+                                                   text-primary
+                                                   d-inline-flex
+                                                   align-items-center
+                                                   justify-content-center
+                                                   flex-shrink-0"
+                                            style="
+                                                width: 38px;
+                                                height: 38px;
+                                            "
+                                        >
+                                            <i class="bi bi-bank2"></i>
+                                        </span>
+
+                                        <div>
+                                            <div class="fw-semibold">
+                                                Rattachement protégé
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Cette faculté appartient
+                                                à votre université active.
+                                                Son université ne peut pas
+                                                être changée depuis cet espace.
+                                            </small>
+                                        </div>
+
+                                        <span
+                                            class="badge bg-light
+                                                   text-secondary border
+                                                   ms-auto"
+                                        >
+                                            <i
+                                                class="bi bi-shield-lock me-1"
+                                            ></i>
+                                            Sécurisé
+                                        </span>
+                                    </div>
+
                                 </div>
 
-                            </div>
+                            <?php endif; ?>
 
-
-                            <!-- Name -->
 
                             <div class="col-md-8">
 
@@ -256,8 +328,6 @@ $status = (string) (
                             </div>
 
 
-                            <!-- Code -->
-
                             <div class="col-md-4">
 
                                 <label
@@ -288,8 +358,6 @@ $status = (string) (
                             </div>
 
 
-                            <!-- Status -->
-
                             <div class="col-md-6">
 
                                 <label
@@ -306,7 +374,6 @@ $status = (string) (
                                     class="form-select"
                                     required
                                 >
-
                                     <option
                                         value="ACTIVE"
                                         <?= $status === 'ACTIVE'
@@ -326,7 +393,6 @@ $status = (string) (
                                     >
                                         Inactive
                                     </option>
-
                                 </select>
 
                             </div>
@@ -339,10 +405,6 @@ $status = (string) (
 
             </div>
 
-
-            <!-- =====================================================
-                 Side panel
-                 ===================================================== -->
 
             <div class="col-xl-4">
 
@@ -365,14 +427,15 @@ $status = (string) (
 
                         <h5 class="fw-bold">
                             <?= htmlspecialchars(
-                                $name,
+                                $name !== ''
+                                    ? $name
+                                    : 'Faculté',
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
                         </h5>
 
                         <?php if ($code !== ''): ?>
-
                             <div class="text-muted">
                                 Code :
                                 <?= htmlspecialchars(
@@ -381,8 +444,14 @@ $status = (string) (
                                     'UTF-8'
                                 ) ?>
                             </div>
-
                         <?php endif; ?>
+
+                        <hr>
+
+                        <div class="small text-muted">
+                            Identifiant :
+                            <strong>#<?= $id ?></strong>
+                        </div>
 
                     </div>
 
@@ -394,24 +463,33 @@ $status = (string) (
                     <div class="card-body p-4">
 
                         <h6 class="fw-bold mb-3">
-
                             <i class="bi bi-info-circle me-2"></i>
-
                             À savoir
-
                         </h6>
 
-                        <p class="small text-muted mb-3">
-                            Une faculté peut être déplacée vers
-                            une autre université uniquement si
-                            la combinaison université + nom reste
-                            unique.
-                        </p>
+                        <?php if ($isUniversityContext): ?>
+
+                            <p class="small text-muted mb-3">
+                                Vous pouvez modifier le nom,
+                                le code et le statut de la faculté.
+                                Son rattachement institutionnel
+                                reste verrouillé sur votre université.
+                            </p>
+
+                        <?php else: ?>
+
+                            <p class="small text-muted mb-3">
+                                Le Super Admin peut déplacer une faculté
+                                vers une autre université si les règles
+                                d’unicité restent respectées.
+                            </p>
+
+                        <?php endif; ?>
 
                         <p class="small text-muted mb-0">
                             Utilisez le statut
-                            <strong>Inactive</strong> lorsqu'une
-                            faculté ne doit plus être utilisée,
+                            <strong>Inactive</strong>
+                            lorsqu'une faculté ne doit plus être utilisée,
                             plutôt que de supprimer ses données.
                         </p>
 
@@ -424,15 +502,12 @@ $status = (string) (
         </div>
 
 
-        <!-- =========================================================
-             Actions
-             ========================================================= -->
-
-        <div class="d-flex
-                    justify-content-end
-                    gap-2
-                    mt-4">
-
+        <div
+            class="d-flex
+                   justify-content-end
+                   gap-2
+                   mt-4"
+        >
             <a
                 href="/faculties/<?= $id ?>"
                 class="btn btn-light border"
@@ -445,7 +520,6 @@ $status = (string) (
                 id="facultySubmitButton"
                 class="btn btn-primary"
             >
-
                 <span id="facultySubmitIcon">
                     <i class="bi bi-check-lg me-1"></i>
                 </span>
@@ -453,9 +527,7 @@ $status = (string) (
                 <span id="facultySubmitText">
                     Enregistrer
                 </span>
-
             </button>
-
         </div>
 
     </form>

@@ -5,29 +5,36 @@
 */
 
 .medtrack-dashboard {
-    --mt-primary: #2563eb;
-    --mt-primary-dark: #1d4ed8;
-    --mt-secondary: #7c3aed;
+    --mt-primary: #6f2dbd;
+    --mt-primary-dark: #4c1d95;
+    --mt-secondary: #8b5cf6;
     --mt-success: #059669;
-    --mt-warning: #d97706;
+    --mt-warning: #d4a017;
     --mt-danger: #dc2626;
-    --mt-cyan: #0891b2;
+    --mt-cyan: #7c3aed;
 
-    --mt-text: #172033;
-    --mt-muted: #64748b;
-    --mt-border: rgba(148, 163, 184, 0.18);
+    --mt-text: #271a38;
+    --mt-muted: #756b83;
+    --mt-border: rgba(111, 45, 189, 0.13);
     --mt-surface: #ffffff;
-    --mt-background: #f6f8fc;
+    --mt-background: #faf8fd;
+
+    --mt-gold: #d4a017;
+    --mt-gold-dark: #a97800;
+    --mt-gold-light: #f2ca52;
+    --mt-gold-soft: #fff8df;
+    --mt-purple-soft: #f5effd;
+    --mt-purple-soft-2: #eee5fb;
 
     --mt-radius-sm: 12px;
     --mt-radius: 18px;
     --mt-radius-lg: 26px;
 
     --mt-shadow:
-        0 12px 35px rgba(15, 23, 42, 0.07);
+        0 14px 38px rgba(76, 29, 149, 0.08);
 
     --mt-shadow-hover:
-        0 20px 50px rgba(15, 23, 42, 0.12);
+        0 22px 54px rgba(76, 29, 149, 0.14);
 
     color: var(--mt-text);
 }
@@ -140,19 +147,24 @@
 
     background:
         radial-gradient(
-            circle at 80% 15%,
-            rgba(255, 255, 255, 0.22),
-            transparent 30%
+            circle at 82% 18%,
+            rgba(242, 202, 82, 0.30),
+            transparent 26%
+        ),
+        radial-gradient(
+            circle at 18% 88%,
+            rgba(255, 255, 255, 0.10),
+            transparent 32%
         ),
         linear-gradient(
             125deg,
-            #2563eb 0%,
-            #4f46e5 48%,
-            #7c3aed 100%
+            #4c1d95 0%,
+            #6f2dbd 50%,
+            #8b3fc7 100%
         );
 
     box-shadow:
-        0 24px 55px rgba(37, 99, 235, 0.20);
+        0 26px 62px rgba(76, 29, 149, 0.28);
 
     color: #ffffff;
 }
@@ -257,15 +269,26 @@
 }
 
 .dashboard-btn--primary {
-    border: 1px solid #ffffff;
-    background: #ffffff;
-    color: #3730a3;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 232, 145, 0.95);
+    background:
+        linear-gradient(
+            135deg,
+            #f7db78 0%,
+            #e7bc3c 52%,
+            #d4a017 100%
+        );
+    color: #3c205f;
+    box-shadow: 0 12px 28px rgba(83, 52, 6, 0.20);
 }
 
 .dashboard-btn--primary:hover {
-    background: #f8fafc;
-    color: #312e81;
+    background:
+        linear-gradient(
+            135deg,
+            #ffe89b,
+            #e0ae27
+        );
+    color: #32164f;
 }
 
 .dashboard-btn--glass {
@@ -449,23 +472,23 @@
 }
 
 .dashboard-metric--students .dashboard-metric__icon {
-    color: #2563eb;
-    background: #eff6ff;
+    color: var(--mt-primary);
+    background: var(--mt-purple-soft);
 }
 
 .dashboard-metric--internships .dashboard-metric__icon {
-    color: #7c3aed;
-    background: #f5f3ff;
+    color: #8b5cf6;
+    background: #f4effd;
 }
 
 .dashboard-metric--hospitals .dashboard-metric__icon {
-    color: #059669;
-    background: #ecfdf5;
+    color: #7440a8;
+    background: #f1e9fa;
 }
 
 .dashboard-metric--payments .dashboard-metric__icon {
-    color: #d97706;
-    background: #fffbeb;
+    color: var(--mt-gold-dark);
+    background: var(--mt-gold-soft);
 }
 
 .dashboard-metric__badge {
@@ -606,8 +629,8 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: #f5f3ff;
-    color: var(--mt-secondary);
+    background: var(--mt-purple-soft);
+    color: var(--mt-primary);
 }
 
 .dashboard-select {
@@ -909,8 +932,8 @@
 }
 
 .dashboard-module--students .dashboard-module__icon {
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--mt-purple-soft);
+    color: var(--mt-primary);
 }
 
 .dashboard-module--internships .dashboard-module__icon {
@@ -1094,5 +1117,467 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| MedTrack brand identity — Purple & Gold
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-dashboard {
+    accent-color: var(--mt-primary);
+}
+
+.medtrack-dashboard a {
+    text-decoration: none;
+}
+
+.dashboard-hero {
+    isolation: isolate;
+}
+
+.dashboard-hero::before {
+    background:
+        radial-gradient(
+            circle,
+            rgba(242, 202, 82, 0.18) 0%,
+            rgba(242, 202, 82, 0.05) 46%,
+            transparent 70%
+        );
+}
+
+.dashboard-hero::after {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.dashboard-hero__eyebrow {
+    border-color: rgba(242, 202, 82, 0.30);
+    background: rgba(66, 20, 108, 0.28);
+}
+
+.dashboard-hero__description {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.dashboard-btn--glass {
+    border-color: rgba(242, 202, 82, 0.32);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.dashboard-btn--glass:hover {
+    border-color: rgba(242, 202, 82, 0.55);
+    background: rgba(255, 255, 255, 0.16);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Branded hero visual
+|--------------------------------------------------------------------------
+*/
+
+.dashboard-hero__brand-stage {
+    position: relative;
+    width: min(100%, 430px);
+    min-height: 270px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-hero__brand-glow {
+    position: absolute;
+    inset: 8% 3% 4%;
+    border-radius: 42% 58% 52% 48%;
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(242, 202, 82, 0.30),
+            rgba(255, 255, 255, 0.08) 40%,
+            transparent 72%
+        );
+    filter: blur(2px);
+}
+
+.dashboard-hero__illustration {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 18px 34px rgba(43, 13, 72, 0.22));
+}
+
+.dashboard-hero__illustration--main {
+    right: -2%;
+    bottom: -7%;
+    width: 72%;
+    max-height: 255px;
+    opacity: 0.90;
+    animation: medtrackFloat 5.2s ease-in-out infinite;
+}
+
+.dashboard-hero__illustration--secondary {
+    left: -5%;
+    top: -2%;
+    width: 42%;
+    max-height: 150px;
+    opacity: 0.34;
+    transform: rotate(-6deg);
+}
+
+.dashboard-hero__logo-card {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    width: 210px;
+    min-height: 150px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 24px 17px;
+    border: 1px solid rgba(255, 232, 145, 0.32);
+    border-radius: 28px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.20),
+            rgba(255, 255, 255, 0.08)
+        );
+    backdrop-filter: blur(16px);
+    box-shadow:
+        0 24px 50px rgba(43, 13, 72, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+.dashboard-hero__logo {
+    display: block;
+    width: 100%;
+    max-width: 165px;
+    max-height: 105px;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 10px 22px rgba(35, 12, 57, 0.18));
+}
+
+.dashboard-hero__brand-caption {
+    margin-top: 10px;
+    color: rgba(255, 246, 211, 0.88);
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    letter-spacing: 0.025em;
+}
+
+.dashboard-hero__gold-orb {
+    position: absolute;
+    z-index: 4;
+    display: block;
+    border-radius: 50%;
+    background:
+        linear-gradient(
+            145deg,
+            #ffe58a,
+            var(--mt-gold)
+        );
+    box-shadow:
+        0 8px 24px rgba(212, 160, 23, 0.26);
+    animation: medtrackFloat 4s ease-in-out infinite;
+}
+
+.dashboard-hero__gold-orb--one {
+    width: 18px;
+    height: 18px;
+    top: 18%;
+    right: 9%;
+}
+
+.dashboard-hero__gold-orb--two {
+    width: 11px;
+    height: 11px;
+    left: 12%;
+    bottom: 18%;
+    animation-delay: 0.8s;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| KPI brand treatment
+|--------------------------------------------------------------------------
+*/
+
+.dashboard-metric {
+    border-color: rgba(111, 45, 189, 0.10);
+}
+
+.dashboard-metric:hover {
+    border-color: rgba(111, 45, 189, 0.22);
+}
+
+.dashboard-metric--students::after {
+    background: var(--mt-primary);
+}
+
+.dashboard-metric--internships::after {
+    background: #9b61d2;
+}
+
+.dashboard-metric--hospitals::after {
+    background: #8152b5;
+}
+
+.dashboard-metric--payments::after {
+    background: var(--mt-gold);
+}
+
+.dashboard-metric--students .dashboard-metric__icon {
+    color: var(--mt-primary);
+    background: var(--mt-purple-soft);
+}
+
+.dashboard-metric--internships .dashboard-metric__icon {
+    color: #8b5cf6;
+    background: #f4effd;
+}
+
+.dashboard-metric--hospitals .dashboard-metric__icon {
+    color: #7440a8;
+    background: #f1e9fa;
+}
+
+.dashboard-metric--payments .dashboard-metric__icon {
+    color: var(--mt-gold-dark);
+    background: var(--mt-gold-soft);
+}
+
+.dashboard-metric--students .dashboard-metric__progress span {
+    background:
+        linear-gradient(
+            90deg,
+            var(--mt-primary),
+            #9461cc
+        );
+}
+
+.dashboard-metric--internships .dashboard-metric__progress span {
+    background:
+        linear-gradient(
+            90deg,
+            #8b5cf6,
+            #b58be0
+        );
+}
+
+.dashboard-metric--hospitals .dashboard-metric__progress span {
+    background:
+        linear-gradient(
+            90deg,
+            #7440a8,
+            #a874d4
+        );
+}
+
+.dashboard-metric--payments .dashboard-metric__progress span {
+    background:
+        linear-gradient(
+            90deg,
+            var(--mt-gold-dark),
+            var(--mt-gold-light)
+        );
+}
+
+.dashboard-metric__badge {
+    border-color: rgba(111, 45, 189, 0.10);
+    background: #fbf9fe;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Panels & module cards
+|--------------------------------------------------------------------------
+*/
+
+.dashboard-panel {
+    border-color: rgba(111, 45, 189, 0.10);
+}
+
+.dashboard-panel__eyebrow {
+    color: var(--mt-primary);
+}
+
+.dashboard-panel__icon {
+    background:
+        linear-gradient(
+            135deg,
+            var(--mt-purple-soft),
+            var(--mt-gold-soft)
+        );
+    color: var(--mt-primary);
+}
+
+.dashboard-module {
+    border-color: rgba(111, 45, 189, 0.09);
+}
+
+.dashboard-module:not(:disabled):hover {
+    border-color: rgba(111, 45, 189, 0.24);
+    box-shadow:
+        0 14px 32px rgba(76, 29, 149, 0.10);
+}
+
+.dashboard-module--students .dashboard-module__icon,
+.dashboard-module--internships .dashboard-module__icon,
+.dashboard-module--hospitals .dashboard-module__icon,
+.dashboard-module--attendance .dashboard-module__icon,
+.dashboard-module--assessments .dashboard-module__icon {
+    background: var(--mt-purple-soft);
+    color: var(--mt-primary);
+}
+
+.dashboard-module--payments .dashboard-module__icon {
+    background: var(--mt-gold-soft);
+    color: var(--mt-gold-dark);
+}
+
+.dashboard-module--audit .dashboard-module__icon {
+    background:
+        linear-gradient(
+            135deg,
+            var(--mt-purple-soft),
+            var(--mt-gold-soft)
+        );
+    color: #5b248f;
+}
+
+.dashboard-module__arrow {
+    color: rgba(111, 45, 189, 0.38);
+}
+
+.dashboard-module:hover .dashboard-module__arrow {
+    color: var(--mt-gold-dark);
+}
+
+.dashboard-modules__grid--admin {
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Activity / tables
+|--------------------------------------------------------------------------
+*/
+
+.dashboard-live-indicator {
+    background: var(--mt-gold-soft);
+    color: #7d5b00;
+}
+
+.dashboard-live-indicator span {
+    background: var(--mt-gold);
+}
+
+.dashboard-activity__icon {
+    background:
+        linear-gradient(
+            135deg,
+            var(--mt-purple-soft),
+            var(--mt-gold-soft)
+        );
+    color: var(--mt-primary);
+}
+
+.dashboard-table thead th {
+    background: #fbf9fe;
+}
+
+.dashboard-table tbody tr:hover td {
+    background: rgba(111, 45, 189, 0.025);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Branded responsive adjustments
+|--------------------------------------------------------------------------
+*/
+
+@media (max-width: 1199.98px) {
+    .dashboard-modules__grid--admin {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .dashboard-hero__visual {
+        display: flex;
+        min-height: 210px;
+        margin-top: 8px;
+    }
+
+    .dashboard-hero__brand-stage {
+        min-height: 205px;
+    }
+
+    .dashboard-hero__illustration--main {
+        width: 54%;
+        right: 5%;
+    }
+
+    .dashboard-hero__illustration--secondary {
+        width: 30%;
+        left: 7%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-hero__visual {
+        min-height: 185px;
+    }
+
+    .dashboard-hero__logo-card {
+        width: 170px;
+        min-height: 125px;
+        padding: 18px;
+    }
+
+    .dashboard-hero__logo {
+        max-width: 132px;
+        max-height: 82px;
+    }
+
+    .dashboard-hero__illustration--main {
+        width: 48%;
+        opacity: 0.68;
+    }
+
+    .dashboard-hero__illustration--secondary {
+        opacity: 0.20;
+    }
+
+    .dashboard-modules__grid--admin {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-hero__illustration {
+        display: none;
+    }
+
+    .dashboard-hero__brand-stage {
+        min-height: 150px;
+    }
+
+    .dashboard-hero__logo-card {
+        width: min(100%, 220px);
     }
 }

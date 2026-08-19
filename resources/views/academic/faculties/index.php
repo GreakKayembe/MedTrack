@@ -3,32 +3,112 @@
 declare(strict_types=1);
 
 /**
- * @var array $faculties
+ * @var array<int, array<string, mixed>> $faculties
+ * @var array<string, int> $statistics
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
  */
 
-$faculties = $faculties ?? [];
-
-$totalFaculties = count($faculties);
-
-$activeFaculties = count(
-    array_filter(
-        $faculties,
-        static fn (array $faculty): bool =>
-            ($faculty['status'] ?? '') === 'ACTIVE'
+$faculties =
+    is_array(
+        $faculties
+        ?? null
     )
-);
+        ? $faculties
+        : [];
+
+$statistics =
+    is_array(
+        $statistics
+        ?? null
+    )
+        ? $statistics
+        : [];
+
+$isPlatform =
+    (bool) (
+        $isPlatform
+        ?? false
+    );
+
+$isUniversityContext =
+    (bool) (
+        $isUniversityContext
+        ?? false
+    );
+
+$totalFaculties =
+    (int) (
+        $statistics['total']
+        ?? count(
+            $faculties
+        )
+    );
+
+$activeFaculties =
+    (int) (
+        $statistics['active']
+        ?? count(
+            array_filter(
+                $faculties,
+                static fn (
+                    array $faculty
+                ): bool =>
+                    strtoupper(
+                        trim(
+                            (string) (
+                                $faculty['status']
+                                ?? ''
+                            )
+                        )
+                    ) === 'ACTIVE'
+            )
+        )
+    );
 
 $inactiveFaculties =
-    $totalFaculties - $activeFaculties;
-
-$universitiesCount = count(
-    array_unique(
-        array_column(
-            $faculties,
-            'university_id'
+    (int) (
+        $statistics['inactive']
+        ?? max(
+            0,
+            $totalFaculties
+            - $activeFaculties
         )
-    )
-);
+    );
+
+$universitiesCount =
+    $isPlatform
+        ? count(
+            array_unique(
+                array_filter(
+                    array_map(
+                        static fn (
+                            mixed $value
+                        ): int =>
+                            (int) $value,
+                        array_column(
+                            $faculties,
+                            'university_id'
+                        )
+                    ),
+                    static fn (
+                        int $value
+                    ): bool =>
+                        $value > 0
+                )
+            )
+        )
+        : 1;
+
+$activityRate =
+    $totalFaculties > 0
+        ? (int) round(
+            (
+                $activeFaculties
+                / $totalFaculties
+            ) * 100
+        )
+        : 0;
 ?>
 
 <div class="container-fluid px-0">
@@ -37,28 +117,51 @@ $universitiesCount = count(
          Header
          ========================================================= -->
 
-    <div class="d-flex flex-column flex-lg-row
-                justify-content-between
-                align-items-lg-center
-                gap-3 mb-4">
+    <div
+        class="d-flex
+               flex-column
+               flex-lg-row
+               justify-content-between
+               align-items-lg-center
+               gap-3
+               mb-4"
+    >
 
         <div>
+
             <h2 class="fw-bold mb-1">
                 Facultés
             </h2>
 
             <p class="text-muted mb-0">
-                Gérez les facultés rattachées aux universités
-                enregistrées dans MedTrack.
+
+                <?php if ($isUniversityContext): ?>
+
+                    Gérez les facultés de votre université
+                    et leur disponibilité dans MedTrack.
+
+                <?php else: ?>
+
+                    Gérez les facultés rattachées aux universités
+                    enregistrées dans MedTrack.
+
+                <?php endif; ?>
+
             </p>
+
         </div>
+
 
         <a
             href="/faculties/create"
-            class="btn btn-primary
-                   d-inline-flex align-items-center gap-2"
+            class="btn
+                   btn-primary
+                   d-inline-flex
+                   align-items-center
+                   gap-2"
         >
             <i class="bi bi-plus-lg"></i>
+
             Nouvelle faculté
         </a>
 
@@ -71,16 +174,22 @@ $universitiesCount = count(
 
     <div class="row g-3 mb-4">
 
+        <!-- Total -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body p-4">
 
-                    <div class="d-flex
-                                justify-content-between
-                                align-items-center">
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
 
                         <div>
+
                             <div class="text-muted small mb-1">
                                 Total
                             </div>
@@ -92,7 +201,9 @@ $universitiesCount = count(
                             <div class="small text-muted">
                                 Facultés enregistrées
                             </div>
+
                         </div>
+
 
                         <div
                             class="rounded-circle
@@ -101,7 +212,10 @@ $universitiesCount = count(
                                    d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:52px;height:52px;"
+                            style="
+                                width: 52px;
+                                height: 52px;
+                            "
                         >
                             <i class="bi bi-diagram-3 fs-4"></i>
                         </div>
@@ -109,21 +223,28 @@ $universitiesCount = count(
                     </div>
 
                 </div>
+
             </div>
 
         </div>
 
 
+        <!-- Active -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body p-4">
 
-                    <div class="d-flex
-                                justify-content-between
-                                align-items-center">
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
 
                         <div>
+
                             <div class="text-muted small mb-1">
                                 Actives
                             </div>
@@ -135,7 +256,9 @@ $universitiesCount = count(
                             <div class="small text-muted">
                                 En activité
                             </div>
+
                         </div>
+
 
                         <div
                             class="rounded-circle
@@ -144,7 +267,10 @@ $universitiesCount = count(
                                    d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:52px;height:52px;"
+                            style="
+                                width: 52px;
+                                height: 52px;
+                            "
                         >
                             <i class="bi bi-check-circle fs-4"></i>
                         </div>
@@ -152,21 +278,28 @@ $universitiesCount = count(
                     </div>
 
                 </div>
+
             </div>
 
         </div>
 
 
+        <!-- Inactive -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body p-4">
 
-                    <div class="d-flex
-                                justify-content-between
-                                align-items-center">
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
 
                         <div>
+
                             <div class="text-muted small mb-1">
                                 Inactives
                             </div>
@@ -178,7 +311,9 @@ $universitiesCount = count(
                             <div class="small text-muted">
                                 Désactivées
                             </div>
+
                         </div>
+
 
                         <div
                             class="rounded-circle
@@ -187,7 +322,10 @@ $universitiesCount = count(
                                    d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:52px;height:52px;"
+                            style="
+                                width: 52px;
+                                height: 52px;
+                            "
                         >
                             <i class="bi bi-pause-circle fs-4"></i>
                         </div>
@@ -195,49 +333,90 @@ $universitiesCount = count(
                     </div>
 
                 </div>
+
             </div>
 
         </div>
 
 
+        <!-- Context-specific metric -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body p-4">
 
-                    <div class="d-flex
-                                justify-content-between
-                                align-items-center">
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-center"
+                    >
 
                         <div>
-                            <div class="text-muted small mb-1">
-                                Universités
-                            </div>
 
-                            <div class="fs-3 fw-bold">
-                                <?= $universitiesCount ?>
-                            </div>
+                            <?php if ($isPlatform): ?>
 
-                            <div class="small text-muted">
-                                Avec des facultés
-                            </div>
+                                <div class="text-muted small mb-1">
+                                    Universités
+                                </div>
+
+                                <div class="fs-3 fw-bold">
+                                    <?= $universitiesCount ?>
+                                </div>
+
+                                <div class="small text-muted">
+                                    Avec des facultés
+                                </div>
+
+                            <?php else: ?>
+
+                                <div class="text-muted small mb-1">
+                                    Taux d'activité
+                                </div>
+
+                                <div class="fs-3 fw-bold">
+                                    <?= $activityRate ?>%
+                                </div>
+
+                                <div class="small text-muted">
+                                    Facultés actives
+                                </div>
+
+                            <?php endif; ?>
+
                         </div>
+
 
                         <div
                             class="rounded-circle
-                                   bg-info-subtle
-                                   text-info
+                                   bg-warning-subtle
+                                   text-warning-emphasis
                                    d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:52px;height:52px;"
+                            style="
+                                width: 52px;
+                                height: 52px;
+                            "
                         >
-                            <i class="bi bi-mortarboard fs-4"></i>
+
+                            <?php if ($isPlatform): ?>
+
+                                <i class="bi bi-mortarboard fs-4"></i>
+
+                            <?php else: ?>
+
+                                <i class="bi bi-activity fs-4"></i>
+
+                            <?php endif; ?>
+
                         </div>
 
                     </div>
 
                 </div>
+
             </div>
 
         </div>
@@ -255,26 +434,48 @@ $universitiesCount = count(
 
             <div class="p-4 border-bottom">
 
-                <div class="d-flex flex-column flex-lg-row
-                            justify-content-between
-                            align-items-lg-center
-                            gap-3">
+                <div
+                    class="d-flex
+                           flex-column
+                           flex-lg-row
+                           justify-content-between
+                           align-items-lg-center
+                           gap-3"
+                >
 
                     <div>
+
                         <h5 class="fw-bold mb-1">
                             Liste des facultés
                         </h5>
 
                         <div class="text-muted small">
+
                             <?= $totalFaculties ?>
-                            faculté<?= $totalFaculties > 1 ? 's' : '' ?>
-                            enregistrée<?= $totalFaculties > 1 ? 's' : '' ?>
+
+                            faculté<?= $totalFaculties > 1
+                                ? 's'
+                                : ''
+                            ?>
+
+                            enregistrée<?= $totalFaculties > 1
+                                ? 's'
+                                : ''
+                            ?>
+
                         </div>
+
                     </div>
+
 
                     <?php if ($totalFaculties > 0): ?>
 
-                        <div style="max-width:320px;width:100%;">
+                        <div
+                            style="
+                                max-width: 320px;
+                                width: 100%;
+                            "
+                        >
 
                             <div class="input-group">
 
@@ -315,7 +516,10 @@ $universitiesCount = count(
                                align-items-center
                                justify-content-center
                                mb-3"
-                        style="width:72px;height:72px;"
+                        style="
+                            width: 72px;
+                            height: 72px;
+                        "
                     >
                         <i class="bi bi-diagram-3 fs-2"></i>
                     </div>
@@ -326,11 +530,23 @@ $universitiesCount = count(
 
                     <p
                         class="text-muted mx-auto"
-                        style="max-width:500px;"
+                        style="max-width: 500px;"
                     >
-                        Commencez par créer une faculté
-                        et rattachez-la à une université
-                        existante.
+
+                        <?php if ($isUniversityContext): ?>
+
+                            Votre université ne possède encore
+                            aucune faculté. Commencez par créer
+                            votre première structure académique.
+
+                        <?php else: ?>
+
+                            Commencez par créer une faculté
+                            et rattachez-la à une université
+                            existante.
+
+                        <?php endif; ?>
+
                     </p>
 
                     <a
@@ -338,10 +554,12 @@ $universitiesCount = count(
                         class="btn btn-primary"
                     >
                         <i class="bi bi-plus-lg me-1"></i>
+
                         Créer une faculté
                     </a>
 
                 </div>
+
 
             <?php else: ?>
 
@@ -358,6 +576,7 @@ $universitiesCount = count(
                         <thead class="table-light">
 
                             <tr>
+
                                 <th class="ps-4">
                                     Faculté
                                 </th>
@@ -366,9 +585,13 @@ $universitiesCount = count(
                                     Code
                                 </th>
 
-                                <th>
-                                    Université
-                                </th>
+                                <?php if ($isPlatform): ?>
+
+                                    <th>
+                                        Université
+                                    </th>
+
+                                <?php endif; ?>
 
                                 <th>
                                     Statut
@@ -377,6 +600,7 @@ $universitiesCount = count(
                                 <th class="text-end pe-4">
                                     Actions
                                 </th>
+
                             </tr>
 
                         </thead>
@@ -384,256 +608,348 @@ $universitiesCount = count(
 
                         <tbody>
 
-                        <?php foreach ($faculties as $faculty): ?>
+                            <?php foreach (
+                                $faculties
+                                as $faculty
+                            ): ?>
 
-                            <?php
-                            $id = (int) (
-                                $faculty['id']
-                                ?? 0
-                            );
+                                <?php
+                                $id =
+                                    (int) (
+                                        $faculty['id']
+                                        ?? 0
+                                    );
 
-                            $name = (string) (
-                                $faculty['name']
-                                ?? ''
-                            );
+                                $name =
+                                    trim(
+                                        (string) (
+                                            $faculty['name']
+                                            ?? ''
+                                        )
+                                    );
 
-                            $code = (string) (
-                                $faculty['code']
-                                ?? ''
-                            );
+                                $code =
+                                    trim(
+                                        (string) (
+                                            $faculty['code']
+                                            ?? ''
+                                        )
+                                    );
 
-                            $universityName = (string) (
-                                $faculty['university_name']
-                                ?? ''
-                            );
+                                $universityName =
+                                    trim(
+                                        (string) (
+                                            $faculty['university_name']
+                                            ?? ''
+                                        )
+                                    );
 
-                            $universityCode = (string) (
-                                $faculty['university_code']
-                                ?? ''
-                            );
+                                $universityCode =
+                                    trim(
+                                        (string) (
+                                            $faculty['university_code']
+                                            ?? ''
+                                        )
+                                    );
 
-                            $status = (string) (
-                                $faculty['status']
-                                ?? 'INACTIVE'
-                            );
+                                $status =
+                                    strtoupper(
+                                        trim(
+                                            (string) (
+                                                $faculty['status']
+                                                ?? 'INACTIVE'
+                                            )
+                                        )
+                                    );
 
-                            $isActive =
-                                $status === 'ACTIVE';
-                            ?>
+                                $isFacultyActive =
+                                    $status === 'ACTIVE';
 
-                            <tr
-                                class="faculty-row"
-                                data-search="<?= htmlspecialchars(
+                                $searchValues = [
+                                    $name,
+                                    $code,
+                                    $status,
+                                ];
+
+                                if ($isPlatform) {
+                                    $searchValues[] =
+                                        $universityName;
+
+                                    $searchValues[] =
+                                        $universityCode;
+                                }
+
+                                $searchable =
                                     strtolower(
                                         implode(
                                             ' ',
-                                            [
-                                                $name,
-                                                $code,
-                                                $universityName,
-                                                $universityCode,
-                                                $status,
-                                            ]
+                                            array_filter(
+                                                $searchValues,
+                                                static fn (
+                                                    string $value
+                                                ): bool =>
+                                                    $value !== ''
+                                            )
                                         )
-                                    ),
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
-                            >
+                                    );
+                                ?>
 
-                                <td class="ps-4">
 
-                                    <div class="d-flex
-                                                align-items-center
-                                                gap-3">
+                                <tr
+                                    class="faculty-row"
+                                    data-search="<?= htmlspecialchars(
+                                        $searchable,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                >
+
+                                    <!-- Faculty -->
+
+                                    <td class="ps-4">
 
                                         <div
-                                            class="rounded-circle
-                                                   bg-primary-subtle
-                                                   text-primary
-                                                   d-flex
+                                            class="d-flex
                                                    align-items-center
-                                                   justify-content-center
-                                                   flex-shrink-0"
-                                            style="
-                                                width:42px;
-                                                height:42px;
-                                            "
+                                                   gap-3"
                                         >
-                                            <i class="bi bi-diagram-3"></i>
-                                        </div>
 
-                                        <div>
-
-                                            <a
-                                                href="/faculties/<?= $id ?>"
-                                                class="fw-semibold
-                                                       text-decoration-none"
+                                            <div
+                                                class="rounded-circle
+                                                       bg-primary-subtle
+                                                       text-primary
+                                                       d-flex
+                                                       align-items-center
+                                                       justify-content-center
+                                                       flex-shrink-0"
+                                                style="
+                                                    width: 42px;
+                                                    height: 42px;
+                                                "
                                             >
-                                                <?= htmlspecialchars(
-                                                    $name
-                                                ) ?>
-                                            </a>
+                                                <i class="bi bi-diagram-3"></i>
+                                            </div>
 
-                                            <div class="small text-muted">
-                                                Faculté
+
+                                            <div>
+
+                                                <?php if ($id > 0): ?>
+
+                                                    <a
+                                                        href="/faculties/<?= $id ?>"
+                                                        class="fw-semibold
+                                                               text-decoration-none"
+                                                    >
+                                                        <?= htmlspecialchars(
+                                                            $name,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </a>
+
+                                                <?php else: ?>
+
+                                                    <span class="fw-semibold">
+                                                        <?= htmlspecialchars(
+                                                            $name,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </span>
+
+                                                <?php endif; ?>
+
+                                                <div class="small text-muted">
+                                                    Faculté
+                                                </div>
+
                                             </div>
 
                                         </div>
 
-                                    </div>
-
-                                </td>
+                                    </td>
 
 
-                                <td>
+                                    <!-- Code -->
 
-                                    <?php if ($code !== ''): ?>
+                                    <td>
 
-                                        <span
-                                            class="badge
-                                                   text-bg-light
-                                                   border"
-                                        >
-                                            <?= htmlspecialchars(
-                                                $code
-                                            ) ?>
-                                        </span>
+                                        <?php if ($code !== ''): ?>
 
-                                    <?php else: ?>
+                                            <span
+                                                class="badge
+                                                       text-bg-light
+                                                       border"
+                                            >
+                                                <?= htmlspecialchars(
+                                                    $code,
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>
+                                            </span>
 
-                                        <span class="text-muted">
-                                            —
-                                        </span>
+                                        <?php else: ?>
 
-                                    <?php endif; ?>
+                                            <span class="text-muted">
+                                                —
+                                            </span>
 
-                                </td>
+                                        <?php endif; ?>
 
-
-                                <td>
-
-                                    <div class="fw-semibold">
-                                        <?= htmlspecialchars(
-                                            $universityName
-                                        ) ?>
-                                    </div>
-
-                                    <?php if ($universityCode !== ''): ?>
-
-                                        <div class="small text-muted">
-                                            <?= htmlspecialchars(
-                                                $universityCode
-                                            ) ?>
-                                        </div>
-
-                                    <?php endif; ?>
-
-                                </td>
+                                    </td>
 
 
-                                <td>
+                                    <!-- University -->
 
-                                    <?php if ($isActive): ?>
+                                    <?php if ($isPlatform): ?>
 
-                                        <span
-                                            class="badge
-                                                   rounded-pill
-                                                   text-bg-success"
-                                        >
-                                            <i
-                                                class="bi
-                                                       bi-check-circle
-                                                       me-1"
-                                            ></i>
+                                        <td>
 
-                                            Active
-                                        </span>
+                                            <div class="fw-semibold">
 
-                                    <?php else: ?>
+                                                <?= htmlspecialchars(
+                                                    $universityName !== ''
+                                                        ? $universityName
+                                                        : '—',
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>
 
-                                        <span
-                                            class="badge
-                                                   rounded-pill
-                                                   text-bg-secondary"
-                                        >
-                                            <i
-                                                class="bi
-                                                       bi-pause-circle
-                                                       me-1"
-                                            ></i>
+                                            </div>
 
-                                            Inactive
-                                        </span>
+                                            <?php if (
+                                                $universityCode !== ''
+                                            ): ?>
+
+                                                <div class="small text-muted">
+
+                                                    <?= htmlspecialchars(
+                                                        $universityCode,
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>
+
+                                                </div>
+
+                                            <?php endif; ?>
+
+                                        </td>
 
                                     <?php endif; ?>
 
-                                </td>
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <?php if ($isFacultyActive): ?>
+
+                                            <span
+                                                class="badge
+                                                       rounded-pill
+                                                       text-bg-success"
+                                            >
+                                                <i
+                                                    class="bi
+                                                           bi-check-circle
+                                                           me-1"
+                                                ></i>
+
+                                                Active
+                                            </span>
+
+                                        <?php else: ?>
+
+                                            <span
+                                                class="badge
+                                                       rounded-pill
+                                                       text-bg-secondary"
+                                            >
+                                                <i
+                                                    class="bi
+                                                           bi-pause-circle
+                                                           me-1"
+                                                ></i>
+
+                                                Inactive
+                                            </span>
+
+                                        <?php endif; ?>
+
+                                    </td>
 
 
-                                <td class="text-end pe-4">
+                                    <!-- Actions -->
 
-                                    <div class="dropdown">
+                                    <td class="text-end pe-4">
 
-                                        <button
-                                            class="btn
-                                                   btn-sm
-                                                   btn-light"
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
-                                        >
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
+                                        <?php if ($id > 0): ?>
 
-                                        <ul
-                                            class="dropdown-menu
-                                                   dropdown-menu-end"
-                                        >
+                                            <div class="dropdown">
 
-                                            <li>
-
-                                                <a
-                                                    class="dropdown-item"
-                                                    href="/faculties/<?= $id ?>"
+                                                <button
+                                                    class="btn
+                                                           btn-sm
+                                                           btn-light"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                    aria-label="Actions de la faculté"
                                                 >
-                                                    <i
-                                                        class="bi
-                                                               bi-eye
-                                                               me-2"
-                                                    ></i>
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
 
-                                                    Consulter
-                                                </a>
-
-                                            </li>
-
-                                            <li>
-
-                                                <a
-                                                    class="dropdown-item"
-                                                    href="/faculties/<?= $id ?>/edit"
+                                                <ul
+                                                    class="dropdown-menu
+                                                           dropdown-menu-end"
                                                 >
-                                                    <i
-                                                        class="bi
-                                                               bi-pencil-square
-                                                               me-2"
-                                                    ></i>
 
-                                                    Modifier
-                                                </a>
+                                                    <li>
 
-                                            </li>
+                                                        <a
+                                                            class="dropdown-item"
+                                                            href="/faculties/<?= $id ?>"
+                                                        >
+                                                            <i
+                                                                class="bi
+                                                                       bi-eye
+                                                                       me-2"
+                                                            ></i>
 
-                                        </ul>
+                                                            Consulter
+                                                        </a>
 
-                                    </div>
+                                                    </li>
 
-                                </td>
 
-                            </tr>
+                                                    <li>
 
-                        <?php endforeach; ?>
+                                                        <a
+                                                            class="dropdown-item"
+                                                            href="/faculties/<?= $id ?>/edit"
+                                                        >
+                                                            <i
+                                                                class="bi
+                                                                       bi-pencil-square
+                                                                       me-2"
+                                                            ></i>
+
+                                                            Modifier
+                                                        </a>
+
+                                                    </li>
+
+                                                </ul>
+
+                                            </div>
+
+                                        <?php endif; ?>
+
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
 
                         </tbody>
 
@@ -648,8 +964,10 @@ $universitiesCount = count(
                     id="facultySearchEmpty"
                     class="text-center py-5 d-none"
                 >
+
                     <i
-                        class="bi bi-search
+                        class="bi
+                               bi-search
                                fs-2
                                text-muted"
                     ></i>
@@ -662,6 +980,7 @@ $universitiesCount = count(
                         Aucune faculté ne correspond
                         à votre recherche.
                     </div>
+
                 </div>
 
             <?php endif; ?>
@@ -676,63 +995,82 @@ $universitiesCount = count(
 <?php if ($faculties !== []): ?>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput =
-        document.getElementById('facultySearch');
-
-    const table =
-        document.getElementById('facultiesTable');
-
-    const emptyState =
-        document.getElementById('facultySearchEmpty');
-
-    if (!searchInput || !table) {
-        return;
-    }
-
-    const rows = Array.from(
-        table.querySelectorAll('.faculty-row')
-    );
-
-    searchInput.addEventListener('input', () => {
-        const query =
-            searchInput.value
-                .trim()
-                .toLowerCase();
-
-        let visible = 0;
-
-        rows.forEach((row) => {
-            const searchable =
-                row.dataset.search
-                || '';
-
-            const matches =
-                searchable.includes(query);
-
-            row.classList.toggle(
-                'd-none',
-                !matches
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+        const searchInput =
+            document.getElementById(
+                'facultySearch'
             );
 
-            if (matches) {
-                visible++;
-            }
-        });
-
-        table.classList.toggle(
-            'd-none',
-            visible === 0
-        );
-
-        if (emptyState) {
-            emptyState.classList.toggle(
-                'd-none',
-                visible !== 0
+        const table =
+            document.getElementById(
+                'facultiesTable'
             );
+
+        const emptyState =
+            document.getElementById(
+                'facultySearchEmpty'
+            );
+
+        if (!searchInput || !table) {
+            return;
         }
-    });
-});
+
+        const rows =
+            Array.from(
+                table.querySelectorAll(
+                    '.faculty-row'
+                )
+            );
+
+        searchInput.addEventListener(
+            'input',
+            () => {
+                const query =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+                let visible = 0;
+
+                rows.forEach(
+                    (row) => {
+                        const searchable =
+                            row.dataset.search
+                            || '';
+
+                        const matches =
+                            searchable.includes(
+                                query
+                            );
+
+                        row.classList.toggle(
+                            'd-none',
+                            !matches
+                        );
+
+                        if (matches) {
+                            visible++;
+                        }
+                    }
+                );
+
+                table.classList.toggle(
+                    'd-none',
+                    visible === 0
+                );
+
+                if (emptyState) {
+                    emptyState.classList.toggle(
+                        'd-none',
+                        visible !== 0
+                    );
+                }
+            }
+        );
+    }
+);
 </script>
 
 <?php endif; ?>
