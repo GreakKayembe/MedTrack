@@ -386,6 +386,197 @@ final class StudentRepository
     }
 
     /**
+     * Recherche contrôlée d'identités étudiantes
+     * pour le workflow d'inscription académique.
+     *
+     * Cette méthode effectue volontairement une
+     * recherche globale : un étudiant peut déjà
+     * exister dans MedTrack sans être encore
+     * inscrit dans l'université courante.
+     *
+     * Seules les données minimales nécessaires à
+     * l'identification sont retournées.
+     */
+    public function searchForEnrollment(
+        string $query,
+        int $universityId,
+        int $limit = 10
+    ): array {
+        $query = trim($query);
+
+        if (
+            $query === ''
+            || $universityId <= 0
+            || $limit <= 0
+        ) {
+            return [];
+        }
+
+        $limit = min(
+            $limit,
+            10
+        );
+
+        $likeQuery =
+            '%' . $query . '%';
+
+        $prefixQuery =
+            $query . '%';
+
+        $sql = <<<'SQL'
+            SELECT
+                s.id,
+                s.national_student_number,
+                s.first_name,
+                s.middle_name,
+                s.last_name,
+                s.birth_date,
+
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM academic_enrollments AS ae
+                        WHERE ae.student_id = s.id
+                          AND ae.university_id = :university_id
+                    )
+                    THEN 1
+                    ELSE 0
+                END AS already_enrolled
+
+            FROM students AS s
+
+            WHERE
+                s.national_student_number = :exact_query
+                OR s.email = :exact_email
+                OR s.phone = :exact_phone
+                OR s.first_name LIKE :like_query
+                OR s.middle_name LIKE :like_query_middle
+                OR s.last_name LIKE :like_query_last
+                OR CONCAT_WS(
+                    ' ',
+                    s.first_name,
+                    s.middle_name,
+                    s.last_name
+                ) LIKE :like_full_name
+
+            ORDER BY
+                CASE
+                    WHEN s.national_student_number = :rank_exact_number
+                        THEN 0
+                    WHEN s.email = :rank_exact_email
+                        THEN 1
+                    WHEN s.phone = :rank_exact_phone
+                        THEN 2
+                    WHEN s.last_name LIKE :rank_last_prefix
+                        THEN 3
+                    WHEN s.first_name LIKE :rank_first_prefix
+                        THEN 4
+                    ELSE 5
+                END ASC,
+                s.last_name ASC,
+                s.first_name ASC,
+                s.id ASC
+
+            LIMIT :result_limit
+        SQL;
+
+        $statement =
+            $this->pdo->prepare(
+                $sql
+            );
+
+        $statement->bindValue(
+            ':university_id',
+            $universityId,
+            PDO::PARAM_INT
+        );
+
+        $statement->bindValue(
+            ':exact_query',
+            $query,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':exact_email',
+            mb_strtolower($query),
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':exact_phone',
+            $query,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':like_query',
+            $likeQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':like_query_middle',
+            $likeQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':like_query_last',
+            $likeQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':like_full_name',
+            $likeQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':rank_exact_number',
+            $query,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':rank_exact_email',
+            mb_strtolower($query),
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':rank_exact_phone',
+            $query,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':rank_last_prefix',
+            $prefixQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':rank_first_prefix',
+            $prefixQuery,
+            PDO::PARAM_STR
+        );
+
+        $statement->bindValue(
+            ':result_limit',
+            $limit,
+            PDO::PARAM_INT
+        );
+
+        $statement->execute();
+
+        return $statement->fetchAll(
+            PDO::FETCH_ASSOC
+        );
+    }
+
+    /**
      * Crée un étudiant.
      */
     public function create(
