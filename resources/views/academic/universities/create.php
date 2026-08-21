@@ -1,15 +1,26 @@
 <?php
 
 declare(strict_types=1);
+
+/** @var string $csrfToken */
+
+$csrfToken =
+    (string) (
+        $csrfToken
+        ?? ''
+    );
 ?>
 
 <div class="container-fluid px-0">
 
-    <div class="d-flex flex-column flex-lg-row
-                justify-content-between align-items-lg-center
-                gap-3 mb-4">
+    <div
+        class="d-flex flex-column flex-lg-row
+               justify-content-between align-items-lg-center
+               gap-3 mb-4"
+    >
 
         <div>
+
             <div class="d-flex align-items-center gap-2 mb-2">
                 <span class="badge rounded-pill text-bg-primary">
                     Academic
@@ -25,9 +36,10 @@ declare(strict_types=1);
             </h2>
 
             <p class="text-muted mb-0">
-                Enregistrez un nouvel établissement universitaire
-                dans MedTrack.
+                Enregistrez l'établissement et créez
+                son administrateur principal MedTrack.
             </p>
+
         </div>
 
         <a
@@ -46,7 +58,140 @@ declare(strict_types=1);
         id="universityFormAlert"
         class="alert d-none"
         role="alert"
+        aria-live="polite"
     ></div>
+
+
+    <div
+        id="universityOnboardingSuccess"
+        class="card border-0 shadow-sm d-none mb-4"
+        aria-live="polite"
+    >
+        <div class="card-body p-4">
+
+            <div class="d-flex gap-3">
+
+                <div
+                    class="rounded-circle
+                           bg-success-subtle
+                           text-success
+                           d-flex
+                           align-items-center
+                           justify-content-center
+                           flex-shrink-0"
+                    style="width:52px;height:52px;"
+                >
+                    <i class="bi bi-check-circle-fill fs-4"></i>
+                </div>
+
+                <div class="flex-grow-1">
+
+                    <h5 class="fw-bold mb-1">
+                        Université créée avec succès
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        Le compte administrateur principal a été créé.
+                        Conservez les identifiants temporaires ci-dessous.
+                    </p>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <div class="text-muted small mb-1">
+                                    Email de connexion
+                                </div>
+
+                                <div
+                                    id="onboardingAdminEmail"
+                                    class="fw-semibold text-break"
+                                >
+                                    —
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <div class="text-muted small mb-1">
+                                    Mot de passe temporaire
+                                </div>
+
+                                <div
+                                    class="d-flex
+                                           align-items-center
+                                           justify-content-between
+                                           gap-2"
+                                >
+
+                                    <code
+                                        id="onboardingTemporaryPassword"
+                                        class="fs-6 text-break"
+                                    >
+                                        —
+                                    </code>
+
+                                    <button
+                                        type="button"
+                                        id="copyTemporaryPassword"
+                                        class="btn btn-sm btn-outline-secondary"
+                                    >
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert alert-warning mt-3 mb-0">
+
+                        <i class="bi bi-shield-lock me-1"></i>
+
+                        L'administrateur devra obligatoirement
+                        changer ce mot de passe à sa première connexion.
+
+                    </div>
+
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+
+                        <a
+                            id="onboardingUniversityLink"
+                            href="/universities"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-building-check me-1"></i>
+                            Voir l'université
+                        </a>
+
+                        <a
+                            href="/universities"
+                            class="btn btn-outline-secondary"
+                        >
+                            Retour à la liste
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
 
 
     <form
@@ -60,22 +205,15 @@ declare(strict_types=1);
             type="hidden"
             name="_token"
             value="<?= htmlspecialchars(
-                (string) ($csrfToken ?? ''),
+                $csrfToken,
                 ENT_QUOTES,
                 'UTF-8'
             ) ?>"
         >
 
-
         <div class="row g-4">
 
-            <!-- =========================
-                 Main content
-                 ========================= -->
-
             <div class="col-xl-8">
-
-                <!-- Identification -->
 
                 <div class="card border-0 shadow-sm mb-4">
 
@@ -121,13 +259,17 @@ declare(strict_types=1);
 
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control text-uppercase"
                                     id="code"
                                     name="code"
                                     maxlength="50"
                                     placeholder="Ex. UNIKIN"
                                     required
                                 >
+
+                                <div class="invalid-feedback">
+                                    Le code de l'université est obligatoire.
+                                </div>
 
                                 <div class="form-text">
                                     Code institutionnel unique.
@@ -151,9 +293,14 @@ declare(strict_types=1);
                                     class="form-control"
                                     id="name"
                                     name="name"
+                                    maxlength="255"
                                     placeholder="Ex. Université de Kinshasa"
                                     required
                                 >
+
+                                <div class="invalid-feedback">
+                                    Le nom de l'université est obligatoire.
+                                </div>
 
                             </div>
 
@@ -201,8 +348,6 @@ declare(strict_types=1);
 
                 </div>
 
-
-                <!-- Location -->
 
                 <div class="card border-0 shadow-sm mb-4">
 
@@ -304,9 +449,7 @@ declare(strict_types=1);
                 </div>
 
 
-                <!-- Contact -->
-
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm mb-4">
 
                     <div class="card-body p-4">
 
@@ -325,11 +468,11 @@ declare(strict_types=1);
 
                             <div>
                                 <h5 class="fw-bold mb-1">
-                                    Coordonnées
+                                    Coordonnées institutionnelles
                                 </h5>
 
                                 <p class="text-muted small mb-0">
-                                    Informations de contact institutionnelles.
+                                    Contacts officiels de l'établissement.
                                 </p>
                             </div>
 
@@ -401,12 +544,188 @@ declare(strict_types=1);
 
                 </div>
 
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-3 mb-4">
+
+                            <div
+                                class="rounded-circle
+                                       bg-warning-subtle
+                                       text-warning-emphasis
+                                       d-flex align-items-center
+                                       justify-content-center"
+                                style="width:48px;height:48px;"
+                            >
+                                <i class="bi bi-person-badge fs-4"></i>
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    Administrateur principal
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    Ce compte recevra le rôle
+                                    UNIVERSITY_ADMIN pour cette université.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="alert alert-light border
+                                   d-flex gap-3 align-items-start"
+                        >
+                            <i
+                                class="bi bi-shield-lock
+                                       text-primary fs-5"
+                            ></i>
+
+                            <div class="small text-muted">
+                                MedTrack générera automatiquement un mot
+                                de passe temporaire. L'administrateur devra
+                                le changer à sa première connexion.
+                            </div>
+                        </div>
+
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="admin_first_name"
+                                    class="form-label fw-semibold"
+                                >
+                                    Prénom
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="admin_first_name"
+                                    name="admin_first_name"
+                                    maxlength="150"
+                                    required
+                                >
+
+                                <div class="invalid-feedback">
+                                    Le prénom de l'administrateur est obligatoire.
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="admin_middle_name"
+                                    class="form-label fw-semibold"
+                                >
+                                    Deuxième prénom
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="admin_middle_name"
+                                    name="admin_middle_name"
+                                    maxlength="150"
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="admin_last_name"
+                                    class="form-label fw-semibold"
+                                >
+                                    Nom
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="admin_last_name"
+                                    name="admin_last_name"
+                                    maxlength="150"
+                                    required
+                                >
+
+                                <div class="invalid-feedback">
+                                    Le nom de l'administrateur est obligatoire.
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="admin_email"
+                                    class="form-label fw-semibold"
+                                >
+                                    Email de connexion
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="admin_email"
+                                    name="admin_email"
+                                    maxlength="190"
+                                    placeholder="admin@universite.cd"
+                                    autocomplete="off"
+                                    required
+                                >
+
+                                <div class="invalid-feedback">
+                                    Une adresse email valide est obligatoire.
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="admin_phone"
+                                    class="form-label fw-semibold"
+                                >
+                                    Téléphone
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    class="form-control"
+                                    id="admin_phone"
+                                    name="admin_phone"
+                                    maxlength="30"
+                                    placeholder="+243 ..."
+                                    autocomplete="off"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-
-            <!-- =========================
-                 Accreditation
-                 ========================= -->
 
             <div class="col-xl-4">
 
@@ -519,19 +838,24 @@ declare(strict_types=1);
 
                             <div class="d-flex gap-2 mb-2">
                                 <i class="bi bi-shield-check text-success"></i>
-
                                 <span>
-                                    Les données seront validées
-                                    côté serveur.
+                                    Les données sont validées côté serveur.
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-2">
+                                <i class="bi bi-database-check text-primary"></i>
+                                <span>
+                                    L'université et son administrateur
+                                    seront créés dans une transaction unique.
                                 </span>
                             </div>
 
                             <div class="d-flex gap-2">
-                                <i class="bi bi-database-check text-primary"></i>
-
+                                <i class="bi bi-person-lock text-warning"></i>
                                 <span>
-                                    L'organisation et l'université
-                                    seront créées atomiquement.
+                                    Le compte administrateur exigera un
+                                    changement de mot de passe.
                                 </span>
                             </div>
 
@@ -545,16 +869,12 @@ declare(strict_types=1);
                                 id="universitySubmitButton"
                                 class="btn btn-primary btn-lg"
                             >
-                                <span
-                                    id="universitySubmitIcon"
-                                >
+                                <span id="universitySubmitIcon">
                                     <i class="bi bi-check-lg me-1"></i>
                                 </span>
 
-                                <span
-                                    id="universitySubmitText"
-                                >
-                                    Enregistrer
+                                <span id="universitySubmitText">
+                                    Créer l'université
                                 </span>
                             </button>
 

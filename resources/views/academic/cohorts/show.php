@@ -3,10 +3,19 @@
 declare(strict_types=1);
 
 /**
- * @var array $cohort
+ * @var array<string, mixed> $cohort
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
  */
 
-$cohort = $cohort ?? [];
+$cohort =
+    $cohort ?? [];
+
+$isPlatform =
+    $isPlatform ?? false;
+
+$isUniversityContext =
+    $isUniversityContext ?? false;
 
 $id = (int) (
     $cohort['id']
@@ -184,7 +193,18 @@ $formatDate = static function (
             </div>
 
             <p class="text-muted mb-0">
-                Fiche détaillée de la cohorte académique
+
+                <?php if ($isUniversityContext): ?>
+
+                    Fiche détaillée de la cohorte
+                    de votre université
+
+                <?php else: ?>
+
+                    Fiche détaillée de la cohorte académique
+
+                <?php endif; ?>
+
             </p>
 
         </div>
@@ -596,6 +616,8 @@ $formatDate = static function (
             </div>
 
 
+            <?php if ($isPlatform): ?>
+
             <!-- University -->
 
             <div class="card border-0 shadow-sm mb-4">
@@ -645,6 +667,8 @@ $formatDate = static function (
                 </div>
 
             </div>
+
+            <?php endif; ?>
 
 
             <!-- Faculty -->
@@ -756,8 +780,18 @@ $formatDate = static function (
                         ) ?>
                     </strong>.
 
-                    L'université et la faculté sont déterminées
-                    par le programme académique.
+                    <?php if ($isPlatform): ?>
+
+                        L'université et la faculté sont déterminées
+                        par le programme académique.
+
+                    <?php else: ?>
+
+                        La faculté est déterminée par le programme
+                        académique. La cohorte reste rattachée
+                        à votre université active.
+
+                    <?php endif; ?>
                 </div>
 
             </div>

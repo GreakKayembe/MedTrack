@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MedTrack\Modules\Academic\Services;
 
+use MedTrack\Core\Context\AccessContext;
+use MedTrack\Core\Context\AccessContextResolver;
 use MedTrack\Modules\Academic\Repositories\AcademicProgramRepository;
 use RuntimeException;
 
@@ -14,21 +16,71 @@ final class AcademicProgramService
         'INACTIVE',
     ];
 
+    private const UNIVERSITY_TYPE =
+        'UNIVERSITY';
+
     public function __construct(
-        private readonly AcademicProgramRepository $programs
+        private readonly AcademicProgramRepository $programs,
+        private readonly AccessContextResolver $accessContextResolver
     ) {
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Listing
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Retourne tous les programmes académiques.
+     * Retourne les programmes visibles
+     * dans le contexte actif.
      */
     public function all(): array
     {
-        return $this->programs->all();
+        $context =
+            $this->accessContext();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Platform
+        |--------------------------------------------------------------------------
+        */
+
+        if ($context->isPlatform()) {
+            return $this->programs
+                ->all();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | University
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->isUniversityContext(
+            $context
+        )) {
+            return $this->programs
+                ->findByUniversity(
+                    $context->organizationId()
+                );
+        }
+
+        throw new RuntimeException(
+            'Le contexte actif ne permet pas '
+            . 'de consulter les programmes académiques.'
+        );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Find
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Recherche un programme académique.
+     * Recherche un programme dans
+     * le périmètre d'accès courant.
      */
     public function findById(
         int $id
@@ -37,20 +89,69 @@ final class AcademicProgramService
             return null;
         }
 
-        return $this->programs->findById(
-            $id
-        );
+        $context =
+            $this->accessContext();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Platform
+        |--------------------------------------------------------------------------
+        */
+
+        if ($context->isPlatform()) {
+            return $this->programs
+                ->findById(
+                    $id
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | University
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->isUniversityContext(
+            $context
+        )) {
+            return $this->programs
+                ->findByIdForUniversity(
+                    $id,
+                    $context->organizationId()
+                );
+        }
+
+        return null;
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Crée un programme académique.
+     *
+     * En contexte Université, university_id
+     * est toujours imposé depuis AccessContext.
      */
     public function create(
         array $data
     ): int {
-        $data = $this->normalize(
-            $data
-        );
+        $context =
+            $this->accessContext();
+
+        $data =
+            $this->applyUniversityScope(
+                $context,
+                $data
+            );
+
+        $data =
+            $this->normalize(
+                $data
+            );
 
         $this->validate(
             $data
@@ -61,10 +162,11 @@ final class AcademicProgramService
         );
 
         if (
-            $this->programs->codeExistsForUniversity(
-                $data['university_id'],
-                $data['code']
-            )
+            $this->programs
+                ->codeExistsForUniversity(
+                    $data['university_id'],
+                    $data['code']
+                )
         ) {
             throw new RuntimeException(
                 'Un programme portant ce code existe déjà '
@@ -72,13 +174,28 @@ final class AcademicProgramService
             );
         }
 
-        return $this->programs->create(
-            $data
-        );
+        return $this->programs
+            ->create(
+                $data
+            );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Update
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Met à jour un programme académique.
+     * Met à jour un programme.
+     *
+     * PLATFORM :
+     * l'université peut éventuellement
+     * être modifiée.
+     *
+     * UNIVERSITY :
+     * university_id est verrouillé sur
+     * l'organisation active.
      */
     public function update(
         int $id,
@@ -90,10 +207,60 @@ final class AcademicProgramService
             );
         }
 
-        $program =
-            $this->programs->findById(
-                $id
+        $context =
+            $this->accessContext();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Platform
+        |--------------------------------------------------------------------------
+        */
+
+        if ($context->isPlatform()) {
+            $this->updateAsPlatform(
+                $id,
+                $data
             );
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | University
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->isUniversityContext(
+            $context
+        )) {
+            $this->updateAsUniversity(
+                $context,
+                $id,
+                $data
+            );
+
+            return;
+        }
+
+        throw new RuntimeException(
+            'Le contexte actif ne permet pas '
+            . 'de modifier un programme académique.'
+        );
+    }
+
+    /**
+     * Mise à jour depuis l'administration centrale.
+     */
+    private function updateAsPlatform(
+        int $id,
+        array $data
+    ): void {
+        $program =
+            $this->programs
+                ->findById(
+                    $id
+                );
 
         if ($program === null) {
             throw new RuntimeException(
@@ -101,9 +268,10 @@ final class AcademicProgramService
             );
         }
 
-        $data = $this->normalize(
-            $data
-        );
+        $data =
+            $this->normalize(
+                $data
+            );
 
         $this->validate(
             $data
@@ -114,11 +282,12 @@ final class AcademicProgramService
         );
 
         if (
-            $this->programs->codeExistsForUniversity(
-                $data['university_id'],
-                $data['code'],
-                $id
-            )
+            $this->programs
+                ->codeExistsForUniversity(
+                    $data['university_id'],
+                    $data['code'],
+                    $id
+                )
         ) {
             throw new RuntimeException(
                 'Un programme portant ce code existe déjà '
@@ -126,11 +295,214 @@ final class AcademicProgramService
             );
         }
 
-        $this->programs->update(
-            $id,
+        $this->programs
+            ->update(
+                $id,
+                $data
+            );
+    }
+
+    /**
+     * Mise à jour depuis une université.
+     */
+    private function updateAsUniversity(
+        AccessContext $context,
+        int $id,
+        array $data
+    ): void {
+        $universityId =
+            $context->organizationId();
+
+        /*
+         * Recherche impérativement limitée
+         * à l'université active.
+         */
+        $program =
+            $this->programs
+                ->findByIdForUniversity(
+                    $id,
+                    $universityId
+                );
+
+        if ($program === null) {
+            /*
+             * 404 logique :
+             * on ne révèle pas si le programme
+             * existe dans une autre université.
+             */
+            throw new RuntimeException(
+                'Le programme académique demandé est introuvable.'
+            );
+        }
+
+        /*
+         * university_id fourni par le navigateur
+         * est volontairement ignoré.
+         */
+        $data['university_id'] =
+            $universityId;
+
+        $data =
+            $this->normalize(
+                $data
+            );
+
+        $this->validate(
             $data
         );
+
+        $this->validateRelationships(
+            $data
+        );
+
+        if (
+            $this->programs
+                ->codeExistsForUniversity(
+                    $universityId,
+                    $data['code'],
+                    $id
+                )
+        ) {
+            throw new RuntimeException(
+                'Un programme portant ce code existe déjà '
+                . 'dans votre université.'
+            );
+        }
+
+        $this->programs
+            ->updateForUniversity(
+                $id,
+                $universityId,
+                $data
+            );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Statistics
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Statistiques des programmes
+     * de l'université active.
+     */
+    public function statistics(): array
+    {
+        $context =
+            $this->accessContext();
+
+        if (!$this->isUniversityContext(
+            $context
+        )) {
+            return [];
+        }
+
+        $universityId =
+            $context->organizationId();
+
+        return [
+            'total' =>
+                $this->programs
+                    ->countByUniversity(
+                        $universityId
+                    ),
+
+            'active' =>
+                $this->programs
+                    ->countByUniversityAndStatus(
+                        $universityId,
+                        'ACTIVE'
+                    ),
+
+            'inactive' =>
+                $this->programs
+                    ->countByUniversityAndStatus(
+                        $universityId,
+                        'INACTIVE'
+                    ),
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scope
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Applique automatiquement
+     * l'université du contexte actif.
+     */
+    private function applyUniversityScope(
+        AccessContext $context,
+        array $data
+    ): array {
+        /*
+        |--------------------------------------------------------------------------
+        | Platform
+        |--------------------------------------------------------------------------
+        */
+
+        if ($context->isPlatform()) {
+            return $data;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | University
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->isUniversityContext(
+            $context
+        )) {
+            /*
+             * Toute valeur university_id provenant
+             * du navigateur est écrasée.
+             */
+            $data['university_id'] =
+                $context->organizationId();
+
+            return $data;
+        }
+
+        throw new RuntimeException(
+            'Le contexte actif ne permet pas '
+            . 'de gérer des programmes académiques.'
+        );
+    }
+
+    /**
+     * Vérifie que le contexte représente
+     * réellement une université.
+     */
+    private function isUniversityContext(
+        AccessContext $context
+    ): bool {
+        return
+            $context->isOrganization()
+            && strtoupper(
+                trim(
+                    $context->organizationType()
+                )
+            ) === self::UNIVERSITY_TYPE;
+    }
+
+    /**
+     * Résout le contexte actif.
+     */
+    private function accessContext(): AccessContext
+    {
+        return $this->accessContextResolver
+            ->resolve();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Normalization
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Normalise les données reçues.
@@ -138,69 +510,82 @@ final class AcademicProgramService
     private function normalize(
         array $data
     ): array {
-        $facultyId = (int) (
-            $data['faculty_id']
-            ?? 0
-        );
+        $facultyId =
+            (int) (
+                $data['faculty_id']
+                ?? 0
+            );
 
-        $durationYears = trim(
-            (string) (
-                $data['duration_years']
-                ?? ''
-            )
-        );
+        $durationYears =
+            trim(
+                (string) (
+                    $data['duration_years']
+                    ?? ''
+                )
+            );
 
         return [
-            'university_id' => (int) (
-                $data['university_id']
-                ?? 0
-            ),
+            'university_id' =>
+                (int) (
+                    $data['university_id']
+                    ?? 0
+                ),
 
             'faculty_id' =>
                 $facultyId > 0
                     ? $facultyId
                     : null,
 
-            'code' => strtoupper(
+            'code' =>
+                strtoupper(
+                    trim(
+                        (string) (
+                            $data['code']
+                            ?? ''
+                        )
+                    )
+                ),
+
+            'name' =>
                 trim(
                     (string) (
-                        $data['code']
+                        $data['name']
                         ?? ''
                     )
-                )
-            ),
+                ),
 
-            'name' => trim(
-                (string) (
-                    $data['name']
-                    ?? ''
-                )
-            ),
-
-            'discipline_code' => strtoupper(
-                trim(
-                    (string) (
-                        $data['discipline_code']
-                        ?? ''
+            'discipline_code' =>
+                strtoupper(
+                    trim(
+                        (string) (
+                            $data['discipline_code']
+                            ?? ''
+                        )
                     )
-                )
-            ),
+                ),
 
             'duration_years' =>
                 $durationYears !== ''
                     ? (int) $durationYears
                     : null,
 
-            'status' => strtoupper(
-                trim(
-                    (string) (
-                        $data['status']
-                        ?? 'ACTIVE'
+            'status' =>
+                strtoupper(
+                    trim(
+                        (string) (
+                            $data['status']
+                            ?? 'ACTIVE'
+                        )
                     )
-                )
-            ),
+                ),
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validation
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Valide les données métier.
@@ -210,7 +595,7 @@ final class AcademicProgramService
     ): void {
         if ($data['university_id'] <= 0) {
             throw new RuntimeException(
-                'Veuillez sélectionner une université.'
+                'Université invalide.'
             );
         }
 
@@ -291,6 +676,12 @@ final class AcademicProgramService
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Vérifie les relations académiques.
      */
@@ -298,20 +689,18 @@ final class AcademicProgramService
         array $data
     ): void {
         if (
-            !$this->programs->universityExists(
-                $data['university_id']
-            )
+            !$this->programs
+                ->universityExists(
+                    $data['university_id']
+                )
         ) {
             throw new RuntimeException(
-                'L’université sélectionnée est introuvable.'
+                'L’université est introuvable.'
             );
         }
 
         /*
-         * faculty_id est nullable dans le schéma.
-         *
-         * Si aucune faculté n'est sélectionnée,
-         * le programme peut donc être directement
+         * Un programme peut être directement
          * rattaché à l'université.
          */
         if ($data['faculty_id'] === null) {
@@ -319,21 +708,19 @@ final class AcademicProgramService
         }
 
         /*
-         * Une faculté sélectionnée doit appartenir
-         * à l'université sélectionnée.
-         *
-         * Cette règle n'est pas garantie par les FK
-         * actuelles et doit donc être appliquée ici.
+         * Une faculté ne peut être utilisée
+         * que si elle appartient à la même université.
          */
         if (
-            !$this->programs->facultyBelongsToUniversity(
-                $data['faculty_id'],
-                $data['university_id']
-            )
+            !$this->programs
+                ->facultyBelongsToUniversity(
+                    $data['faculty_id'],
+                    $data['university_id']
+                )
         ) {
             throw new RuntimeException(
                 'La faculté sélectionnée n’appartient pas '
-                . 'à l’université sélectionnée.'
+                . 'à cette université.'
             );
         }
     }

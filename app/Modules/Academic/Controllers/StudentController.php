@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MedTrack\Modules\Academic\Controllers;
 
-use MedTrack\Core\Context\AccessContext;
 use MedTrack\Core\Context\AccessContextResolver;
 use MedTrack\Core\Http\Request;
 use MedTrack\Core\Http\Response;
@@ -62,6 +61,14 @@ final class StudentController
 
                 'students' =>
                     $students,
+
+                'isPlatform' =>
+                    $context->isPlatform(),
+
+                'isUniversityContext' =>
+                    $context->isOrganization()
+                    && $context->organizationType()
+                        === 'UNIVERSITY',
             ]
         );
     }
@@ -72,7 +79,7 @@ final class StudentController
     public function create(
         Request $request
     ): string {
-        $this->assertStudentManagementContext();
+        $this->assertPlatformStudentManagementContext();
 
         return $this->view->render(
             'academic.students.create',
@@ -100,7 +107,7 @@ final class StudentController
         Request $request
     ): never {
         try {
-            $this->assertStudentManagementContext();
+            $this->assertPlatformStudentManagementContext();
 
             $studentId =
                 $this->students->create(
@@ -262,6 +269,14 @@ final class StudentController
 
                 'academicEnrollments' =>
                     $academicEnrollments,
+
+                'isPlatform' =>
+                    $context->isPlatform(),
+
+                'isUniversityContext' =>
+                    $context->isOrganization()
+                    && $context->organizationType()
+                        === 'UNIVERSITY',
             ]
         );
     }
@@ -277,13 +292,10 @@ final class StudentController
                 $request
             );
 
-        $context =
-            $this->accessContextResolver
-                ->resolve();
+        $this->assertPlatformStudentManagementContext();
 
         $student =
-            $this->studentForContext(
-                $context,
+            $this->students->findById(
                 $id
             );
 
@@ -327,58 +339,14 @@ final class StudentController
             );
 
         try {
-            $context =
-                $this->accessContextResolver
-                    ->resolve();
+            $this->assertPlatformStudentManagementContext();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Platform
-            |--------------------------------------------------------------------------
-            */
-
-            if ($context->isPlatform()) {
-                $this->students->update(
-                    $id,
-                    $this->studentPayload(
-                        $request
-                    )
-                );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | University
-            |--------------------------------------------------------------------------
-            */
-
-            elseif (
-                $context->isOrganization()
-                && $context->organizationType()
-                    === 'UNIVERSITY'
-            ) {
-                $this->students
-                    ->updateForUniversity(
-                        $id,
-                        $context->organizationId(),
-                        $this->studentPayload(
-                            $request
-                        )
-                    );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Unsupported context
-            |--------------------------------------------------------------------------
-            */
-
-            else {
-                throw new RuntimeException(
-                    'Ce contexte ne permet pas '
-                    . 'de modifier cet étudiant.'
-                );
-            }
+            $this->students->update(
+                $id,
+                $this->studentPayload(
+                    $request
+                )
+            );
         } catch (RuntimeException $exception) {
             Response::json(
                 [
@@ -426,40 +394,14 @@ final class StudentController
     }
 
     /**
-     * Retourne un étudiant en respectant
-     * strictement le contexte actif.
+     * Vérifie que le contexte actif est PLATFORM.
+     *
+     * L'identité globale d'un étudiant ne peut être
+     * créée ou modifiée que depuis l'espace plateforme.
+     * Les universités administrent uniquement leurs
+     * inscriptions via academic_enrollments.
      */
-    private function studentForContext(
-        AccessContext $context,
-        int $studentId
-    ): ?array {
-        if ($context->isPlatform()) {
-            return $this->students
-                ->findById(
-                    $studentId
-                );
-        }
-
-        if (
-            $context->isOrganization()
-            && $context->organizationType()
-                === 'UNIVERSITY'
-        ) {
-            return $this->students
-                ->findByIdForUniversity(
-                    $studentId,
-                    $context->organizationId()
-                );
-        }
-
-        return null;
-    }
-
-    /**
-     * Vérifie que le contexte actif peut
-     * administrer des étudiants.
-     */
-    private function assertStudentManagementContext(): void
+    private function assertPlatformStudentManagementContext(): void
     {
         $context =
             $this->accessContextResolver
@@ -469,17 +411,10 @@ final class StudentController
             return;
         }
 
-        if (
-            $context->isOrganization()
-            && $context->organizationType()
-                === 'UNIVERSITY'
-        ) {
-            return;
-        }
-
         throw new RuntimeException(
-            'Ce contexte ne permet pas '
-            . 'de gérer les étudiants.'
+            'Seul l’espace plateforme peut '
+            . 'administrer l’identité globale '
+            . 'des étudiants.'
         );
     }
 

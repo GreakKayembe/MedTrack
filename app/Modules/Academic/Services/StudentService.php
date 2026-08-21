@@ -130,6 +130,87 @@ final class StudentService
     }
 
     /**
+     * Recherche des identités étudiantes pour
+     * une nouvelle inscription académique.
+     */
+    public function searchForEnrollment(
+        string $query,
+        int $universityId,
+        int $limit = 10
+    ): array {
+        $query = trim($query);
+
+        if ($universityId <= 0) {
+            throw new RuntimeException(
+                'Identifiant d’université invalide.'
+            );
+        }
+
+        if (mb_strlen($query) < 3) {
+            throw new RuntimeException(
+                'Saisissez au moins 3 caractères '
+                . 'pour rechercher un étudiant.'
+            );
+        }
+
+        if (mb_strlen($query) > 190) {
+            throw new RuntimeException(
+                'Le critère de recherche est trop long.'
+            );
+        }
+
+        $limit = max(1, min($limit, 10));
+
+        return $this->students
+            ->searchForEnrollment(
+                $query,
+                $universityId,
+                $limit
+            );
+    }
+
+    /**
+     * Crée une identité étudiante minimale dans
+     * le cadre du workflow d'inscription académique.
+     *
+     * L'université ne choisit ni le compte utilisateur
+     * ni le statut global de l'identité.
+     */
+    public function createForEnrollment(
+        array $data
+    ): int {
+        $data['user_id'] = null;
+        $data['status'] = 'ACTIVE';
+
+        $normalized =
+            $this->normalize(
+                $data
+            );
+
+        if ($normalized['birth_date'] === null) {
+            throw new RuntimeException(
+                'La date de naissance est obligatoire '
+                . 'pour créer une nouvelle identité étudiante.'
+            );
+        }
+
+        $this->validate(
+            $normalized
+        );
+
+        $this->validateUniqueness(
+            $normalized
+        );
+
+        $normalized['uuid'] =
+            $this->generateUuidV4();
+
+        return $this->students->create(
+            $normalized
+        );
+    }
+
+    /**
      * Crée un étudiant.
      */
     public function create(
@@ -179,60 +260,6 @@ final class StudentService
         ) {
             throw new RuntimeException(
                 'Étudiant introuvable.'
-            );
-        }
-
-        $normalized =
-            $this->normalize(
-                $data
-            );
-
-        $this->validate(
-            $normalized
-        );
-
-        $this->validateUniqueness(
-            $normalized,
-            $id
-        );
-
-        $this->students->update(
-            $id,
-            $normalized
-        );
-    }
-
-    /**
-     * Met à jour un étudiant uniquement s'il
-     * appartient à l'université concernée.
-     */
-    public function updateForUniversity(
-        int $id,
-        int $universityId,
-        array $data
-    ): void {
-        if ($id <= 0) {
-            throw new RuntimeException(
-                'Identifiant d’étudiant invalide.'
-            );
-        }
-
-        if ($universityId <= 0) {
-            throw new RuntimeException(
-                'Identifiant d’université invalide.'
-            );
-        }
-
-        if (
-            $this->students
-                ->findByIdForUniversity(
-                    $id,
-                    $universityId
-                ) === null
-        ) {
-            throw new RuntimeException(
-                'Cet étudiant n’appartient pas '
-                . 'à cette université.'
             );
         }
 

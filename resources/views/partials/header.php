@@ -2,22 +2,28 @@
 
 declare(strict_types=1);
 
-/** @var string $csrfToken */
+/**
+ * @var string $csrfToken
+ */
 
 $currentAccess =
     $currentAccess
     ?? [];
 
 $displayName =
-    (string) (
-        $currentAccess['display_name']
-        ?? 'Utilisateur'
+    trim(
+        (string) (
+            $currentAccess['display_name']
+            ?? 'Utilisateur'
+        )
     );
 
 $contextLabel =
-    (string) (
-        $currentAccess['label']
-        ?? 'MedTrack'
+    trim(
+        (string) (
+            $currentAccess['label']
+            ?? 'MedTrack'
+        )
     );
 
 $organizationName =
@@ -37,57 +43,140 @@ $roles =
         : [];
 
 $roleName =
-    (string) (
-        $roles[0]['name']
-        ?? match (
-            $currentAccess['scope']
-            ?? null
-        ) {
-            'PLATFORM' =>
-                'Administration plateforme',
+    trim(
+        (string) (
+            $roles[0]['name']
+            ?? match (
+                $currentAccess['scope']
+                ?? null
+            ) {
+                'PLATFORM' =>
+                    'Administration plateforme',
 
-            'STUDENT' =>
-                'Étudiant',
+                'STUDENT' =>
+                    'Étudiant',
 
-            default =>
-                'Compte MedTrack',
-        }
-    );
-
-$initials =
-    strtoupper(
-        substr(
-            trim(
-                preg_replace(
-                    '/\s+/',
-                    '',
-                    $displayName
-                )
-                ?? $displayName
-            ),
-            0,
-            2
+                default =>
+                    'Compte MedTrack',
+            }
         )
     );
 
-if ($initials === '') {
-    $initials = 'MT';
+
+/*
+|--------------------------------------------------------------------------
+| Initiales
+|--------------------------------------------------------------------------
+*/
+
+$initials =
+    'MT';
+
+$nameParts =
+    preg_split(
+        '/\s+/',
+        $displayName
+    );
+
+if (
+    is_array($nameParts)
+    && $nameParts !== []
+) {
+    $firstName =
+        trim(
+            (string) (
+                $nameParts[0]
+                ?? ''
+            )
+        );
+
+    $lastName =
+        count($nameParts) > 1
+            ? trim(
+                (string) (
+                    $nameParts[
+                        count($nameParts) - 1
+                    ]
+                    ?? ''
+                )
+            )
+            : '';
+
+    $firstInitial =
+        $firstName !== ''
+            ? mb_strtoupper(
+                mb_substr(
+                    $firstName,
+                    0,
+                    1,
+                    'UTF-8'
+                ),
+                'UTF-8'
+            )
+            : '';
+
+    $lastInitial =
+        $lastName !== ''
+            ? mb_strtoupper(
+                mb_substr(
+                    $lastName,
+                    0,
+                    1,
+                    'UTF-8'
+                ),
+                'UTF-8'
+            )
+            : '';
+
+    $candidate =
+        $firstInitial
+        . $lastInitial;
+
+    if ($candidate !== '') {
+        $initials =
+            $candidate;
+    }
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Contexte
+|--------------------------------------------------------------------------
+*/
+
+$contextDisplayName =
+    $organizationName !== ''
+        ? $organizationName
+        : $roleName;
 ?>
 
 <header
-    id="header"
-    class="header fixed-top d-flex align-items-center medtrack-header"
+    id="medtrackHeader"
+    class="medtrack-header"
 >
 
-    <div class="medtrack-header__brand d-flex align-items-center">
+    <!--
+    |--------------------------------------------------------------------------
+    | Marque
+    |--------------------------------------------------------------------------
+    -->
+
+    <div
+        class="medtrack-header__brand
+               d-flex
+               align-items-center"
+    >
 
         <a
             href="/"
-            class="logo d-flex align-items-center gap-2"
+            class="medtrack-header__brand-link"
             aria-label="Accueil MedTrack"
         >
-            <span class="medtrack-header__logo-wrap">
+
+            <span
+                class="medtrack-header__logo-wrap"
+            >
                 <img
                     src="/assets/img/logo.png"
                     alt="MedTrack"
@@ -95,21 +184,37 @@ if ($initials === '') {
                 >
             </span>
 
-            <span class="d-none d-lg-flex flex-column lh-sm">
-                <strong class="medtrack-header__brand-name">
+
+            <span
+                class="medtrack-header__brand-copy
+                       d-none
+                       d-lg-flex"
+            >
+
+                <strong
+                    class="medtrack-header__brand-name"
+                >
                     MedTrack
                 </strong>
 
-                <small class="medtrack-header__brand-tagline">
+                <small
+                    class="medtrack-header__brand-tagline"
+                >
                     Stages médicaux
                 </small>
+
             </span>
+
         </a>
+
 
         <button
             type="button"
-            class="toggle-sidebar-btn medtrack-header__toggle"
+            class="medtrack-header__toggle"
+            id="medtrackSidebarToggle"
             aria-label="Afficher ou masquer le menu"
+            aria-controls="medtrackSidebar"
+            aria-expanded="true"
         >
             <i class="bi bi-list"></i>
         </button>
@@ -117,32 +222,51 @@ if ($initials === '') {
     </div>
 
 
+    <!--
+    |--------------------------------------------------------------------------
+    | Contexte actif
+    |--------------------------------------------------------------------------
+    -->
+
     <div
-        class="d-none d-md-flex
-               align-items-center
-               ms-3
-               medtrack-header__context"
+        class="medtrack-header__context
+               d-none
+               d-md-flex"
     >
 
-        <span class="medtrack-header__context-icon">
+        <span
+            class="medtrack-header__context-icon"
+            aria-hidden="true"
+        >
             <i class="bi bi-grid-1x2-fill"></i>
         </span>
 
-        <div>
 
-            <small class="medtrack-header__context-label d-block">
+        <div class="medtrack-header__context-copy">
+
+            <small
+                class="medtrack-header__context-label"
+            >
                 <?= htmlspecialchars(
-                    $contextLabel,
+                    $contextLabel !== ''
+                        ? $contextLabel
+                        : 'MedTrack',
                     ENT_QUOTES,
                     'UTF-8'
                 ) ?>
             </small>
 
-            <strong class="medtrack-header__context-name">
+
+            <strong
+                class="medtrack-header__context-name"
+                title="<?= htmlspecialchars(
+                    $contextDisplayName,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+            >
                 <?= htmlspecialchars(
-                    $organizationName !== ''
-                        ? $organizationName
-                        : $roleName,
+                    $contextDisplayName,
                     ENT_QUOTES,
                     'UTF-8'
                 ) ?>
@@ -153,48 +277,137 @@ if ($initials === '') {
     </div>
 
 
-    <nav class="header-nav ms-auto">
+    <!--
+    |--------------------------------------------------------------------------
+    | Actions
+    |--------------------------------------------------------------------------
+    -->
 
-        <ul class="d-flex align-items-center">
+    <nav
+        class="medtrack-header__actions"
+        aria-label="Actions utilisateur"
+    >
 
-            <li class="nav-item dropdown">
+        <ul
+            class="medtrack-header__actions-list"
+        >
 
-                <a
-                    class="nav-link nav-icon medtrack-header__icon-button"
-                    href="#"
+            <!--
+            |--------------------------------------------------------------------------
+            | Notifications
+            |--------------------------------------------------------------------------
+            -->
+
+            <li class="dropdown">
+
+                <button
+                    type="button"
+                    class="medtrack-header__action-button
+                           medtrack-header__notification-button"
                     data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
                     aria-label="Notifications"
+                    aria-expanded="false"
                 >
+
                     <i class="bi bi-bell"></i>
-                </a>
 
-                <ul
-                    class="dropdown-menu dropdown-menu-end
-                           dropdown-menu-arrow notifications
-                           medtrack-dropdown"
+                    <span
+                        class="medtrack-header__notification-dot"
+                        aria-hidden="true"
+                    ></span>
+
+                </button>
+
+
+                <div
+                    class="dropdown-menu
+                           dropdown-menu-end
+                           medtrack-dropdown
+                           medtrack-notifications-menu"
                 >
 
-                    <li class="dropdown-header">
-                        Aucune nouvelle notification
-                    </li>
+                    <div
+                        class="medtrack-dropdown__header"
+                    >
 
-                </ul>
+                        <div>
+
+                            <span
+                                class="medtrack-dropdown__eyebrow"
+                            >
+                                Centre
+                            </span>
+
+                            <h6>
+                                Notifications
+                            </h6>
+
+                        </div>
+
+
+                        <span
+                            class="medtrack-dropdown__header-icon"
+                        >
+                            <i class="bi bi-bell"></i>
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="medtrack-dropdown__divider"
+                    ></div>
+
+
+                    <div
+                        class="medtrack-notifications-menu__empty"
+                    >
+
+                        <span
+                            class="medtrack-notifications-menu__empty-icon"
+                        >
+                            <i class="bi bi-check2-circle"></i>
+                        </span>
+
+
+                        <strong>
+                            Tout est à jour
+                        </strong>
+
+
+                        <p>
+                            Aucune nouvelle notification
+                            pour le moment.
+                        </p>
+
+                    </div>
+
+                </div>
 
             </li>
 
 
-            <li class="nav-item dropdown pe-3">
+            <!--
+            |--------------------------------------------------------------------------
+            | Mon compte
+            |--------------------------------------------------------------------------
+            -->
 
-                <a
-                    class="nav-link nav-profile
-                           d-flex align-items-center pe-0
-                           medtrack-header__profile"
-                    href="#"
+            <li class="dropdown">
+
+                <button
+                    type="button"
+                    class="medtrack-account-trigger"
                     data-bs-toggle="dropdown"
-                    aria-label="Menu du profil"
+                    data-bs-auto-close="outside"
+                    aria-label="Mon compte"
+                    aria-expanded="false"
                 >
 
-                    <span class="medtrack-header__avatar">
+                    <span
+                        class="medtrack-header__avatar"
+                    >
                         <?= htmlspecialchars(
                             $initials,
                             ENT_QUOTES,
@@ -202,43 +415,57 @@ if ($initials === '') {
                         ) ?>
                     </span>
 
+
                     <span
-                        class="d-none d-md-flex
-                               flex-column
-                               dropdown-toggle
-                               ps-2
-                               medtrack-header__profile-copy"
+                        class="medtrack-account-trigger__copy
+                               d-none
+                               d-md-flex"
                     >
+
+                        <small>
+                            Mon compte
+                        </small>
+
                         <strong>
                             <?= htmlspecialchars(
-                                $displayName,
+                                $displayName !== ''
+                                    ? $displayName
+                                    : 'Utilisateur',
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
                         </strong>
 
-                        <small>
-                            <?= htmlspecialchars(
-                                $roleName,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </small>
                     </span>
 
-                </a>
+
+                    <i
+                        class="bi
+                               bi-chevron-down
+                               medtrack-account-trigger__chevron
+                               d-none
+                               d-md-inline"
+                    ></i>
+
+                </button>
 
 
-                <ul
-                    class="dropdown-menu dropdown-menu-end
-                           dropdown-menu-arrow profile
+                <div
+                    class="dropdown-menu
+                           dropdown-menu-end
                            medtrack-dropdown
                            medtrack-profile-menu"
                 >
 
-                    <li class="dropdown-header">
+                    <!-- Profil -->
 
-                        <span class="medtrack-profile-menu__avatar">
+                    <div
+                        class="medtrack-profile-menu__identity"
+                    >
+
+                        <span
+                            class="medtrack-profile-menu__avatar"
+                        >
                             <?= htmlspecialchars(
                                 $initials,
                                 ENT_QUOTES,
@@ -246,99 +473,180 @@ if ($initials === '') {
                             ) ?>
                         </span>
 
-                        <h6>
-                            <?= htmlspecialchars(
-                                $displayName,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </h6>
 
-                        <span>
-                            <?= htmlspecialchars(
-                                $roleName,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </span>
+                        <div>
 
-                        <?php if ($organizationName !== ''): ?>
+                            <h6>
+                                <?= htmlspecialchars(
+                                    $displayName !== ''
+                                        ? $displayName
+                                        : 'Utilisateur',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </h6>
 
-                            <small class="d-block mt-1 text-muted">
+
+                            <span
+                                class="medtrack-profile-menu__role"
+                            >
+                                <?= htmlspecialchars(
+                                    $roleName,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <?php if (
+                        $organizationName !== ''
+                    ): ?>
+
+                        <div
+                            class="medtrack-profile-menu__organization"
+                        >
+                            <i class="bi bi-building"></i>
+
+                            <span>
                                 <?= htmlspecialchars(
                                     $organizationName,
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>
-                            </small>
+                            </span>
+                        </div>
 
-                        <?php endif; ?>
-
-                    </li>
-
-
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    <?php endif; ?>
 
 
-                    <li>
+                    <div
+                        class="medtrack-dropdown__divider"
+                    ></div>
 
-                        <a
-                            class="dropdown-item d-flex align-items-center"
-                            href="#"
+
+                    <!-- Mon profil -->
+
+                    <a
+                        href="#"
+                        class="medtrack-profile-menu__item"
+                    >
+
+                        <span
+                            class="medtrack-profile-menu__item-icon"
                         >
                             <i class="bi bi-person"></i>
+                        </span>
 
-                            <span>
+
+                        <span
+                            class="medtrack-profile-menu__item-copy"
+                        >
+                            <strong>
                                 Mon profil
-                            </span>
-                        </a>
+                            </strong>
 
-                    </li>
-
-
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                            <small>
+                                Informations personnelles
+                            </small>
+                        </span>
 
 
-                    <li>
+                        <i
+                            class="bi bi-chevron-right"
+                        ></i>
 
-                        <form
-                            action="/logout"
-                            method="POST"
-                            id="logout-form"
+                    </a>
+
+
+                    <!-- Contexte -->
+
+                    <div
+                        class="medtrack-profile-menu__context"
+                    >
+
+                        <span
+                            class="medtrack-profile-menu__item-icon"
+                        >
+                            <i class="bi bi-diagram-3"></i>
+                        </span>
+
+
+                        <span
+                            class="medtrack-profile-menu__item-copy"
                         >
 
-                            <input
-                                type="hidden"
-                                name="_token"
-                                value="<?= htmlspecialchars(
-                                    $csrfToken,
+                            <small>
+                                Contexte actif
+                            </small>
+
+                            <strong
+                                title="<?= htmlspecialchars(
+                                    $contextDisplayName,
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"
                             >
+                                <?= htmlspecialchars(
+                                    $contextDisplayName,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </strong>
 
-                            <button
-                                type="submit"
-                                class="dropdown-item
-                                       d-flex align-items-center
-                                       medtrack-profile-menu__logout"
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="medtrack-dropdown__divider"
+                    ></div>
+
+
+                    <!-- Logout -->
+
+                    <form
+                        action="/logout"
+                        method="POST"
+                        id="logout-form"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                        >
+
+
+                        <button
+                            type="submit"
+                            class="medtrack-profile-menu__logout"
+                        >
+
+                            <span
+                                class="medtrack-profile-menu__logout-icon"
                             >
                                 <i class="bi bi-box-arrow-right"></i>
+                            </span>
 
-                                <span>
-                                    Déconnexion
-                                </span>
-                            </button>
 
-                        </form>
+                            <span>
+                                Déconnexion
+                            </span>
 
-                    </li>
+                        </button>
 
-                </ul>
+                    </form>
+
+                </div>
 
             </li>
 

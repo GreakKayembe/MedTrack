@@ -10,6 +10,9 @@ declare(strict_types=1);
  * @var array $academicYears
  * @var array $studyLevels
  * @var array $cohorts
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
 $enrollment = $enrollment ?? [];
@@ -19,6 +22,13 @@ $academicPrograms = $academicPrograms ?? [];
 $academicYears = $academicYears ?? [];
 $studyLevels = $studyLevels ?? [];
 $cohorts = $cohorts ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
 
 $enrollmentId =
     (int) (
@@ -119,8 +129,13 @@ $enrolledAt =
             </h1>
 
             <p class="text-muted mb-0">
-                Modifiez le rattachement académique
-                de l'étudiant.
+                <?php if ($isUniversityContext): ?>
+                    Modifiez le rattachement académique
+                    de l'étudiant dans votre université.
+                <?php else: ?>
+                    Modifiez le rattachement académique
+                    de l'étudiant dans MedTrack.
+                <?php endif; ?>
             </p>
 
         </div>
@@ -385,102 +400,133 @@ $enrolledAt =
 
                             <!-- University -->
 
-                            <div class="col-md-6">
+                            <?php if ($isPlatform): ?>
 
-                                <label
-                                    for="university_id"
-                                    class="form-label"
-                                >
-                                    Université
+                                <div class="col-md-6">
 
-                                    <span class="text-danger">
-                                        *
-                                    </span>
-                                </label>
+                                    <label
+                                        for="university_id"
+                                        class="form-label"
+                                    >
+                                        Université
 
-                                <select
-                                    class="form-select"
-                                    id="university_id"
-                                    name="university_id"
-                                    required
-                                >
+                                        <span class="text-danger">
+                                            *
+                                        </span>
+                                    </label>
 
-                                    <option value="">
-                                        Sélectionnez une université
-                                    </option>
+                                    <select
+                                        class="form-select"
+                                        id="university_id"
+                                        name="university_id"
+                                        required
+                                    >
 
-                                    <?php foreach (
-                                        $universities
-                                        as $university
-                                    ): ?>
+                                        <option value="">
+                                            Sélectionnez une université
+                                        </option>
 
-                                        <?php
-                                        $universityId =
-                                            (int) (
-                                                $university[
-                                                    'organization_id'
-                                                ]
-                                                ?? $university['id']
-                                                ?? 0
-                                            );
+                                        <?php foreach (
+                                            $universities
+                                            as $university
+                                        ): ?>
 
-                                        $universityCode =
-                                            trim(
-                                                (string) (
-                                                    $university['code']
-                                                    ?? ''
-                                                )
-                                            );
+                                            <?php
+                                            $universityId =
+                                                (int) (
+                                                    $university[
+                                                        'organization_id'
+                                                    ]
+                                                    ?? $university['id']
+                                                    ?? 0
+                                                );
 
-                                        $universityName =
-                                            trim(
-                                                (string) (
-                                                    $university['name']
-                                                    ?? ''
-                                                )
-                                            );
-                                        ?>
+                                            $universityCode =
+                                                trim(
+                                                    (string) (
+                                                        $university['code']
+                                                        ?? ''
+                                                    )
+                                                );
 
-                                        <option
-                                            value="<?= $universityId ?>"
-                                            <?= $universityId === $selectedUniversityId
-                                                ? 'selected'
-                                                : '' ?>
-                                        >
+                                            $universityName =
+                                                trim(
+                                                    (string) (
+                                                        $university['name']
+                                                        ?? ''
+                                                    )
+                                                );
+                                            ?>
 
-                                            <?= htmlspecialchars(
-                                                $universityName !== ''
-                                                    ? $universityName
-                                                    : 'Université #'
-                                                        . $universityId,
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>
-
-                                            <?php if (
-                                                $universityCode !== ''
-                                            ): ?>
+                                            <option
+                                                value="<?= $universityId ?>"
+                                                <?= $universityId === $selectedUniversityId
+                                                    ? 'selected'
+                                                    : '' ?>
+                                            >
 
                                                 <?= htmlspecialchars(
-                                                    ' — '
-                                                    . $universityCode,
+                                                    $universityName !== ''
+                                                        ? $universityName
+                                                        : 'Université #'
+                                                            . $universityId,
                                                     ENT_QUOTES,
                                                     'UTF-8'
                                                 ) ?>
 
-                                            <?php endif; ?>
+                                                <?php if (
+                                                    $universityCode !== ''
+                                                ): ?>
 
-                                        </option>
+                                                    <?= htmlspecialchars(
+                                                        ' — '
+                                                        . $universityCode,
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>
 
-                                    <?php endforeach; ?>
+                                                <?php endif; ?>
 
-                                </select>
+                                            </option>
 
-                                <div class="invalid-feedback">
-                                    Veuillez sélectionner une université.
+                                        <?php endforeach; ?>
+
+                                    </select>
+
+                                    <div class="invalid-feedback">
+                                        Veuillez sélectionner une université.
+                                    </div>
+
                                 </div>
 
-                            </div>
+                            <?php else: ?>
+
+                                <input
+                                    type="hidden"
+                                    id="university_id"
+                                    name="university_id"
+                                    value="<?= $selectedUniversityId ?>"
+                                >
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Université
+                                    </label>
+
+                                    <div class="form-control bg-body-tertiary">
+                                        Université active
+                                    </div>
+
+                                    <div class="form-text">
+                                        L'université de l'inscription
+                                        ne peut pas être modifiée depuis
+                                        l'espace université.
+                                    </div>
+
+                                </div>
+
+                            <?php endif; ?>
 
 
                             <!-- Academic year -->

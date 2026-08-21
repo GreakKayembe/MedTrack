@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 /**
  * @var array $enrollment
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
 $enrollment = $enrollment ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
 
 $enrollmentId =
     (int) (
@@ -347,8 +357,13 @@ $formatDate =
             </h1>
 
             <p class="text-muted mb-0">
-                Consultez le rattachement académique
-                de l'étudiant.
+                <?php if ($isUniversityContext): ?>
+                    Consultez le rattachement académique
+                    de l'étudiant dans votre université.
+                <?php else: ?>
+                    Consultez le rattachement académique
+                    de l'étudiant dans MedTrack.
+                <?php endif; ?>
             </p>
 
         </div>
@@ -561,41 +576,45 @@ $formatDate =
                     <div class="row g-4">
 
 
-                        <!-- University -->
+                        <?php if ($isPlatform): ?>
 
-                        <div class="col-md-6">
+                            <!-- University -->
 
-                            <div class="small text-muted mb-1">
-                                Université
-                            </div>
+                            <div class="col-md-6">
 
-                            <div class="fw-semibold">
+                                <div class="small text-muted mb-1">
+                                    Université
+                                </div>
 
-                                <?= htmlspecialchars(
-                                    $universityName !== ''
-                                        ? $universityName
-                                        : '—',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
+                                <div class="fw-semibold">
 
-                            </div>
-
-                            <?php if (
-                                $universityCode !== ''
-                            ): ?>
-
-                                <div class="small text-muted">
                                     <?= htmlspecialchars(
-                                        $universityCode,
+                                        $universityName !== ''
+                                            ? $universityName
+                                            : '—',
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>
+
                                 </div>
 
-                            <?php endif; ?>
+                                <?php if (
+                                    $universityCode !== ''
+                                ): ?>
 
-                        </div>
+                                    <div class="small text-muted">
+                                        <?= htmlspecialchars(
+                                            $universityCode,
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </div>
+
+                                <?php endif; ?>
+
+                            </div>
+
+                        <?php endif; ?>
 
 
                         <!-- Program -->

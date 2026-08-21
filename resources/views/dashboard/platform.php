@@ -2,9 +2,19 @@
 
 declare(strict_types=1);
 
+/*
+|--------------------------------------------------------------------------
+| Dashboard data
+|--------------------------------------------------------------------------
+*/
+
 $metrics =
-    $dashboard['metrics']
-    ?? [];
+    is_array(
+        $dashboard['metrics']
+        ?? null
+    )
+        ? $dashboard['metrics']
+        : [];
 
 $students =
     (int) (
@@ -49,23 +59,72 @@ $successfulPayments =
     );
 
 $title =
-    (string) (
-        $dashboard['title']
-        ?? 'Administration MedTrack'
+    trim(
+        (string) (
+            $dashboard['title']
+            ?? 'Administration MedTrack'
+        )
     );
 
 $subtitle =
-    (string) (
-        $dashboard['subtitle']
-        ?? 'Vue globale de la plateforme'
+    trim(
+        (string) (
+            $dashboard['subtitle']
+            ?? 'Vue globale de la plateforme'
+        )
     );
+
+$totalInstitutions =
+    $universities
+    + $hospitals
+    + $professionalOrders
+    + $ministries;
+
+
+/*
+|--------------------------------------------------------------------------
+| Chart data
+|--------------------------------------------------------------------------
+*/
+
+$institutionChartData = [
+    'labels' => [
+        'Universités',
+        'Hôpitaux',
+        'Ordres professionnels',
+        'Ministères',
+    ],
+
+    'values' => [
+        $universities,
+        $hospitals,
+        $professionalOrders,
+        $ministries,
+    ],
+];
+
+$activityChartData = [
+    'labels' => [
+        'Étudiants',
+        'Stages actifs',
+        'Paiements réussis',
+        'Institutions',
+    ],
+
+    'values' => [
+        $students,
+        $activeInternships,
+        $successfulPayments,
+        $totalInstitutions,
+    ],
+];
 ?>
 
 <div class="medtrack-dashboard">
 
     <!--
     |--------------------------------------------------------------------------
-    | Welcome / Hero
+    | Hero
     |--------------------------------------------------------------------------
     -->
 
@@ -74,48 +133,76 @@ $subtitle =
         <div class="dashboard-hero__content">
 
             <div class="dashboard-hero__eyebrow">
-                <span class="dashboard-hero__pulse"></span>
-                Super administration MedTrack
+
+                <span
+                    class="dashboard-hero__pulse"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Super administration MedTrack
+                </span>
+
             </div>
 
+
             <h2 class="dashboard-hero__title">
+
                 <?= htmlspecialchars(
                     $title,
                     ENT_QUOTES,
                     'UTF-8'
                 ) ?>
+
             </h2>
 
+
             <p class="dashboard-hero__description">
+
                 <?= htmlspecialchars(
                     $subtitle,
                     ENT_QUOTES,
                     'UTF-8'
                 ) ?>.
-                Supervisez les institutions, les étudiants,
-                les stages et les opérations principales
+
+                Analysez les institutions,
+                les étudiants, les stages et
+                l’activité opérationnelle
                 depuis l’espace central MedTrack.
+
             </p>
+
 
             <div class="dashboard-hero__actions">
 
                 <a
                     href="#dashboard-overview"
-                    class="btn dashboard-btn dashboard-btn--primary"
+                    class="btn
+                           dashboard-btn
+                           dashboard-btn--primary"
                 >
-                    <i class="bi bi-grid-1x2-fill"></i>
+                    <i
+                        class="bi bi-bar-chart-fill"
+                        aria-hidden="true"
+                    ></i>
 
                     <span>
-                        Voir l’activité
+                        Voir les statistiques
                     </span>
                 </a>
 
+
                 <button
                     type="button"
-                    class="btn dashboard-btn dashboard-btn--glass"
+                    class="btn
+                           dashboard-btn
+                           dashboard-btn--glass"
                     data-dashboard-refresh
                 >
-                    <i class="bi bi-arrow-clockwise"></i>
+                    <i
+                        class="bi bi-arrow-clockwise"
+                        aria-hidden="true"
+                    ></i>
 
                     <span>
                         Actualiser
@@ -126,30 +213,50 @@ $subtitle =
 
         </div>
 
+
+        <!-- Hero visual -->
+
         <div
             class="dashboard-hero__visual"
-            aria-label="Identité visuelle MedTrack"
+            aria-hidden="true"
         >
 
             <div class="dashboard-hero__brand-stage">
 
-                <span class="dashboard-hero__brand-glow"></span>
-                <span class="dashboard-hero__gold-orb dashboard-hero__gold-orb--one"></span>
-                <span class="dashboard-hero__gold-orb dashboard-hero__gold-orb--two"></span>
+                <span
+                    class="dashboard-hero__brand-glow"
+                ></span>
+
+
+                <span
+                    class="dashboard-hero__accent-orb
+                           dashboard-hero__accent-orb--one"
+                ></span>
+
+
+                <span
+                    class="dashboard-hero__accent-orb
+                           dashboard-hero__accent-orb--two"
+                ></span>
+
 
                 <img
                     src="/assets/img/illustration_dashbord_1.png"
-                    class="dashboard-hero__illustration dashboard-hero__illustration--main"
+                    class="dashboard-hero__illustration
+                           dashboard-hero__illustration--main"
                     alt=""
                     loading="eager"
                 >
 
+
                 <img
                     src="/assets/img/illustration_dashbord_2.png"
-                    class="dashboard-hero__illustration dashboard-hero__illustration--secondary"
+                    class="dashboard-hero__illustration
+                           dashboard-hero__illustration--secondary"
                     alt=""
                     loading="eager"
                 >
+
 
                 <div class="dashboard-hero__logo-card">
 
@@ -159,8 +266,11 @@ $subtitle =
                         alt="MedTrack"
                     >
 
-                    <span class="dashboard-hero__brand-caption">
-                        La plateforme intelligente des stages médicaux
+                    <span
+                        class="dashboard-hero__brand-caption"
+                    >
+                        La plateforme intelligente
+                        des stages médicaux
                     </span>
 
                 </div>
@@ -174,22 +284,34 @@ $subtitle =
 
     <!--
     |--------------------------------------------------------------------------
-    | Main indicators
+    | KPI
     |--------------------------------------------------------------------------
     -->
 
     <section
         id="dashboard-overview"
         class="dashboard-metrics"
+        aria-label="Indicateurs principaux"
     >
 
-        <article class="dashboard-metric dashboard-metric--students">
+        <!-- Students -->
+
+        <article
+            class="dashboard-metric
+                   dashboard-metric--navy"
+        >
 
             <div class="dashboard-metric__header">
 
-                <div class="dashboard-metric__icon">
-                    <i class="bi bi-mortarboard-fill"></i>
-                </div>
+                <span class="dashboard-metric__icon">
+
+                    <i
+                        class="bi bi-mortarboard-fill"
+                        aria-hidden="true"
+                    ></i>
+
+                </span>
+
 
                 <span class="dashboard-metric__badge">
                     Étudiants
@@ -197,14 +319,21 @@ $subtitle =
 
             </div>
 
+
             <div class="dashboard-metric__body">
 
                 <strong
                     class="dashboard-metric__value"
                     data-counter="<?= $students ?>"
                 >
-                    <?= $students ?>
+                    <?= number_format(
+                        $students,
+                        0,
+                        ',',
+                        ' '
+                    ) ?>
                 </strong>
+
 
                 <span class="dashboard-metric__label">
                     étudiants enregistrés
@@ -212,20 +341,35 @@ $subtitle =
 
             </div>
 
-            <div class="dashboard-metric__progress">
-                <span style="--progress: 100%;"></span>
+
+            <div
+                class="dashboard-metric__progress"
+                aria-hidden="true"
+            >
+                <span></span>
             </div>
 
         </article>
 
 
-        <article class="dashboard-metric dashboard-metric--internships">
+        <!-- Internships -->
+
+        <article
+            class="dashboard-metric
+                   dashboard-metric--turquoise"
+        >
 
             <div class="dashboard-metric__header">
 
-                <div class="dashboard-metric__icon">
-                    <i class="bi bi-briefcase-fill"></i>
-                </div>
+                <span class="dashboard-metric__icon">
+
+                    <i
+                        class="bi bi-briefcase-fill"
+                        aria-hidden="true"
+                    ></i>
+
+                </span>
+
 
                 <span class="dashboard-metric__badge">
                     Stages
@@ -233,14 +377,21 @@ $subtitle =
 
             </div>
 
+
             <div class="dashboard-metric__body">
 
                 <strong
                     class="dashboard-metric__value"
                     data-counter="<?= $activeInternships ?>"
                 >
-                    <?= $activeInternships ?>
+                    <?= number_format(
+                        $activeInternships,
+                        0,
+                        ',',
+                        ' '
+                    ) ?>
                 </strong>
+
 
                 <span class="dashboard-metric__label">
                     stages actuellement actifs
@@ -248,20 +399,35 @@ $subtitle =
 
             </div>
 
-            <div class="dashboard-metric__progress">
-                <span style="--progress: 100%;"></span>
+
+            <div
+                class="dashboard-metric__progress"
+                aria-hidden="true"
+            >
+                <span></span>
             </div>
 
         </article>
 
 
-        <article class="dashboard-metric dashboard-metric--hospitals">
+        <!-- Hospitals -->
+
+        <article
+            class="dashboard-metric
+                   dashboard-metric--teal"
+        >
 
             <div class="dashboard-metric__header">
 
-                <div class="dashboard-metric__icon">
-                    <i class="bi bi-hospital-fill"></i>
-                </div>
+                <span class="dashboard-metric__icon">
+
+                    <i
+                        class="bi bi-hospital-fill"
+                        aria-hidden="true"
+                    ></i>
+
+                </span>
+
 
                 <span class="dashboard-metric__badge">
                     Hôpitaux
@@ -269,35 +435,57 @@ $subtitle =
 
             </div>
 
+
             <div class="dashboard-metric__body">
 
                 <strong
                     class="dashboard-metric__value"
                     data-counter="<?= $hospitals ?>"
                 >
-                    <?= $hospitals ?>
+                    <?= number_format(
+                        $hospitals,
+                        0,
+                        ',',
+                        ' '
+                    ) ?>
                 </strong>
 
+
                 <span class="dashboard-metric__label">
-                    établissements hospitaliers actifs
+                    structures hospitalières
                 </span>
 
             </div>
 
-            <div class="dashboard-metric__progress">
-                <span style="--progress: 100%;"></span>
+
+            <div
+                class="dashboard-metric__progress"
+                aria-hidden="true"
+            >
+                <span></span>
             </div>
 
         </article>
 
 
-        <article class="dashboard-metric dashboard-metric--payments">
+        <!-- Payments -->
+
+        <article
+            class="dashboard-metric
+                   dashboard-metric--mint"
+        >
 
             <div class="dashboard-metric__header">
 
-                <div class="dashboard-metric__icon">
-                    <i class="bi bi-wallet2"></i>
-                </div>
+                <span class="dashboard-metric__icon">
+
+                    <i
+                        class="bi bi-wallet2"
+                        aria-hidden="true"
+                    ></i>
+
+                </span>
+
 
                 <span class="dashboard-metric__badge">
                     Paiements
@@ -305,14 +493,21 @@ $subtitle =
 
             </div>
 
+
             <div class="dashboard-metric__body">
 
                 <strong
                     class="dashboard-metric__value"
                     data-counter="<?= $successfulPayments ?>"
                 >
-                    <?= $successfulPayments ?>
+                    <?= number_format(
+                        $successfulPayments,
+                        0,
+                        ',',
+                        ' '
+                    ) ?>
                 </strong>
+
 
                 <span class="dashboard-metric__label">
                     transactions réussies
@@ -320,8 +515,12 @@ $subtitle =
 
             </div>
 
-            <div class="dashboard-metric__progress">
-                <span style="--progress: 100%;"></span>
+
+            <div
+                class="dashboard-metric__progress"
+                aria-hidden="true"
+            >
+                <span></span>
             </div>
 
         </article>
@@ -331,13 +530,18 @@ $subtitle =
 
     <!--
     |--------------------------------------------------------------------------
-    | Institutions overview
+    | Analytics
     |--------------------------------------------------------------------------
     -->
 
-    <section class="dashboard-grid dashboard-grid--analytics">
+    <section
+        class="dashboard-grid
+               dashboard-grid--main"
+    >
 
-        <article class="dashboard-panel dashboard-panel--large">
+        <!-- Institutions doughnut -->
+
+        <article class="dashboard-panel">
 
             <div class="dashboard-panel__header">
 
@@ -347,124 +551,130 @@ $subtitle =
                         Institutions
                     </span>
 
+
                     <h3 class="dashboard-panel__title">
-                        Écosystème MedTrack
+                        Répartition des institutions
                     </h3>
 
                 </div>
 
+
                 <span class="dashboard-panel__icon">
-                    <i class="bi bi-buildings-fill"></i>
+
+                    <i
+                        class="bi bi-pie-chart-fill"
+                        aria-hidden="true"
+                    ></i>
+
                 </span>
 
             </div>
 
 
-            <div class="dashboard-modules__grid">
+            <div
+                class="dashboard-chart
+                       dashboard-chart--donut"
+            >
 
-                <a
-                    href="/universities"
-                    class="dashboard-module dashboard-module--students"
-                >
+                <canvas
+                    id="dashboardInstitutionsChart"
+                    role="img"
+                    aria-label="Répartition des institutions MedTrack"
+                ></canvas>
 
-                    <span class="dashboard-module__icon">
-                        <i class="bi bi-bank2"></i>
-                    </span>
+            </div>
 
-                    <span class="dashboard-module__content">
+
+            <div
+                class="dashboard-chart-summary"
+                aria-label="Résumé des institutions"
+            >
+
+                <div class="dashboard-chart-summary__item">
+
+                    <span
+                        class="dashboard-chart-summary__dot
+                               dashboard-chart-summary__dot--navy"
+                    ></span>
+
+                    <div>
+                        <small>
+                            Universités
+                        </small>
+
                         <strong>
                             <?= $universities ?>
-                            Université<?= $universities !== 1 ? 's' : '' ?>
                         </strong>
+                    </div>
 
+                </div>
+
+
+                <div class="dashboard-chart-summary__item">
+
+                    <span
+                        class="dashboard-chart-summary__dot
+                               dashboard-chart-summary__dot--turquoise"
+                    ></span>
+
+                    <div>
                         <small>
-                            Institutions universitaires actives
+                            Hôpitaux
                         </small>
-                    </span>
 
-                    <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-
-                </a>
-
-
-                <a
-                    href="/hospitals"
-                    class="dashboard-module dashboard-module--hospitals"
-                >
-
-                    <span class="dashboard-module__icon">
-                        <i class="bi bi-hospital-fill"></i>
-                    </span>
-
-                    <span class="dashboard-module__content">
                         <strong>
                             <?= $hospitals ?>
-                            Hôpital<?= $hospitals !== 1 ? 'aux' : '' ?>
                         </strong>
+                    </div>
 
+                </div>
+
+
+                <div class="dashboard-chart-summary__item">
+
+                    <span
+                        class="dashboard-chart-summary__dot
+                               dashboard-chart-summary__dot--navy-light"
+                    ></span>
+
+                    <div>
                         <small>
-                            Structures hospitalières
+                            Ordres
                         </small>
-                    </span>
 
-                    <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-
-                </a>
-
-
-                <a
-                    href="/professional-orders"
-                    class="dashboard-module dashboard-module--assessments"
-                >
-
-                    <span class="dashboard-module__icon">
-                        <i class="bi bi-patch-check-fill"></i>
-                    </span>
-
-                    <span class="dashboard-module__content">
                         <strong>
                             <?= $professionalOrders ?>
-                            Ordre<?= $professionalOrders !== 1 ? 's' : '' ?>
                         </strong>
+                    </div>
 
+                </div>
+
+
+                <div class="dashboard-chart-summary__item">
+
+                    <span
+                        class="dashboard-chart-summary__dot
+                               dashboard-chart-summary__dot--mint"
+                    ></span>
+
+                    <div>
                         <small>
-                            Ordres professionnels actifs
+                            Ministères
                         </small>
-                    </span>
 
-                    <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-
-                </a>
-
-
-                <a
-                    href="/ministries"
-                    class="dashboard-module dashboard-module--payments"
-                >
-
-                    <span class="dashboard-module__icon">
-                        <i class="bi bi-building-check"></i>
-                    </span>
-
-                    <span class="dashboard-module__content">
                         <strong>
                             <?= $ministries ?>
-                            Ministère<?= $ministries !== 1 ? 's' : '' ?>
                         </strong>
+                    </div>
 
-                        <small>
-                            Institutions ministérielles
-                        </small>
-                    </span>
-
-                    <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-
-                </a>
+                </div>
 
             </div>
 
         </article>
 
+
+        <!-- Activity bar -->
 
         <article class="dashboard-panel">
 
@@ -473,41 +683,36 @@ $subtitle =
                 <div>
 
                     <span class="dashboard-panel__eyebrow">
-                        Contexte
+                        Pilotage
                     </span>
 
+
                     <h3 class="dashboard-panel__title">
-                        Administration centrale
+                        Activité de la plateforme
                     </h3>
 
                 </div>
 
+
                 <span class="dashboard-panel__icon">
-                    <i class="bi bi-shield-lock-fill"></i>
+
+                    <i
+                        class="bi bi-bar-chart-fill"
+                        aria-hidden="true"
+                    ></i>
+
                 </span>
 
             </div>
 
 
-            <div class="dashboard-activity">
+            <div class="dashboard-chart">
 
-                <div class="dashboard-activity__empty">
-
-                    <span class="dashboard-activity__icon">
-                        <i class="bi bi-shield-check"></i>
-                    </span>
-
-                    <strong>
-                        Accès plateforme
-                    </strong>
-
-                    <p>
-                        Vous travaillez actuellement dans le contexte
-                        global MedTrack. Les données présentées ici
-                        couvrent l’ensemble de la plateforme.
-                    </p>
-
-                </div>
+                <canvas
+                    id="dashboardActivityChart"
+                    role="img"
+                    aria-label="Activité globale de la plateforme MedTrack"
+                ></canvas>
 
             </div>
 
@@ -518,116 +723,182 @@ $subtitle =
 
     <!--
     |--------------------------------------------------------------------------
-    | Operational overview
+    | Platform overview
     |--------------------------------------------------------------------------
     -->
 
-    <section class="dashboard-grid dashboard-grid--operations">
+    <section
+        class="dashboard-grid
+               dashboard-grid--main"
+    >
 
-        <article class="dashboard-panel dashboard-panel--large">
+        <!-- Institution shortcuts -->
+
+        <article class="dashboard-panel">
 
             <div class="dashboard-panel__header">
 
                 <div>
 
                     <span class="dashboard-panel__eyebrow">
-                        Pilotage
+                        Écosystème
                     </span>
 
+
                     <h3 class="dashboard-panel__title">
-                        Activité opérationnelle
+                        Institutions MedTrack
                     </h3>
 
                 </div>
 
+
+                <span class="dashboard-panel__icon">
+
+                    <i
+                        class="bi bi-buildings-fill"
+                        aria-hidden="true"
+                    ></i>
+
+                </span>
+
             </div>
 
 
-            <div class="dashboard-table-wrapper">
+            <div class="dashboard-modules__grid">
 
-                <table class="table dashboard-table">
+                <a
+                    href="/universities"
+                    class="dashboard-module"
+                >
 
-                    <thead>
+                    <span class="dashboard-module__icon">
+                        <i class="bi bi-bank2"></i>
+                    </span>
 
-                        <tr>
-                            <th>Indicateur</th>
-                            <th>Valeur</th>
-                            <th>Périmètre</th>
-                        </tr>
 
-                    </thead>
+                    <span class="dashboard-module__content">
 
-                    <tbody>
+                        <strong>
+                            Universités
+                        </strong>
 
-                        <tr>
-                            <td>Étudiants</td>
+                        <small>
+                            <?= $universities ?>
+                            institution<?= $universities !== 1 ? 's' : '' ?>
+                        </small>
 
-                            <td>
-                                <strong>
-                                    <?= $students ?>
-                                </strong>
-                            </td>
+                    </span>
 
-                            <td>
-                                Plateforme
-                            </td>
-                        </tr>
 
-                        <tr>
-                            <td>Stages actifs</td>
+                    <i
+                        class="bi bi-arrow-up-right
+                               dashboard-module__arrow"
+                    ></i>
 
-                            <td>
-                                <strong>
-                                    <?= $activeInternships ?>
-                                </strong>
-                            </td>
+                </a>
 
-                            <td>
-                                Plateforme
-                            </td>
-                        </tr>
 
-                        <tr>
-                            <td>Paiements réussis</td>
+                <a
+                    href="/hospitals"
+                    class="dashboard-module"
+                >
 
-                            <td>
-                                <strong>
-                                    <?= $successfulPayments ?>
-                                </strong>
-                            </td>
+                    <span class="dashboard-module__icon">
+                        <i class="bi bi-hospital"></i>
+                    </span>
 
-                            <td>
-                                Plateforme
-                            </td>
-                        </tr>
 
-                        <tr>
-                            <td>Institutions actives</td>
+                    <span class="dashboard-module__content">
 
-                            <td>
-                                <strong>
-                                    <?=
-                                        $universities
-                                        + $hospitals
-                                        + $professionalOrders
-                                        + $ministries
-                                    ?>
-                                </strong>
-                            </td>
+                        <strong>
+                            Hôpitaux
+                        </strong>
 
-                            <td>
-                                Plateforme
-                            </td>
-                        </tr>
+                        <small>
+                            <?= $hospitals ?>
+                            structure<?= $hospitals !== 1 ? 's' : '' ?>
+                        </small>
 
-                    </tbody>
+                    </span>
 
-                </table>
+
+                    <i
+                        class="bi bi-arrow-up-right
+                               dashboard-module__arrow"
+                    ></i>
+
+                </a>
+
+
+                <a
+                    href="/professional-orders"
+                    class="dashboard-module"
+                >
+
+                    <span class="dashboard-module__icon">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </span>
+
+
+                    <span class="dashboard-module__content">
+
+                        <strong>
+                            Ordres professionnels
+                        </strong>
+
+                        <small>
+                            <?= $professionalOrders ?>
+                            ordre<?= $professionalOrders !== 1 ? 's' : '' ?>
+                        </small>
+
+                    </span>
+
+
+                    <i
+                        class="bi bi-arrow-up-right
+                               dashboard-module__arrow"
+                    ></i>
+
+                </a>
+
+
+                <a
+                    href="/ministries"
+                    class="dashboard-module"
+                >
+
+                    <span class="dashboard-module__icon">
+                        <i class="bi bi-building-check"></i>
+                    </span>
+
+
+                    <span class="dashboard-module__content">
+
+                        <strong>
+                            Ministères
+                        </strong>
+
+                        <small>
+                            <?= $ministries ?>
+                            ministère<?= $ministries !== 1 ? 's' : '' ?>
+                        </small>
+
+                    </span>
+
+
+                    <i
+                        class="bi bi-arrow-up-right
+                               dashboard-module__arrow"
+                    ></i>
+
+                </a>
 
             </div>
 
         </article>
 
+
+        <!-- Live state -->
 
         <article class="dashboard-panel">
 
@@ -639,39 +910,48 @@ $subtitle =
                         Temps réel
                     </span>
 
+
                     <h3 class="dashboard-panel__title">
                         Activités récentes
                     </h3>
 
                 </div>
 
+
                 <span class="dashboard-live-indicator">
+
                     <span></span>
+
                     Live
+
                 </span>
 
             </div>
 
 
-            <div class="dashboard-activity">
+            <div class="dashboard-state">
 
-                <div class="dashboard-activity__empty">
+                <span class="dashboard-state__icon">
 
-                    <span class="dashboard-activity__icon">
-                        <i class="bi bi-bell"></i>
-                    </span>
+                    <i
+                        class="bi bi-bell"
+                        aria-hidden="true"
+                    ></i>
 
-                    <strong>
-                        Aucun événement récent
-                    </strong>
+                </span>
 
-                    <p>
-                        Les événements issus de l’audit,
-                        des inscriptions et des stages
-                        apparaîtront ici progressivement.
-                    </p>
 
-                </div>
+                <strong>
+                    Aucun événement récent
+                </strong>
+
+
+                <p>
+                    Les événements issus de
+                    l’audit, des inscriptions
+                    et des stages apparaîtront
+                    ici progressivement.
+                </p>
 
             </div>
 
@@ -682,19 +962,23 @@ $subtitle =
 
     <!--
     |--------------------------------------------------------------------------
-    | Module shortcuts
+    | Quick navigation
     |--------------------------------------------------------------------------
     -->
 
-    <section class="dashboard-panel dashboard-modules">
+    <section
+        class="dashboard-panel
+               dashboard-shortcuts"
+    >
 
         <div class="dashboard-panel__header">
 
             <div>
 
                 <span class="dashboard-panel__eyebrow">
-                    Navigation rapide
+                    Accès rapides
                 </span>
+
 
                 <h3 class="dashboard-panel__title">
                     Administration MedTrack
@@ -702,121 +986,617 @@ $subtitle =
 
             </div>
 
+
+            <span class="dashboard-panel__icon">
+
+                <i
+                    class="bi bi-lightning-charge-fill"
+                    aria-hidden="true"
+                ></i>
+
+            </span>
+
         </div>
 
 
-        <div class="dashboard-modules__grid dashboard-modules__grid--admin">
+        <?php
+        $shortcuts = [
+            [
+                'href' =>
+                    '/students',
 
-            <a href="/universities" class="dashboard-module dashboard-module--students">
-                <span class="dashboard-module__icon"><i class="bi bi-bank2"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Universités</strong>
-                    <small>Institutions universitaires</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'icon' =>
+                    'bi-people-fill',
 
-            <a href="/hospitals" class="dashboard-module dashboard-module--hospitals">
-                <span class="dashboard-module__icon"><i class="bi bi-hospital-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Hôpitaux</strong>
-                    <small>Structures hospitalières</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'title' =>
+                    'Étudiants',
 
-            <a href="/professional-orders" class="dashboard-module dashboard-module--assessments">
-                <span class="dashboard-module__icon"><i class="bi bi-patch-check-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Ordres professionnels</strong>
-                    <small>Supervision institutionnelle</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'description' =>
+                    'Répertoire global',
+            ],
 
-            <a href="/ministries" class="dashboard-module dashboard-module--payments">
-                <span class="dashboard-module__icon"><i class="bi bi-building-check"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Ministères</strong>
-                    <small>Institutions ministérielles</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+            [
+                'href' =>
+                    '/academic-enrollments',
 
-            <a href="/students" class="dashboard-module dashboard-module--students">
-                <span class="dashboard-module__icon"><i class="bi bi-people-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Étudiants</strong>
-                    <small>Répertoire global</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'icon' =>
+                    'bi-person-vcard-fill',
 
-            <a href="/academic-enrollments" class="dashboard-module dashboard-module--internships">
-                <span class="dashboard-module__icon"><i class="bi bi-person-vcard-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Inscriptions</strong>
-                    <small>Inscriptions académiques</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'title' =>
+                    'Inscriptions',
 
-            <a href="/internships" class="dashboard-module dashboard-module--internships">
-                <span class="dashboard-module__icon"><i class="bi bi-briefcase-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Stages</strong>
-                    <small>Suivi des stages médicaux</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'description' =>
+                    'Parcours académiques',
+            ],
 
-            <a href="/payments" class="dashboard-module dashboard-module--payments">
-                <span class="dashboard-module__icon"><i class="bi bi-wallet2"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Paiements</strong>
-                    <small>Transactions et règlements</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+            [
+                'href' =>
+                    '/internships',
 
-            <a href="/users" class="dashboard-module dashboard-module--attendance">
-                <span class="dashboard-module__icon"><i class="bi bi-person-gear"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Utilisateurs</strong>
-                    <small>Comptes et accès plateforme</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'icon' =>
+                    'bi-briefcase-fill',
 
-            <a href="/roles" class="dashboard-module dashboard-module--assessments">
-                <span class="dashboard-module__icon"><i class="bi bi-shield-lock-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Rôles & permissions</strong>
-                    <small>Contrôle des autorisations</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'title' =>
+                    'Stages',
 
-            <a href="/audit" class="dashboard-module dashboard-module--audit">
-                <span class="dashboard-module__icon"><i class="bi bi-journal-check"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Audit</strong>
-                    <small>Traçabilité des opérations</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+                'description' =>
+                    'Gestion des stages',
+            ],
 
-            <a href="/faculties" class="dashboard-module dashboard-module--hospitals">
-                <span class="dashboard-module__icon"><i class="bi bi-diagram-3-fill"></i></span>
-                <span class="dashboard-module__content">
-                    <strong>Structure académique</strong>
-                    <small>Facultés et programmes</small>
-                </span>
-                <i class="bi bi-arrow-up-right dashboard-module__arrow"></i>
-            </a>
+            [
+                'href' =>
+                    '/faculties',
+
+                'icon' =>
+                    'bi-diagram-3-fill',
+
+                'title' =>
+                    'Structure académique',
+
+                'description' =>
+                    'Facultés et programmes',
+            ],
+
+            [
+                'href' =>
+                    '/users',
+
+                'icon' =>
+                    'bi-person-gear',
+
+                'title' =>
+                    'Utilisateurs',
+
+                'description' =>
+                    'Comptes et accès',
+            ],
+
+            [
+                'href' =>
+                    '/roles',
+
+                'icon' =>
+                    'bi-shield-lock-fill',
+
+                'title' =>
+                    'Rôles & permissions',
+
+                'description' =>
+                    'Contrôle RBAC',
+            ],
+
+            [
+                'href' =>
+                    '/payments',
+
+                'icon' =>
+                    'bi-wallet2',
+
+                'title' =>
+                    'Paiements',
+
+                'description' =>
+                    'Transactions',
+            ],
+
+            [
+                'href' =>
+                    '/audit',
+
+                'icon' =>
+                    'bi-journal-check',
+
+                'title' =>
+                    'Audit',
+
+                'description' =>
+                    'Traçabilité',
+            ],
+        ];
+        ?>
+
+
+        <div
+            class="dashboard-modules__grid
+                   dashboard-modules__grid--admin"
+        >
+
+            <?php foreach (
+                $shortcuts
+                as $shortcut
+            ): ?>
+
+                <a
+                    href="<?= htmlspecialchars(
+                        $shortcut['href'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    class="dashboard-module"
+                >
+
+                    <span class="dashboard-module__icon">
+
+                        <i
+                            class="bi <?= htmlspecialchars(
+                                $shortcut['icon'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                        ></i>
+
+                    </span>
+
+
+                    <span class="dashboard-module__content">
+
+                        <strong>
+                            <?= htmlspecialchars(
+                                $shortcut['title'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </strong>
+
+
+                        <small>
+                            <?= htmlspecialchars(
+                                $shortcut['description'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </small>
+
+                    </span>
+
+
+                    <i
+                        class="bi bi-arrow-up-right
+                               dashboard-module__arrow"
+                    ></i>
+
+                </a>
+
+            <?php endforeach; ?>
 
         </div>
 
     </section>
 
 </div>
+
+
+<!--
+|--------------------------------------------------------------------------
+| Chart.js
+|--------------------------------------------------------------------------
+|
+| chart.umd.js est déjà chargé dans partials/scripts.php.
+|--------------------------------------------------------------------------
+-->
+
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        if (
+            typeof Chart
+            === 'undefined'
+        ) {
+            console.warn(
+                'Chart.js n’est pas disponible.'
+            );
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data
+        |--------------------------------------------------------------------------
+        */
+
+        const institutionsData =
+            <?= json_encode(
+                $institutionChartData,
+                JSON_UNESCAPED_UNICODE
+                | JSON_UNESCAPED_SLASHES
+                | JSON_THROW_ON_ERROR
+            ) ?>;
+
+        const activityData =
+            <?= json_encode(
+                $activityChartData,
+                JSON_UNESCAPED_UNICODE
+                | JSON_UNESCAPED_SLASHES
+                | JSON_THROW_ON_ERROR
+            ) ?>;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Brand
+        |--------------------------------------------------------------------------
+        */
+
+        const colors = {
+            navy:
+                '#0b1f3a',
+
+            navyLight:
+                '#163a5f',
+
+            turquoise:
+                '#14b8a6',
+
+            turquoiseDark:
+                '#0f8f83',
+
+            turquoiseLight:
+                '#5eead4',
+
+            grid:
+                'rgba(11, 31, 58, 0.07)',
+
+            muted:
+                '#667085',
+        };
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Defaults
+        |--------------------------------------------------------------------------
+        */
+
+        Chart.defaults.font.family =
+            'Inter, -apple-system, '
+            + 'BlinkMacSystemFont, '
+            + '"Segoe UI", sans-serif';
+
+        Chart.defaults.color =
+            colors.muted;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Institutions
+        |--------------------------------------------------------------------------
+        */
+
+        const institutionsCanvas =
+            document.getElementById(
+                'dashboardInstitutionsChart'
+            );
+
+        if (institutionsCanvas) {
+
+            new Chart(
+                institutionsCanvas,
+                {
+                    type:
+                        'doughnut',
+
+                    data: {
+                        labels:
+                            institutionsData.labels,
+
+                        datasets: [
+                            {
+                                data:
+                                    institutionsData.values,
+
+                                backgroundColor: [
+                                    colors.navy,
+                                    colors.turquoise,
+                                    colors.navyLight,
+                                    colors.turquoiseLight,
+                                ],
+
+                                borderColor:
+                                    '#ffffff',
+
+                                borderWidth:
+                                    3,
+
+                                hoverOffset:
+                                    8,
+                            },
+                        ],
+                    },
+
+                    options: {
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        cutout:
+                            '70%',
+
+                        animation: {
+                            duration:
+                                700,
+                        },
+
+                        plugins: {
+                            legend: {
+                                position:
+                                    'bottom',
+
+                                labels: {
+                                    usePointStyle:
+                                        true,
+
+                                    pointStyle:
+                                        'circle',
+
+                                    padding:
+                                        17,
+
+                                    boxWidth:
+                                        8,
+
+                                    boxHeight:
+                                        8,
+
+                                    font: {
+                                        size:
+                                            11,
+
+                                        weight:
+                                            '600',
+                                    },
+                                },
+                            },
+
+                            tooltip: {
+                                callbacks: {
+                                    label:
+                                        (context) => {
+                                            const label =
+                                                context.label
+                                                || '';
+
+                                            const value =
+                                                Number(
+                                                    context.raw
+                                                    || 0
+                                                );
+
+                                            return (
+                                                `${label}: ${value}`
+                                            );
+                                        },
+                                },
+                            },
+                        },
+                    },
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Platform activity
+        |--------------------------------------------------------------------------
+        */
+
+        const activityCanvas =
+            document.getElementById(
+                'dashboardActivityChart'
+            );
+
+        if (activityCanvas) {
+
+            new Chart(
+                activityCanvas,
+                {
+                    type:
+                        'bar',
+
+                    data: {
+                        labels:
+                            activityData.labels,
+
+                        datasets: [
+                            {
+                                label:
+                                    'Volume',
+
+                                data:
+                                    activityData.values,
+
+                                backgroundColor: [
+                                    colors.navy,
+                                    colors.turquoise,
+                                    colors.turquoiseDark,
+                                    colors.navyLight,
+                                ],
+
+                                hoverBackgroundColor: [
+                                    colors.navyLight,
+                                    colors.turquoiseDark,
+                                    colors.turquoise,
+                                    colors.navy,
+                                ],
+
+                                borderWidth:
+                                    0,
+
+                                borderRadius:
+                                    8,
+
+                                borderSkipped:
+                                    false,
+
+                                maxBarThickness:
+                                    48,
+                            },
+                        ],
+                    },
+
+                    options: {
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        animation: {
+                            duration:
+                                700,
+                        },
+
+                        plugins: {
+                            legend: {
+                                display:
+                                    false,
+                            },
+
+                            tooltip: {
+                                displayColors:
+                                    false,
+                            },
+                        },
+
+                        scales: {
+                            x: {
+                                grid: {
+                                    display:
+                                        false,
+                                },
+
+                                border: {
+                                    display:
+                                        false,
+                                },
+
+                                ticks: {
+                                    color:
+                                        colors.muted,
+
+                                    font: {
+                                        size:
+                                            10,
+
+                                        weight:
+                                            '600',
+                                    },
+                                },
+                            },
+
+                            y: {
+                                beginAtZero:
+                                    true,
+
+                                border: {
+                                    display:
+                                        false,
+                                },
+
+                                grid: {
+                                    color:
+                                        colors.grid,
+
+                                    drawTicks:
+                                        false,
+                                },
+
+                                ticks: {
+                                    precision:
+                                        0,
+
+                                    color:
+                                        colors.muted,
+
+                                    padding:
+                                        8,
+
+                                    font: {
+                                        size:
+                                            10,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refresh
+        |--------------------------------------------------------------------------
+        */
+
+        const dashboard =
+            document.querySelector(
+                '.medtrack-dashboard'
+            );
+
+        const refreshButton =
+            document.querySelector(
+                '[data-dashboard-refresh]'
+            );
+
+        if (
+            dashboard
+            && refreshButton
+        ) {
+
+            refreshButton.addEventListener(
+                'click',
+                () => {
+
+                    dashboard
+                        .classList
+                        .add(
+                            'is-refreshing'
+                        );
+
+                    window.setTimeout(
+                        () => {
+                            window
+                                .location
+                                .reload();
+                        },
+                        350
+                    );
+
+                }
+            );
+
+        }
+
+    }
+);
+</script>

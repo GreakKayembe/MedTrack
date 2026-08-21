@@ -77,6 +77,7 @@ $accreditationScore =
             <p class="text-muted mb-0">
                 Modifiez les informations institutionnelles
                 de <?= htmlspecialchars($name) ?>.
+                Le compte administrateur principal se gère séparément.
             </p>
 
         </div>
@@ -461,11 +462,11 @@ $accreditationScore =
 
                             <div>
                                 <h5 class="fw-bold mb-1">
-                                    Coordonnées
+                                    Coordonnées institutionnelles
                                 </h5>
 
                                 <p class="text-muted small mb-0">
-                                    Informations de contact institutionnelles.
+                                    Coordonnées officielles de l’université. Elles ne correspondent pas nécessairement aux identifiants de connexion de l’administrateur principal.
                                 </p>
                             </div>
 
@@ -480,7 +481,7 @@ $accreditationScore =
                                     for="email"
                                     class="form-label fw-semibold"
                                 >
-                                    Adresse e-mail
+                                    E-mail institutionnel
                                 </label>
 
                                 <div class="input-group">
@@ -502,6 +503,12 @@ $accreditationScore =
                                         ) ?>"
                                     >
 
+                                </div>
+
+                                <div class="form-text">
+                                    Adresse officielle de l’université.
+                                    Elle n’est pas utilisée automatiquement
+                                    comme compte de connexion administrateur.
                                 </div>
 
                             </div>
@@ -551,6 +558,59 @@ $accreditationScore =
             <!-- Accreditation -->
 
             <div class="col-xl-4">
+
+                <div class="card border-0 shadow-sm mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-start gap-3">
+
+                            <div
+                                class="rounded-circle
+                                       bg-primary-subtle
+                                       text-primary
+                                       d-flex align-items-center
+                                       justify-content-center
+                                       flex-shrink-0"
+                                style="width:48px;height:48px;"
+                            >
+                                <i class="bi bi-person-gear fs-4"></i>
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    Administrateur principal
+                                </h5>
+
+                                <p class="text-muted small mb-3">
+                                    Le compte UNIVERSITY_ADMIN n’est pas modifié
+                                    depuis ce formulaire. Il possède son propre
+                                    cycle de vie utilisateur, membership et rôles.
+                                </p>
+
+                                <div class="alert alert-light border mb-0">
+
+                                    <div class="d-flex gap-2">
+
+                                        <i class="bi bi-shield-lock text-primary"></i>
+
+                                        <small class="text-muted">
+                                            Les modifications ci-dessous concernent
+                                            uniquement l’université et son accréditation.
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
                 <div
                     class="card border-0 shadow-sm"

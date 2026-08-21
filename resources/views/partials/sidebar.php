@@ -18,6 +18,14 @@ $organizationType =
         ?? ''
     );
 
+$organizationName =
+    trim(
+        (string) (
+            $currentAccess['organization_name']
+            ?? ''
+        )
+    );
+
 $permissions =
     is_array(
         $currentAccess['permissions']
@@ -66,6 +74,26 @@ $isActive =
             );
     };
 
+$isAnyActive =
+    static function (
+        array $paths
+    ) use (
+        $isActive
+    ): bool {
+        foreach ($paths as $path) {
+            if (
+                is_string($path)
+                && $isActive(
+                    $path,
+                    false
+                )
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    };
 
 $can =
     static function (
@@ -74,13 +102,6 @@ $can =
         $scope,
         $permissionCodes
     ): bool {
-        /*
-         * Le contexte PLATFORM conserve
-         * la navigation globale.
-         *
-         * Les actions sensibles restent
-         * protégées côté serveur.
-         */
         if ($scope === 'PLATFORM') {
             return true;
         }
@@ -91,1082 +112,1193 @@ $can =
             true
         );
     };
+
+$scopeLabel =
+    match ($scope) {
+        'PLATFORM' =>
+            'Administration plateforme',
+
+        'STUDENT' =>
+            'Espace étudiant',
+
+        'ORGANIZATION' =>
+            match ($organizationType) {
+                'UNIVERSITY' =>
+                    'Université',
+
+                'HOSPITAL' =>
+                    'Hôpital',
+
+                'PROFESSIONAL_ORDER' =>
+                    'Ordre professionnel',
+
+                'MINISTRY' =>
+                    'Ministère',
+
+                default =>
+                    'Organisation',
+            },
+
+        default =>
+            'MedTrack',
+    };
 ?>
 
 <aside
-    id="sidebar"
-    class="sidebar"
+    id="medtrackSidebar"
+    class="medtrack-sidebar"
+    aria-label="Navigation principale"
 >
 
-    <div class="sidebar-brand">
+    <!-- Brand -->
 
-        <a
-            href="/"
-            class="sidebar-brand__link"
-            aria-label="Accueil MedTrack"
-        >
-            <span class="sidebar-brand__logo-wrap">
-                <img
-                    src="/assets/img/logo.png"
-                    alt="MedTrack"
-                    class="sidebar-brand__logo"
-                >
-            </span>
 
-            <span class="sidebar-brand__content">
-                <strong>MedTrack</strong>
-                <small>Gestion des stages médicaux</small>
-            </span>
-        </a>
 
-    </div>
+    <!-- Navigation -->
 
-    <ul
-        class="sidebar-nav"
-        id="sidebar-nav"
+    <nav
+        class="medtrack-sidebar__body"
+        aria-label="Menu MedTrack"
     >
 
-        <!-- =========================================================
-             Dashboard
-             ========================================================= -->
+        <ul
+            class="medtrack-sidebar__menu"
+            id="medtrackSidebarMenu"
+        >
 
-        <li class="nav-item">
+            <!-- Dashboard -->
 
-            <a
-                class="nav-link <?= $isActive("/", true) ? '' : 'collapsed' ?>"
-                href="/"
-            >
-                <i class="bi bi-grid"></i>
-
-                <span>
-                    Tableau de bord
-                </span>
-            </a>
-
-        </li>
-
-
-        <?php if ($scope === 'PLATFORM'): ?>
-
-            <!--
-            ==========================================================
-            PLATFORM
-            ==========================================================
-            -->
-
-            <li class="nav-heading">
-                Plateforme
-            </li>
-
-
-            <!-- Universities -->
-
-            <li class="nav-item">
+            <li class="medtrack-sidebar__item">
 
                 <a
-                    class="nav-link <?= $isActive("/universities", false) ? '' : 'collapsed' ?>"
-                    href="/universities"
+                    href="/"
+                    class="medtrack-sidebar__link
+                           <?= $isActive('/', true)
+                               ? 'is-active'
+                               : '' ?>"
                 >
-                    <i class="bi bi-bank2"></i>
-                    <span>Universités</span>
+                    <i class="bi bi-grid-1x2-fill"></i>
+
+                    <span>
+                        Tableau de bord
+                    </span>
                 </a>
 
             </li>
 
 
-            <!-- Hospitals -->
+            <?php if ($scope === 'PLATFORM'): ?>
 
-            <li class="nav-item">
+                <?php
+                $platformInstitutionsOpen =
+                    $isAnyActive([
+                        '/universities',
+                        '/hospitals',
+                        '/professional-orders',
+                        '/ministries',
+                    ]);
 
-                <a
-                    class="nav-link <?= $isActive("/hospitals", false) ? '' : 'collapsed' ?>"
-                    href="/hospitals"
-                >
-                    <i class="bi bi-hospital"></i>
-                    <span>Hôpitaux</span>
-                </a>
+                $platformAcademicOpen =
+                    $isAnyActive([
+                        '/students',
+                        '/academic-enrollments',
+                        '/faculties',
+                        '/academic-programs',
+                        '/academic-years',
+                        '/study-levels',
+                        '/cohorts',
+                    ]);
 
-            </li>
+                $platformInternshipsOpen =
+                    $isAnyActive([
+                        '/internships',
+                    ]);
 
-
-            <!-- Professional orders -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/professional-orders", false) ? '' : 'collapsed' ?>"
-                    href="/professional-orders"
-                >
-                    <i class="bi bi-award"></i>
-                    <span>Ordres professionnels</span>
-                </a>
-
-            </li>
-
-
-            <!-- Ministries -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/ministries", false) ? '' : 'collapsed' ?>"
-                    href="/ministries"
-                >
-                    <i class="bi bi-building"></i>
-                    <span>Ministères</span>
-                </a>
-
-            </li>
+                $platformAdminOpen =
+                    $isAnyActive([
+                        '/users',
+                        '/roles',
+                        '/audit',
+                    ]);
+                ?>
 
 
-            <!-- Students -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/students", false) ? '' : 'collapsed' ?>"
-                    href="/students"
-                >
-                    <i class="bi bi-people"></i>
-                    <span>Étudiants</span>
-                </a>
-
-            </li>
-
-
-            <!-- Academic enrollments -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/academic-enrollments", false) ? '' : 'collapsed' ?>"
-                    href="/academic-enrollments"
-                >
-                    <i class="bi bi-person-vcard"></i>
-                    <span>Inscriptions</span>
-                </a>
-
-            </li>
-
-
-            <!-- =====================================================
-                 Academic
-                 ===================================================== -->
-
-            <li class="nav-heading">
-                Académique
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/faculties", false) ? '' : 'collapsed' ?>"
-                    href="/faculties"
-                >
-                    <i class="bi bi-diagram-3"></i>
-                    <span>Facultés</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/academic-programs", false) ? '' : 'collapsed' ?>"
-                    href="/academic-programs"
-                >
-                    <i class="bi bi-journal-bookmark"></i>
-                    <span>Programmes</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/academic-years", false) ? '' : 'collapsed' ?>"
-                    href="/academic-years"
-                >
-                    <i class="bi bi-calendar3"></i>
-                    <span>Années académiques</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/study-levels", false) ? '' : 'collapsed' ?>"
-                    href="/study-levels"
-                >
-                    <i class="bi bi-layers"></i>
-                    <span>Niveaux d’études</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/cohorts", false) ? '' : 'collapsed' ?>"
-                    href="/cohorts"
-                >
-                    <i class="bi bi-collection"></i>
-                    <span>Cohortes</span>
-                </a>
-
-            </li>
-
-
-            <!-- =====================================================
-                 Internships
-                 ===================================================== -->
-
-            <li class="nav-heading">
-                Stages & supervision
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/internships", false) ? '' : 'collapsed' ?>"
-                    href="/internships"
-                >
-                    <i class="bi bi-briefcase"></i>
-                    <span>Stages</span>
-                </a>
-
-            </li>
-
-
-            <!-- =====================================================
-                 Finance
-                 ===================================================== -->
-
-            <li class="nav-heading">
-                Finance
-            </li>
-
-
-            <!--
-             * Route à construire durant le workflow Payments.
-             * Nous gardons volontairement le lien désactivé
-             * tant que /payments n'est pas implémenté.
-             -->
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link <?= $isActive("/payments", false) ? '' : 'collapsed' ?>"
-                        href="/payments"
-                    >
-                        <i class="bi bi-cash-stack"></i>
-                        <span>Paiements</span>
-                    </a>
-
+                <li class="medtrack-sidebar__section">
+                    Plateforme
                 </li>
 
 
-            <!-- =====================================================
-                 Administration
-                 ===================================================== -->
+                <!-- Institutions -->
 
-            <li class="nav-heading">
-                Administration
-            </li>
+                <li class="medtrack-sidebar__item">
 
-
-            <!-- Future /users -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/users", false) ? '' : 'collapsed' ?>"
-                    href="/users"
-                >
-                    <i class="bi bi-people-fill"></i>
-                    <span>Utilisateurs</span>
-                </a>
-
-            </li>
-
-
-
-            <!-- Future /roles -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/roles", false) ? '' : 'collapsed' ?>"
-                    href="/roles"
-                >
-                    <i class="bi bi-shield-lock"></i>
-                    <span>Rôles & permissions</span>
-                </a>
-
-            </li>
-
-           
-
-
-            <!-- Future /audit -->
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link <?= $isActive("/audit", false) ? '' : 'collapsed' ?>"
-                    href="/audit"
-                >
-                    <i class="bi bi-clock-history"></i>
-                    <span>Audit</span>
-                </a>
-
-            </li>
-
-
-        <?php elseif (
-            $scope === 'ORGANIZATION'
-            && $organizationType === 'UNIVERSITY'
-        ): ?>
-
-            <!-- ==========================================================
-                 UNIVERSITY
-                 ========================================================== -->
-
-            <!-- =====================================================
-                 Structure académique
-                 ===================================================== -->
-
-            <li class="nav-heading">
-                Structure académique
-            </li>
-
-            <?php if ($can('faculties.view')): ?>
-                <li class="nav-item">
                     <a
-                        class="nav-link <?= $isActive("/faculties", false) ? '' : 'collapsed' ?>"
-                        href="/faculties"
+                        href="#platformInstitutions"
+                        class="medtrack-sidebar__link"
+                        data-bs-toggle="collapse"
+                        role="button"
+                        aria-expanded="<?= $platformInstitutionsOpen
+                            ? 'true'
+                            : 'false' ?>"
+                        aria-controls="platformInstitutions"
                     >
-                        <i class="bi bi-diagram-3"></i>
-                        <span>Facultés</span>
-                    </a>
-                </li>
-            <?php endif; ?>
+                        <i class="bi bi-buildings"></i>
 
-            <?php if ($can('academic_programs.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link <?= $isActive("/academic-programs", false) ? '' : 'collapsed' ?>"
-                        href="/academic-programs"
-                    >
-                        <i class="bi bi-journal-bookmark"></i>
-                        <span>Programmes académiques</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <?php if ($can('academic_years.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link <?= $isActive("/academic-years", false) ? '' : 'collapsed' ?>"
-                        href="/academic-years"
-                    >
-                        <i class="bi bi-calendar3"></i>
-                        <span>Années académiques</span>
-
-                        <span
-                            class="badge rounded-pill
-                                   bg-light text-secondary
-                                   border ms-auto"
-                            title="Référentiel MedTrack en lecture seule"
-                        >
-                            <i class="bi bi-lock-fill"></i>
+                        <span>
+                            Établissements
                         </span>
+
+                        <i
+                            class="bi bi-chevron-right
+                                   medtrack-sidebar__chevron"
+                        ></i>
                     </a>
-                </li>
-            <?php endif; ?>
 
-            <?php if ($can('study_levels.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link <?= $isActive("/study-levels", false) ? '' : 'collapsed' ?>"
-                        href="/study-levels"
+
+                    <div
+                        class="collapse <?= $platformInstitutionsOpen
+                            ? 'show'
+                            : '' ?>"
+                        id="platformInstitutions"
                     >
-                        <i class="bi bi-layers"></i>
-                        <span>Niveaux d’études</span>
-                    </a>
-                </li>
-            <?php endif; ?>
+                        <ul class="medtrack-sidebar__submenu">
 
-            <?php if ($can('cohorts.view')): ?>
-                <li class="nav-item">
+                            <li>
+                                <a
+                                    href="/universities"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/universities')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Universités
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/hospitals"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/hospitals')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Hôpitaux
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/professional-orders"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/professional-orders')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Ordres professionnels
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/ministries"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/ministries')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Ministères
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </li>
+
+
+                <!-- Academic -->
+
+                <li class="medtrack-sidebar__item">
+
                     <a
-                        class="nav-link <?= $isActive("/cohorts", false) ? '' : 'collapsed' ?>"
-                        href="/cohorts"
+                        href="#platformAcademic"
+                        class="medtrack-sidebar__link"
+                        data-bs-toggle="collapse"
+                        role="button"
+                        aria-expanded="<?= $platformAcademicOpen
+                            ? 'true'
+                            : 'false' ?>"
+                        aria-controls="platformAcademic"
                     >
-                        <i class="bi bi-collection"></i>
-                        <span>Cohortes</span>
-                    </a>
-                </li>
-            <?php endif; ?>
+                        <i class="bi bi-mortarboard"></i>
 
-
-            <!-- =====================================================
-                 Étudiants
-                 ===================================================== -->
-
-            <?php if (
-                $can('students.view')
-                || $can('students.import')
-                || $can('academic_enrollments.view')
-            ): ?>
-
-                <li class="nav-heading">
-                    Étudiants
-                </li>
-
-            <?php endif; ?>
-
-            <?php if ($can('students.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link <?= $isActive("/students", false) ? '' : 'collapsed' ?>"
-                        href="/students"
-                    >
-                        <i class="bi bi-people"></i>
-                        <span>Étudiants</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <?php if ($can('students.import')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
-                    >
-                        <i class="bi bi-file-earmark-arrow-up"></i>
-                        <span>Importer les étudiants</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
+                        <span>
+                            Académique
                         </span>
-                    </a>
-                </li>
-            <?php endif; ?>
 
-            <?php if ($can('academic_enrollments.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link <?= $isActive("/academic-enrollments", false) ? '' : 'collapsed' ?>"
-                        href="/academic-enrollments"
+                        <i
+                            class="bi bi-chevron-right
+                                   medtrack-sidebar__chevron"
+                        ></i>
+                    </a>
+
+
+                    <div
+                        class="collapse <?= $platformAcademicOpen
+                            ? 'show'
+                            : '' ?>"
+                        id="platformAcademic"
                     >
-                        <i class="bi bi-person-vcard"></i>
-                        <span>Inscriptions académiques</span>
-                    </a>
+                        <ul class="medtrack-sidebar__submenu">
+
+                            <li>
+                                <a
+                                    href="/students"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/students')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Étudiants
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/academic-enrollments"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/academic-enrollments')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Inscriptions
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/faculties"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/faculties')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Facultés
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/academic-programs"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/academic-programs')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Programmes
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/academic-years"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/academic-years')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Années académiques
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/study-levels"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/study-levels')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Niveaux d’études
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    href="/cohorts"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/cohorts')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Cohortes
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+
                 </li>
-            <?php endif; ?>
 
 
-            <!-- =====================================================
-                 Stages
-                 ===================================================== -->
+                <!-- Internships -->
 
-            <?php if (
-                $can('internships.view')
-                || $can('internships.create')
-                || $can('internships.assign')
-            ): ?>
+                <li class="medtrack-sidebar__item">
 
-                <li class="nav-heading">
-                    Stages
-                </li>
-
-            <?php endif; ?>
-
-            <?php if ($can('internships.view')): ?>
-                <li class="nav-item">
                     <a
-                        class="nav-link <?= $isActive("/internships", false) ? '' : 'collapsed' ?>"
-                        href="/internships"
+                        href="#platformInternships"
+                        class="medtrack-sidebar__link"
+                        data-bs-toggle="collapse"
+                        role="button"
+                        aria-expanded="<?= $platformInternshipsOpen
+                            ? 'true'
+                            : 'false' ?>"
+                        aria-controls="platformInternships"
                     >
                         <i class="bi bi-briefcase"></i>
-                        <span>Stages</span>
-                    </a>
-                </li>
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
-                    >
-                        <i class="bi bi-hospital"></i>
-                        <span>Hôpitaux partenaires</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
+                        <span>
+                            Stages
                         </span>
-                    </a>
-                </li>
-            <?php endif; ?>
 
-            <?php if ($can('internships.create')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Workflow à implémenter"
+                        <i
+                            class="bi bi-chevron-right
+                                   medtrack-sidebar__chevron"
+                        ></i>
+                    </a>
+
+                    <div
+                        class="collapse <?= $platformInternshipsOpen
+                            ? 'show'
+                            : '' ?>"
+                        id="platformInternships"
                     >
-                        <i class="bi bi-send-check"></i>
-                        <span>Demandes de stage</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-            <?php endif; ?>
+                        <ul class="medtrack-sidebar__submenu">
+                            <li>
+                                <a
+                                    href="/internships"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/internships')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Gestion des stages
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-            <?php if ($can('internships.assign')): ?>
-                <li class="nav-item">
+                </li>
+
+
+                <li class="medtrack-sidebar__section">
+                    Gestion
+                </li>
+
+
+                <!-- Finance -->
+
+                <li class="medtrack-sidebar__item">
                     <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Workflow à implémenter"
-                    >
-                        <i class="bi bi-diagram-2"></i>
-                        <span>Affectations</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-
-            <!-- =====================================================
-                 Finance
-                 ===================================================== -->
-
-            <?php if (
-                $can('payments.view')
-                || $can('payments.manage')
-            ): ?>
-
-                <li class="nav-heading">
-                    Finance
-                </li>
-
-            <?php endif; ?>
-
-            <?php if ($can('payments.view')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
+                        href="/payments"
+                        class="medtrack-sidebar__link
+                               <?= $isActive('/payments')
+                                   ? 'is-active'
+                                   : '' ?>"
                     >
                         <i class="bi bi-cash-stack"></i>
-                        <span>Paiements</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-            <?php endif; ?>
 
-            <?php if ($can('payments.manage')): ?>
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
-                    >
-                        <i class="bi bi-wallet2"></i>
-                        <span>Gestion financière</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-
-            <!-- =====================================================
-                 Pilotage
-                 ===================================================== -->
-
-            <?php if ($can('analytics.organization')): ?>
-
-                <li class="nav-heading">
-                    Pilotage
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
-                    >
-                        <i class="bi bi-bar-chart"></i>
-                        <span>Statistiques</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
+                        <span>
+                            Paiements
                         </span>
                     </a>
                 </li>
 
-                <li class="nav-item">
+
+                <!-- Administration -->
+
+                <li class="medtrack-sidebar__item">
+
                     <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Module à implémenter"
-                    >
-                        <i class="bi bi-file-earmark-bar-graph"></i>
-                        <span>Rapports</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-
-            <?php endif; ?>
-
-
-            <!-- =====================================================
-                 Administration université
-                 ===================================================== -->
-
-            <?php if (
-                $can('students.view')
-                || $can('audit.view')
-            ): ?>
-
-                <li class="nav-heading">
-                    Administration
-                </li>
-
-            <?php endif; ?>
-
-            <?php if ($can('students.view')): ?>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Gestion des membres de l'université à implémenter"
-                    >
-                        <i class="bi bi-people-fill"></i>
-                        <span>Équipe universitaire</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Gestion RBAC institutionnelle à implémenter"
+                        href="#platformAdministration"
+                        class="medtrack-sidebar__link"
+                        data-bs-toggle="collapse"
+                        role="button"
+                        aria-expanded="<?= $platformAdminOpen
+                            ? 'true'
+                            : 'false' ?>"
+                        aria-controls="platformAdministration"
                     >
                         <i class="bi bi-shield-lock"></i>
-                        <span>Rôles & permissions</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
+
+                        <span>
+                            Administration
                         </span>
+
+                        <i
+                            class="bi bi-chevron-right
+                                   medtrack-sidebar__chevron"
+                        ></i>
                     </a>
-                </li>
 
-            <?php endif; ?>
-
-            <?php if ($can('audit.view')): ?>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                        tabindex="-1"
-                        title="Audit institutionnel à implémenter"
+                    <div
+                        class="collapse <?= $platformAdminOpen
+                            ? 'show'
+                            : '' ?>"
+                        id="platformAdministration"
                     >
-                        <i class="bi bi-clock-history"></i>
-                        <span>Audit</span>
-                        <span class="badge bg-light text-secondary ms-auto">
-                            Bientôt
-                        </span>
-                    </a>
-                </li>
+                        <ul class="medtrack-sidebar__submenu">
 
-            <?php endif; ?>
+                            <li>
+                                <a
+                                    href="/users"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/users')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Utilisateurs
+                                </a>
+                            </li>
 
+                            <li>
+                                <a
+                                    href="/roles"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/roles')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Rôles & permissions
+                                </a>
+                            </li>
 
-        <?php elseif (
-            $scope === 'ORGANIZATION'
-            && $organizationType === 'HOSPITAL'
-        ): ?>
+                            <li>
+                                <a
+                                    href="/audit"
+                                    class="medtrack-sidebar__link
+                                           <?= $isActive('/audit')
+                                               ? 'is-active'
+                                               : '' ?>"
+                                >
+                                    Audit
+                                </a>
+                            </li>
 
-            <!--
-            ==========================================================
-            HOSPITAL
-            ==========================================================
-            -->
-
-            <li class="nav-heading">
-                Gestion hospitalière
-            </li>
-
-
-            <?php if ($can('internships.view')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link <?= $isActive("/internships", false) ? '' : 'collapsed' ?>"
-                        href="/internships"
-                    >
-                        <i class="bi bi-people"></i>
-                        <span>Stagiaires</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
-
-
-            <?php if ($can('internships.manage_programs')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-briefcase"></i>
-                        <span>Programmes de stage</span>
-                    </a>
+                        </ul>
+                    </div>
 
                 </li>
 
-            <?php endif; ?>
 
-
-            <?php if ($can('rotations.manage')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span>Rotations</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
-
-
-            <?php if ($can('logbook.validate')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-journal-check"></i>
-                        <span>Logbooks</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
-
-
-            <?php if (
-                $can('evaluations.create')
-                || $can('evaluations.finalize')
+            <?php elseif (
+                $scope === 'ORGANIZATION'
+                && $organizationType === 'UNIVERSITY'
             ): ?>
 
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-clipboard2-check"></i>
-                        <span>Évaluations</span>
-                    </a>
-
+                <li class="medtrack-sidebar__section">
+                    Structure académique
                 </li>
 
-            <?php endif; ?>
+
+                <?php if ($can('faculties.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/faculties"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/faculties')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-diagram-3"></i>
+                            <span>Facultés</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
 
-        <?php elseif (
-            $scope === 'ORGANIZATION'
-            && $organizationType === 'PROFESSIONAL_ORDER'
-        ): ?>
+                <?php if ($can('academic_programs.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/academic-programs"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/academic-programs')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-journal-bookmark"></i>
+                            <span>Programmes académiques</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
-            <!--
-            ==========================================================
-            PROFESSIONAL ORDER
-            ==========================================================
-            -->
 
-            <li class="nav-heading">
-                Ordre professionnel
-            </li>
+                <?php if ($can('academic_years.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/academic-years"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/academic-years')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-calendar3"></i>
+                            <span>Années académiques</span>
+                            <span
+                                class="medtrack-sidebar__badge"
+                                title="Référentiel MedTrack en lecture seule"
+                            >
+                                Réf.
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
 
-            <?php if (
-                $can(
-                    'professional_registration.review'
-                )
+                <?php if ($can('study_levels.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/study-levels"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/study-levels')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-layers"></i>
+                            <span>Niveaux d’études</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('cohorts.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/cohorts"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/cohorts')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-collection"></i>
+                            <span>Cohortes</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if (
+                    $can('students.view')
+                    || $can('students.import')
+                    || $can('academic_enrollments.view')
+                ): ?>
+                    <li class="medtrack-sidebar__section">
+                        Étudiants
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('students.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/students"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/students')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-people"></i>
+                            <span>Étudiants</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('students.import')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Importer les étudiants</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('academic_enrollments.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/academic-enrollments"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/academic-enrollments')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-person-vcard"></i>
+                            <span>Inscriptions académiques</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if (
+                    $can('internships.view')
+                    || $can('internships.create')
+                    || $can('internships.assign')
+                ): ?>
+                    <li class="medtrack-sidebar__section">
+                        Stages
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('internships.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/internships"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/internships')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-briefcase"></i>
+                            <span>Stages</span>
+                        </a>
+                    </li>
+
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-hospital"></i>
+                            <span>Hôpitaux partenaires</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('internships.create')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-send-check"></i>
+                            <span>Demandes de stage</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('internships.assign')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-diagram-2"></i>
+                            <span>Affectations</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if (
+                    $can('payments.view')
+                    || $can('payments.manage')
+                ): ?>
+                    <li class="medtrack-sidebar__section">
+                        Finance
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('payments.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-cash-stack"></i>
+                            <span>Paiements</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('payments.manage')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-wallet2"></i>
+                            <span>Gestion financière</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('analytics.organization')): ?>
+                    <li class="medtrack-sidebar__section">
+                        Pilotage
+                    </li>
+
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Statistiques</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-file-earmark-bar-graph"></i>
+                            <span>Rapports</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if (
+                    $can('students.view')
+                    || $can('audit.view')
+                ): ?>
+                    <li class="medtrack-sidebar__section">
+                        Administration
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('students.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-people-fill"></i>
+                            <span>Équipe universitaire</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-shield-lock"></i>
+                            <span>Rôles & permissions</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('audit.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-clock-history"></i>
+                            <span>Audit</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+            <?php elseif (
+                $scope === 'ORGANIZATION'
+                && $organizationType === 'HOSPITAL'
             ): ?>
 
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-file-earmark-person"></i>
-                        <span>Dossiers</span>
-                    </a>
-
+                <li class="medtrack-sidebar__section">
+                    Gestion hospitalière
                 </li>
 
 
-                <li class="nav-item">
+                <?php if ($can('internships.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="/internships"
+                            class="medtrack-sidebar__link
+                                   <?= $isActive('/internships')
+                                       ? 'is-active'
+                                       : '' ?>"
+                        >
+                            <i class="bi bi-people"></i>
+                            <span>Stagiaires</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Validations</span>
-                    </a>
 
+                <?php if ($can('internships.manage_programs')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-briefcase"></i>
+                            <span>Programmes de stage</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('rotations.manage')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-arrow-repeat"></i>
+                            <span>Rotations</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('logbook.validate')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-journal-check"></i>
+                            <span>Logbooks</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if (
+                    $can('evaluations.create')
+                    || $can('evaluations.finalize')
+                ): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-clipboard2-check"></i>
+                            <span>Évaluations</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+            <?php elseif (
+                $scope === 'ORGANIZATION'
+                && $organizationType === 'PROFESSIONAL_ORDER'
+            ): ?>
+
+                <li class="medtrack-sidebar__section">
+                    Ordre professionnel
                 </li>
+
+
+                <?php if (
+                    $can(
+                        'professional_registration.review'
+                    )
+                ): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-file-earmark-person"></i>
+                            <span>Dossiers</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-check2-circle"></i>
+                            <span>Validations</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('certificates.issue')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-award"></i>
+                            <span>Certifications</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+            <?php elseif (
+                $scope === 'ORGANIZATION'
+                && $organizationType === 'MINISTRY'
+            ): ?>
+
+                <li class="medtrack-sidebar__section">
+                    Supervision nationale
+                </li>
+
+
+                <?php if ($can('analytics.national')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Statistiques nationales</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+                <?php if ($can('audit.view')): ?>
+                    <li class="medtrack-sidebar__item">
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i class="bi bi-shield-check"></i>
+                            <span>Audit</span>
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+
+            <?php elseif ($scope === 'STUDENT'): ?>
+
+                <li class="medtrack-sidebar__section">
+                    Mon espace
+                </li>
+
+
+                <?php
+                $studentItems = [
+                    [
+                        'icon' => 'bi-person-vcard',
+                        'label' => 'Mon profil',
+                    ],
+                    [
+                        'icon' => 'bi-mortarboard',
+                        'label' => 'Mon cursus',
+                    ],
+                    [
+                        'icon' => 'bi-briefcase',
+                        'label' => 'Mes stages',
+                    ],
+                    [
+                        'icon' => 'bi-calendar2-check',
+                        'label' => 'Mes présences',
+                    ],
+                    [
+                        'icon' => 'bi-journal-check',
+                        'label' => 'Mon logbook',
+                    ],
+                    [
+                        'icon' => 'bi-clipboard2-data',
+                        'label' => 'Mes évaluations',
+                    ],
+                    [
+                        'icon' => 'bi-award',
+                        'label' => 'Mes attestations',
+                    ],
+                ];
+                ?>
+
+                <?php foreach ($studentItems as $item): ?>
+
+                    <li class="medtrack-sidebar__item">
+
+                        <a
+                            href="#"
+                            class="medtrack-sidebar__link
+                                   is-disabled"
+                            aria-disabled="true"
+                            tabindex="-1"
+                        >
+                            <i
+                                class="bi <?= htmlspecialchars(
+                                    $item['icon'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                            ></i>
+
+                            <span>
+                                <?= htmlspecialchars(
+                                    $item['label'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </span>
+
+                            <span class="medtrack-sidebar__badge">
+                                Bientôt
+                            </span>
+                        </a>
+
+                    </li>
+
+                <?php endforeach; ?>
 
             <?php endif; ?>
 
+        </ul>
 
-            <?php if ($can('certificates.issue')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-award"></i>
-                        <span>Certifications</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
+    </nav>
 
 
-        <?php elseif (
-            $scope === 'ORGANIZATION'
-            && $organizationType === 'MINISTRY'
-        ): ?>
+    <!-- Context -->
 
-            <!--
-            ==========================================================
-            MINISTRY
-            ==========================================================
-            -->
+    <div class="medtrack-sidebar__footer">
 
-            <li class="nav-heading">
-                Supervision nationale
-            </li>
+        <div class="medtrack-sidebar__footer-card">
 
+            <small>
+                Contexte actif
+            </small>
 
-            <?php if ($can('analytics.national')): ?>
+            <strong>
+                <?= htmlspecialchars(
+                    $organizationName !== ''
+                        ? $organizationName
+                        : $scopeLabel,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>
+            </strong>
 
-                <li class="nav-item">
+        </div>
 
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-bar-chart"></i>
-                        <span>Statistiques nationales</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
-
-
-            <?php if ($can('audit.view')): ?>
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link collapsed disabled"
-                        href="#"
-                        aria-disabled="true"
-                    >
-                        <i class="bi bi-shield-check"></i>
-                        <span>Audit</span>
-                    </a>
-
-                </li>
-
-            <?php endif; ?>
-
-
-        <?php elseif ($scope === 'STUDENT'): ?>
-
-            <!--
-            ==========================================================
-            STUDENT
-            ==========================================================
-            -->
-
-            <li class="nav-heading">
-                Mon espace
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-person-vcard"></i>
-                    <span>Mon profil</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-mortarboard"></i>
-                    <span>Mon cursus</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-briefcase"></i>
-                    <span>Mes stages</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-calendar2-check"></i>
-                    <span>Mes présences</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-journal-check"></i>
-                    <span>Mon logbook</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-clipboard2-data"></i>
-                    <span>Mes évaluations</span>
-                </a>
-
-            </li>
-
-
-            <li class="nav-item">
-
-                <a
-                    class="nav-link collapsed disabled"
-                    href="#"
-                    aria-disabled="true"
-                >
-                    <i class="bi bi-award"></i>
-                    <span>Mes attestations</span>
-                </a>
-
-            </li>
-
-        <?php endif; ?>
-
-    </ul>
+    </div>
 
 </aside>

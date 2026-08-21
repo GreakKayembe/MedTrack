@@ -2,7 +2,53 @@
 
 declare(strict_types=1);
 
-$programs = $programs ?? [];
+$programs =
+    is_array($programs ?? null)
+        ? $programs
+        : [];
+
+$statistics =
+    is_array($statistics ?? null)
+        ? $statistics
+        : [];
+
+$isPlatform =
+    (bool) ($isPlatform ?? false);
+
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
+
+$totalPrograms =
+    isset($statistics['total'])
+        ? (int) $statistics['total']
+        : count($programs);
+
+$activeProgramsCount =
+    isset($statistics['active'])
+        ? (int) $statistics['active']
+        : count(
+            array_filter(
+                $programs,
+                static fn (array $program): bool =>
+                    ($program['status'] ?? null) === 'ACTIVE'
+            )
+        );
+
+$inactiveProgramsCount =
+    isset($statistics['inactive'])
+        ? (int) $statistics['inactive']
+        : count(
+            array_filter(
+                $programs,
+                static fn (array $program): bool =>
+                    ($program['status'] ?? null) === 'INACTIVE'
+            )
+        );
 
 ob_start();
 ?>
@@ -21,8 +67,13 @@ ob_start();
             </h4>
 
             <p class="text-muted mb-0">
-                Gérez les programmes académiques proposés
-                par les universités partenaires.
+                <?php if ($isUniversityContext): ?>
+                    Gérez les programmes académiques
+                    proposés par votre université.
+                <?php else: ?>
+                    Gérez les programmes académiques proposés
+                    par les universités partenaires.
+                <?php endif; ?>
             </p>
         </div>
 
@@ -55,7 +106,7 @@ ob_start();
                             </div>
 
                             <h3 class="fw-bold mb-0">
-                                <?= count($programs) ?>
+                                <?= $totalPrograms ?>
                             </h3>
                         </div>
 
@@ -90,16 +141,7 @@ ob_start();
 
                             <h3 class="fw-bold mb-0">
 
-                                <?php
-                                $activePrograms = array_filter(
-                                    $programs,
-                                    static fn (array $program): bool =>
-                                        ($program['status'] ?? null)
-                                        === 'ACTIVE'
-                                );
-                                ?>
-
-                                <?= count($activePrograms) ?>
+                                <?= $activeProgramsCount ?>
 
                             </h3>
                         </div>
@@ -135,16 +177,7 @@ ob_start();
 
                             <h3 class="fw-bold mb-0">
 
-                                <?php
-                                $inactivePrograms = array_filter(
-                                    $programs,
-                                    static fn (array $program): bool =>
-                                        ($program['status'] ?? null)
-                                        === 'INACTIVE'
-                                );
-                                ?>
-
-                                <?= count($inactivePrograms) ?>
+                                <?= $inactiveProgramsCount ?>
 
                             </h3>
                         </div>
@@ -183,9 +216,9 @@ ob_start();
                     </h5>
 
                     <small class="text-muted">
-                        <?= count($programs) ?>
-                        programme<?= count($programs) > 1 ? 's' : '' ?>
-                        enregistré<?= count($programs) > 1 ? 's' : '' ?>
+                        <?= $totalPrograms ?>
+                        programme<?= $totalPrograms > 1 ? 's' : '' ?>
+                        enregistré<?= $totalPrograms > 1 ? 's' : '' ?>
                     </small>
                 </div>
 
@@ -233,8 +266,13 @@ ob_start();
                     </h5>
 
                     <p class="text-muted mb-4">
-                        Aucun programme académique n'a encore
-                        été enregistré dans MedTrack.
+                        <?php if ($isUniversityContext): ?>
+                            Votre université ne possède encore
+                            aucun programme académique enregistré.
+                        <?php else: ?>
+                            Aucun programme académique n'a encore
+                            été enregistré dans MedTrack.
+                        <?php endif; ?>
                     </p>
 
                     <a
@@ -264,9 +302,11 @@ ob_start();
                                     Programme
                                 </th>
 
-                                <th>
-                                    Université
-                                </th>
+                                <?php if ($isPlatform): ?>
+                                    <th>
+                                        Université
+                                    </th>
+                                <?php endif; ?>
 
                                 <th>
                                     Faculté
@@ -386,13 +426,21 @@ ob_start();
                                 </td>
 
 
-                                <td>
-                                    <?= $universityName ?>
-                                </td>
+                                <?php if ($isPlatform): ?>
+                                    <td>
+                                        <?= $universityName ?>
+                                    </td>
+                                <?php endif; ?>
 
 
                                 <td>
-                                    <?= $facultyName ?>
+                                    <?php if ($facultyName !== '—'): ?>
+                                        <?= $facultyName ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">
+                                            Rattachement direct
+                                        </span>
+                                    <?php endif; ?>
                                 </td>
 
 

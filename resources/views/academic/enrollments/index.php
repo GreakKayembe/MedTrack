@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 /**
  * @var array $enrollments
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
 $enrollments = $enrollments ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
 
 $statusLabels = [
     'PENDING' => 'En attente',
@@ -38,8 +48,13 @@ $statusClasses = [
             </h1>
 
             <p class="text-muted mb-0">
-                Gérez les inscriptions académiques
-                des étudiants dans MedTrack.
+                <?php if ($isUniversityContext): ?>
+                    Gérez les inscriptions académiques
+                    des étudiants de votre université.
+                <?php else: ?>
+                    Gérez les inscriptions académiques
+                    des étudiants dans MedTrack.
+                <?php endif; ?>
             </p>
         </div>
 
@@ -111,9 +126,11 @@ $statusClasses = [
                                     Matricule
                                 </th>
 
-                                <th>
-                                    Université
-                                </th>
+                                <?php if ($isPlatform): ?>
+                                    <th>
+                                        Université
+                                    </th>
+                                <?php endif; ?>
 
                                 <th>
                                     Programme
@@ -459,34 +476,38 @@ $statusClasses = [
                                 </td>
 
 
-                                <!-- University -->
-                                <td>
+                                <?php if ($isPlatform): ?>
 
-                                    <div class="fw-medium">
-                                        <?= htmlspecialchars(
-                                            $universityName !== ''
-                                                ? $universityName
-                                                : '—',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-                                    </div>
+                                    <!-- University -->
+                                    <td>
 
-                                    <?php if (
-                                        $universityCode !== ''
-                                    ): ?>
-
-                                        <div class="small text-muted">
+                                        <div class="fw-medium">
                                             <?= htmlspecialchars(
-                                                $universityCode,
+                                                $universityName !== ''
+                                                    ? $universityName
+                                                    : '—',
                                                 ENT_QUOTES,
                                                 'UTF-8'
                                             ) ?>
                                         </div>
 
-                                    <?php endif; ?>
+                                        <?php if (
+                                            $universityCode !== ''
+                                        ): ?>
 
-                                </td>
+                                            <div class="small text-muted">
+                                                <?= htmlspecialchars(
+                                                    $universityCode,
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>
+                                            </div>
+
+                                        <?php endif; ?>
+
+                                    </td>
+
+                                <?php endif; ?>
 
 
                                 <!-- Program -->

@@ -25,6 +25,7 @@ use MedTrack\Modules\Dashboard\Controllers\DashboardController;
 use MedTrack\Modules\Dashboard\Repositories\DashboardRepository;
 use MedTrack\Modules\Dashboard\Services\DashboardService;
 
+use MedTrack\Modules\Academic\Services\UniversityOnboardingService;
 use MedTrack\Modules\Academic\Controllers\AcademicEnrollmentController;
 use MedTrack\Modules\Academic\Controllers\AcademicProgramController;
 use MedTrack\Modules\Academic\Controllers\AcademicYearController;
@@ -53,6 +54,7 @@ use MedTrack\Modules\Identity\Controllers\RoleManagementController;
 use MedTrack\Modules\Identity\Repositories\RoleManagementRepository;
 use MedTrack\Modules\Identity\Services\RoleManagementService;
 use MedTrack\Modules\Audit\Services\AuditRecorder;
+use MedTrack\Modules\Identity\Repositories\OrganizationOnboardingRepository;
 
 
 
@@ -192,6 +194,9 @@ $userRepository =
     new UserRepository(
         $database->connection()
     );
+
+   
+
 
 $loginHistoryRepository =
     new LoginHistoryRepository(
@@ -389,6 +394,14 @@ $universityRepository =
     new UniversityRepository(
         $database->connection()
     );
+
+
+
+$organizationOnboardingRepository =
+    new OrganizationOnboardingRepository(
+        $database->connection()
+    );
+
 
 $hospitalRepository =
     new HospitalRepository(
@@ -814,6 +827,13 @@ $universityService =
         $universityRepository
     );
 
+   $universityOnboardingService =
+    new UniversityOnboardingService(
+        $database->connection(),
+        $universityService,
+        $organizationOnboardingRepository
+    );
+
 $hospitalService =
     new HospitalService(
         $hospitalRepository
@@ -822,6 +842,15 @@ $hospitalService =
 $professionalOrderService =
     new ProfessionalOrderService(
         $professionalOrderRepository
+    );
+
+
+
+$universityOnboardingService =
+    new UniversityOnboardingService(
+        $database->connection(),
+        $universityService,
+        $organizationOnboardingRepository
     );
 
 
@@ -840,7 +869,8 @@ $facultyService =
 
 $academicProgramService =
     new AcademicProgramService(
-        $academicProgramRepository
+        $academicProgramRepository,
+        $accessContextResolver
     );
 
 $academicYearService =
@@ -856,7 +886,8 @@ $studyLevelService =
 
 $cohortService =
     new CohortService(
-        $cohortRepository
+        $cohortRepository,
+        $accessContextResolver
     );
 
 $studentService =
@@ -877,9 +908,11 @@ $academicEnrollmentService =
 |--------------------------------------------------------------------------
 */
 
+
 $universityController =
     new UniversityController(
         $universityService,
+        $universityOnboardingService,
         $view
     );
 
@@ -917,9 +950,9 @@ $academicProgramController =
         $academicProgramService,
         $universityService,
         $facultyService,
+        $accessContextResolver,
         $view
     );
-
 
 $academicYearController =
     new AcademicYearController(
@@ -931,17 +964,21 @@ $academicYearController =
 $studyLevelController =
     new StudyLevelController(
         $studyLevelService,
+        $accessContextResolver,
         $view
     );
+
 
 $cohortController =
     new CohortController(
         $cohortService,
         $academicProgramService,
         $academicYearService,
+        $accessContextResolver,
         $view
     );
 
+    
 $studentController =
     new StudentController(
         $studentService,
@@ -950,7 +987,7 @@ $studentController =
         $view
     );
 
-$academicEnrollmentController =
+    $academicEnrollmentController =
     new AcademicEnrollmentController(
         $academicEnrollmentService,
         $studentService,
@@ -959,6 +996,7 @@ $academicEnrollmentController =
         $academicYearService,
         $studyLevelService,
         $cohortService,
+        $accessContextResolver,
         $view
     );
 

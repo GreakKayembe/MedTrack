@@ -158,6 +158,123 @@ final class AcademicEnrollmentController
 
     /*
     |--------------------------------------------------------------------------
+    | Student search
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Recherche contrôlée d'une identité étudiante
+     * dans le cadre d'une nouvelle inscription.
+     *
+     * Cette action ne retourne jamais la liste complète
+     * des étudiants. Elle délègue au StudentService la
+     * recherche minimale prévue pour ce workflow.
+     */
+    public function studentSearch(
+        Request $request
+    ): never {
+        try {
+            $context =
+                $this->accessContext();
+
+            $this->ensureSupportedContext(
+                $context
+            );
+
+            $query =
+                trim(
+                    (string) $request->query(
+                        'q',
+                        ''
+                    )
+                );
+
+            /*
+             * En contexte UNIVERSITY, l'université
+             * active est toujours imposée par
+             * AccessContext.
+             *
+             * PLATFORM doit fournir explicitement
+             * university_id afin que l'indicateur
+             * already_enrolled soit calculé dans le
+             * bon périmètre.
+             */
+            if (
+                $this->isUniversityContext(
+                    $context
+                )
+            ) {
+                $universityId =
+                    $context->organizationId();
+            } else {
+                $universityId =
+                    (int) $request->query(
+                        'university_id',
+                        0
+                    );
+
+                if ($universityId <= 0) {
+                    throw new RuntimeException(
+                        'Sélectionnez une université '
+                        . 'avant de rechercher un étudiant.'
+                    );
+                }
+            }
+
+            $students =
+                $this->studentService
+                    ->searchForEnrollment(
+                        $query,
+                        $universityId
+                    );
+
+            Response::json(
+                [
+                    'status' =>
+                        'success',
+
+                    'students' =>
+                        $students,
+                ]
+            );
+        } catch (
+            InvalidArgumentException
+            | RuntimeException $exception
+        ) {
+            Response::json(
+                [
+                    'status' =>
+                        'error',
+
+                    'code' =>
+                        'VALIDATION_ERROR',
+
+                    'message' =>
+                        $exception->getMessage(),
+                ],
+                422
+            );
+        } catch (Throwable $exception) {
+            Response::json(
+                [
+                    'status' =>
+                        'error',
+
+                    'code' =>
+                        'STUDENT_SEARCH_FAILED',
+
+                    'message' =>
+                        'Impossible de rechercher '
+                        . 'les étudiants pour le moment.',
+                ],
+                500
+            );
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Store
     |--------------------------------------------------------------------------
     */
@@ -240,6 +357,178 @@ final class AcademicEnrollmentController
                     'message' =>
                         'Impossible d’enregistrer '
                         . 'l’inscription académique '
+                        . 'pour le moment.',
+                ],
+                500
+            );
+        }
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create student identity for enrollment
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Crée une identité étudiante minimale
+     * depuis le workflow d'inscription académique.
+     *
+     * Aucun compte utilisateur n'est créé ici et
+     * le statut global est imposé par StudentService.
+     */
+    public function createStudentIdentity(
+        Request $request
+    ): never {
+        try {
+            $context =
+                $this->accessContext();
+
+            $this->ensureSupportedContext(
+                $context
+            );
+
+            $payload = [
+                'national_student_number' =>
+                    $request->input(
+                        'national_student_number'
+                    ),
+
+                'first_name' =>
+                    $request->input(
+                        'first_name'
+                    ),
+
+                'middle_name' =>
+                    $request->input(
+                        'middle_name'
+                    ),
+
+                'last_name' =>
+                    $request->input(
+                        'last_name'
+                    ),
+
+                'gender' =>
+                    $request->input(
+                        'gender'
+                    ),
+
+                'birth_date' =>
+                    $request->input(
+                        'birth_date'
+                    ),
+
+                'birth_place' =>
+                    $request->input(
+                        'birth_place'
+                    ),
+
+                'nationality' =>
+                    $request->input(
+                        'nationality'
+                    ),
+
+                'email' =>
+                    $request->input(
+                        'email'
+                    ),
+
+                'phone' =>
+                    $request->input(
+                        'phone'
+                    ),
+            ];
+
+            $studentId =
+                $this->studentService
+                    ->createForEnrollment(
+                        $payload
+                    );
+
+            $student =
+                $this->studentService
+                    ->findById(
+                        $studentId
+                    );
+
+            if ($student === null) {
+                throw new RuntimeException(
+                    'L’identité étudiante a été créée, '
+                    . 'mais elle n’a pas pu être rechargée.'
+                );
+            }
+
+            Response::json(
+                [
+                    'status' =>
+                        'success',
+
+                    'message' =>
+                        'Identité étudiante '
+                        . 'créée avec succès.',
+
+                    'student' => [
+                        'id' =>
+                            (int) $student['id'],
+
+                        'national_student_number' =>
+                            $student['national_student_number']
+                            ?? null,
+
+                        'first_name' =>
+                            $student['first_name']
+                            ?? '',
+
+                        'middle_name' =>
+                            $student['middle_name']
+                            ?? null,
+
+                        'last_name' =>
+                            $student['last_name']
+                            ?? '',
+
+                        'birth_date' =>
+                            $student['birth_date']
+                            ?? null,
+
+                        'already_enrolled' =>
+                            0,
+                    ],
+                ],
+                201
+            );
+        } catch (
+            InvalidArgumentException
+            | RuntimeException $exception
+        ) {
+            Response::json(
+                [
+                    'status' =>
+                        'error',
+
+                    'code' =>
+                        'VALIDATION_ERROR',
+
+                    'message' =>
+                        $exception->getMessage(),
+                ],
+                422
+            );
+        } catch (Throwable $exception) {
+            Response::json(
+                [
+                    'status' =>
+                        'error',
+
+                    'code' =>
+                        'STUDENT_IDENTITY_CREATION_FAILED',
+
+                    'message' =>
+                        'Impossible de créer '
+                        . 'l’identité étudiante '
                         . 'pour le moment.',
                 ],
                 500

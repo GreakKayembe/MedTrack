@@ -1,0 +1,2341 @@
+/* ==========================================================================
+   MedTrack UI
+   Bootstrap 5 + Mantis-inspired shell
+   Brand: Navy + Turquoise
+   ========================================================================== */
+
+:root {
+    --mt-navy: #0b1f3a;
+    --mt-navy-dark: #07172c;
+    --mt-navy-light: #163a5f;
+
+    --mt-turquoise: #14b8a6;
+    --mt-turquoise-dark: #0f8f83;
+    --mt-turquoise-light: #5eead4;
+    --mt-turquoise-soft: #e8f8f6;
+
+    --mt-success: #16a36a;
+    --mt-warning: #d99000;
+    --mt-danger: #d92d20;
+
+    --mt-bg: #f5f8fa;
+    --mt-surface: #ffffff;
+    --mt-surface-soft: #f8fbfc;
+    --mt-text: #172033;
+    --mt-muted: #667085;
+    --mt-soft: #98a2b3;
+    --mt-border: #e4eaf0;
+
+    --mt-header-height: 72px;
+    --mt-sidebar-width: 286px;
+    --mt-sidebar-collapsed-width: 84px;
+
+    --mt-radius-sm: 10px;
+    --mt-radius: 14px;
+    --mt-radius-lg: 20px;
+
+    --mt-shadow-sm: 0 6px 18px rgba(11, 31, 58, .06);
+    --mt-shadow: 0 14px 34px rgba(11, 31, 58, .08);
+    --mt-shadow-lg: 0 22px 48px rgba(11, 31, 58, .13);
+
+    --bs-primary: #0b1f3a;
+    --bs-primary-rgb: 11, 31, 58;
+    --bs-info: #14b8a6;
+    --bs-info-rgb: 20, 184, 166;
+    --bs-link-color: #0f8f83;
+    --bs-link-hover-color: #0b1f3a;
+    --bs-body-color: #172033;
+    --bs-body-bg: #f5f8fa;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body.medtrack-app,
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--mt-bg);
+    color: var(--mt-text);
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+a {
+    color: var(--mt-turquoise-dark);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--mt-navy);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--mt-navy);
+    font-family: inherit;
+    letter-spacing: -.02em;
+}
+
+/* ==========================================================================
+   MedTrack Header — refined
+   ========================================================================== */
+
+.medtrack-header {
+    position:
+        fixed;
+
+    inset:
+        0 0 auto 0;
+
+    z-index:
+        1030;
+
+    display:
+        flex;
+
+    height:
+        var(--mt-header-height);
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    padding:
+        0 22px;
+
+    border-bottom:
+        1px solid
+        var(--mt-border);
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.97
+        );
+
+    box-shadow:
+        0 5px 22px
+        rgba(
+            11,
+            31,
+            58,
+            0.06
+        );
+
+    backdrop-filter:
+        blur(14px);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Brand
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-header__brand {
+    display:
+        flex;
+
+    min-width:
+        calc(
+            var(--mt-sidebar-width)
+            - 22px
+        );
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+}
+
+.medtrack-header__brand-link {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    color:
+        inherit;
+
+    text-decoration:
+        none;
+}
+
+.medtrack-header__brand-link:hover {
+    color:
+        inherit;
+}
+
+.medtrack-header__logo-wrap {
+    display:
+        flex;
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    flex:
+        0 0 42px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        rgba(
+            20,
+            184,
+            166,
+            0.16
+        );
+
+    border-radius:
+        12px;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        0 6px 16px
+        rgba(
+            11,
+            31,
+            58,
+            0.07
+        );
+}
+
+.medtrack-header__logo {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    object-fit:
+        contain;
+}
+
+.medtrack-header__brand-copy {
+    min-width:
+        0;
+
+    flex-direction:
+        column;
+}
+
+.medtrack-header__brand-name {
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.96rem;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.1;
+
+    letter-spacing:
+        -0.025em;
+}
+
+.medtrack-header__brand-tagline {
+    margin-top:
+        3px;
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    font-size:
+        0.61rem;
+
+    font-weight:
+        700;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Toggle
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-header__toggle {
+    display:
+        flex;
+
+    width:
+        40px;
+
+    height:
+        40px;
+
+    flex:
+        0 0 40px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-left:
+        5px;
+
+    padding:
+        0;
+
+    border:
+        0;
+
+    border-radius:
+        11px;
+
+    background:
+        #f4f8fa;
+
+    color:
+        var(--mt-navy);
+
+    transition:
+        0.18s ease;
+}
+
+.medtrack-header__toggle:hover {
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Context
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-header__context {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    max-width:
+        340px;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    padding:
+        7px 12px;
+
+    border:
+        1px solid
+        var(--mt-border);
+
+    border-radius:
+        12px;
+
+    background:
+        #f8fbfc;
+}
+
+.medtrack-header__context-icon {
+    display:
+        flex;
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex:
+        0 0 34px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+}
+
+.medtrack-header__context-copy {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    flex-direction:
+        column;
+}
+
+.medtrack-header__context-label {
+    color:
+        var(--mt-muted);
+
+    font-size:
+        0.56rem;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.065em;
+
+    line-height:
+        1;
+
+    text-transform:
+        uppercase;
+}
+
+.medtrack-header__context-name {
+    margin-top:
+        4px;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.72rem;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Header actions
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-header__actions {
+    margin-left:
+        auto;
+}
+
+.medtrack-header__actions-list {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    list-style:
+        none;
+}
+
+.medtrack-header__action-button {
+    position:
+        relative;
+
+    display:
+        flex;
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        0;
+
+    border:
+        1px solid
+        var(--mt-border) !important;
+
+    border-radius:
+        12px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        1rem;
+
+    transition:
+        0.18s ease;
+}
+
+.medtrack-header__action-button:hover,
+.medtrack-header__action-button:focus {
+    border-color:
+        rgba(
+            20,
+            184,
+            166,
+            0.34
+        ) !important;
+
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    box-shadow:
+        0 5px 14px
+        rgba(
+            11,
+            31,
+            58,
+            0.07
+        );
+}
+
+.medtrack-header__notification-dot {
+    position:
+        absolute;
+
+    top:
+        9px;
+
+    right:
+        9px;
+
+    width:
+        6px;
+
+    height:
+        6px;
+
+    border:
+        2px solid
+        #ffffff;
+
+    border-radius:
+        50%;
+
+    background:
+        var(
+            --mt-turquoise
+        );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Account trigger
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-account-trigger {
+    display:
+        flex;
+
+    min-height:
+        48px;
+
+    max-width:
+        260px;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    padding:
+        4px 9px 4px 5px;
+
+    border:
+        1px solid
+        var(--mt-border);
+
+    border-radius:
+        13px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--mt-navy);
+
+    transition:
+        0.18s ease;
+}
+
+.medtrack-account-trigger:hover,
+.medtrack-account-trigger:focus {
+    border-color:
+        rgba(
+            20,
+            184,
+            166,
+            0.32
+        );
+
+    background:
+        #f8fbfc;
+
+    box-shadow:
+        0 6px 16px
+        rgba(
+            11,
+            31,
+            58,
+            0.07
+        );
+}
+
+.medtrack-header__avatar {
+    display:
+        flex;
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex:
+        0 0 38px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--mt-navy),
+            #163a5f
+        );
+
+    color:
+        #ffffff;
+
+    font-size:
+        0.70rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.04em;
+
+    box-shadow:
+        0 7px 17px
+        rgba(
+            11,
+            31,
+            58,
+            0.18
+        );
+}
+
+.medtrack-account-trigger__copy {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    flex-direction:
+        column;
+
+    text-align:
+        left;
+}
+
+.medtrack-account-trigger__copy small {
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    font-size:
+        0.55rem;
+
+    font-weight:
+        700;
+
+    line-height:
+        1;
+}
+
+.medtrack-account-trigger__copy strong {
+    max-width:
+        155px;
+
+    margin-top:
+        4px;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.70rem;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.medtrack-account-trigger__chevron {
+    margin-left:
+        2px;
+
+    color:
+        var(--mt-soft);
+
+    font-size:
+        0.67rem;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Generic dropdown
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-dropdown {
+    margin-top:
+        12px !important;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        var(--mt-border) !important;
+
+    border-radius:
+        16px !important;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        0 18px 46px
+        rgba(
+            11,
+            31,
+            58,
+            0.14
+        ) !important;
+}
+
+.medtrack-dropdown__header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        14px;
+
+    padding:
+        17px 18px 14px;
+}
+
+.medtrack-dropdown__eyebrow {
+    display:
+        block;
+
+    margin-bottom:
+        3px;
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    font-size:
+        0.57rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+.medtrack-dropdown__header h6 {
+    margin:
+        0;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.87rem;
+
+    font-weight:
+        800;
+}
+
+.medtrack-dropdown__header-icon {
+    display:
+        flex;
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    flex:
+        0 0 36px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        11px;
+
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+}
+
+.medtrack-dropdown__divider {
+    height:
+        1px;
+
+    margin:
+        0;
+
+    background:
+        var(--mt-border);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Notification box
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-notifications-menu {
+    width:
+        min(
+            340px,
+            calc(
+                100vw
+                - 24px
+            )
+        );
+
+    padding:
+        0;
+}
+
+.medtrack-notifications-menu__empty {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    padding:
+        28px 22px 30px;
+
+    text-align:
+        center;
+}
+
+.medtrack-notifications-menu__empty-icon {
+    display:
+        flex;
+
+    width:
+        52px;
+
+    height:
+        52px;
+
+    margin-bottom:
+        12px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        16px;
+
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    font-size:
+        1.25rem;
+}
+
+.medtrack-notifications-menu__empty strong {
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.82rem;
+}
+
+.medtrack-notifications-menu__empty p {
+    max-width:
+        240px;
+
+    margin:
+        6px 0 0;
+
+    color:
+        var(--mt-muted);
+
+    font-size:
+        0.69rem;
+
+    line-height:
+        1.55;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Account dropdown
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-profile-menu {
+    width:
+        min(
+            330px,
+            calc(
+                100vw
+                - 24px
+            )
+        );
+
+    padding:
+        0;
+}
+
+.medtrack-profile-menu__identity {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        18px;
+}
+
+.medtrack-profile-menu__avatar {
+    display:
+        flex;
+
+    width:
+        48px;
+
+    height:
+        48px;
+
+    flex:
+        0 0 48px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--mt-navy),
+            #163a5f
+        );
+
+    color:
+        #ffffff;
+
+    font-size:
+        0.80rem;
+
+    font-weight:
+        800;
+}
+
+.medtrack-profile-menu__identity > div {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    flex-direction:
+        column;
+}
+
+.medtrack-profile-menu__identity h6 {
+    margin:
+        0;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.82rem;
+
+    font-weight:
+        800;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.medtrack-profile-menu__role {
+    margin-top:
+        4px;
+
+    color:
+        var(--mt-muted);
+
+    font-size:
+        0.63rem;
+}
+
+.medtrack-profile-menu__organization {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    margin:
+        0 18px 14px;
+
+    padding:
+        9px 11px;
+
+    border:
+        1px solid
+        rgba(
+            20,
+            184,
+            166,
+            0.13
+        );
+
+    border-radius:
+        10px;
+
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(
+            --mt-turquoise-dark
+        );
+
+    font-size:
+        0.63rem;
+}
+
+.medtrack-profile-menu__organization span {
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.medtrack-profile-menu__item,
+.medtrack-profile-menu__context {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    margin:
+        5px 8px;
+
+    padding:
+        10px;
+
+    border-radius:
+        11px;
+
+    color:
+        var(--mt-text);
+
+    text-decoration:
+        none;
+}
+
+.medtrack-profile-menu__item:hover {
+    background:
+        var(
+            --mt-turquoise-soft
+        );
+
+    color:
+        var(--mt-navy);
+}
+
+.medtrack-profile-menu__item-icon {
+    display:
+        flex;
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex:
+        0 0 34px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        #eef3f7;
+
+    color:
+        var(--mt-navy);
+}
+
+.medtrack-profile-menu__item-copy {
+    display:
+        flex;
+
+    min-width:
+        0;
+
+    flex:
+        1;
+
+    flex-direction:
+        column;
+}
+
+.medtrack-profile-menu__item-copy strong {
+    overflow:
+        hidden;
+
+    color:
+        var(--mt-navy);
+
+    font-size:
+        0.69rem;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.medtrack-profile-menu__item-copy small {
+    margin-top:
+        2px;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--mt-muted);
+
+    font-size:
+        0.58rem;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+.medtrack-profile-menu__context {
+    background:
+        #f8fbfc;
+
+    cursor:
+        default;
+}
+
+.medtrack-profile-menu__context
+> i:last-child,
+.medtrack-profile-menu__item
+> i:last-child {
+    margin-left:
+        auto;
+
+    color:
+        var(--mt-soft);
+
+    font-size:
+        0.65rem;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+*/
+
+.medtrack-profile-menu__logout {
+    display:
+        flex;
+
+    width:
+        calc(
+            100%
+            - 16px
+        );
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    margin:
+        8px;
+
+    padding:
+        10px;
+
+    border:
+        0;
+
+    border-radius:
+        11px;
+
+    background:
+        transparent;
+
+    color:
+        var(--mt-danger);
+
+    font-size:
+        0.70rem;
+
+    font-weight:
+        700;
+
+    text-align:
+        left;
+
+    transition:
+        0.18s ease;
+}
+
+.medtrack-profile-menu__logout:hover {
+    background:
+        #fff1f0;
+}
+
+.medtrack-profile-menu__logout-icon {
+    display:
+        flex;
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        #fff1f0;
+
+    color:
+        var(--mt-danger);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Responsive
+|--------------------------------------------------------------------------
+*/
+
+@media (
+    max-width: 1199.98px
+) {
+
+    .medtrack-header__brand {
+        min-width:
+            auto;
+    }
+
+}
+
+
+@media (
+    max-width: 767.98px
+) {
+
+    .medtrack-header {
+        gap:
+            8px;
+
+        padding:
+            0 11px;
+    }
+
+    .medtrack-header__actions-list {
+        gap:
+            6px;
+    }
+
+    .medtrack-account-trigger {
+        min-height:
+            42px;
+
+        padding:
+            3px;
+    }
+
+    .medtrack-header__avatar {
+        width:
+            36px;
+
+        height:
+            36px;
+
+        flex-basis:
+            36px;
+    }
+
+    .medtrack-header__action-button {
+        width:
+            40px;
+
+        height:
+            40px;
+    }
+
+}
+
+
+@media (
+    max-width: 575.98px
+) {
+
+    .medtrack-notifications-menu,
+    .medtrack-profile-menu {
+        width:
+            calc(
+                100vw
+                - 20px
+            );
+    }
+
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.medtrack-sidebar {
+    position: fixed;
+    top: var(--mt-header-height);
+    bottom: 0;
+    left: 0;
+    z-index: 1025;
+    display: flex;
+    width: var(--mt-sidebar-width);
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid rgba(255, 255, 255, .06);
+    background:
+        linear-gradient(
+            180deg,
+            var(--mt-navy) 0%,
+            var(--mt-navy-dark) 100%
+        );
+    box-shadow: 8px 0 30px rgba(7, 23, 44, .15);
+    transition: width .25s ease, transform .25s ease;
+}
+
+.medtrack-sidebar__brand {
+    padding: 18px 16px 10px;
+}
+
+.medtrack-sidebar__brand-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 11px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, .045);
+    color: #fff;
+}
+
+.medtrack-sidebar__brand-link:hover {
+    color: #fff;
+    background: rgba(20, 184, 166, .10);
+}
+
+.medtrack-sidebar__brand-logo {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .94);
+}
+
+.medtrack-sidebar__brand-logo img {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+}
+
+.medtrack-sidebar__brand-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.medtrack-sidebar__brand-copy strong {
+    color: #fff;
+    font-size: .92rem;
+    font-weight: 800;
+}
+
+.medtrack-sidebar__brand-copy small {
+    margin-top: 2px;
+    overflow: hidden;
+    color: rgba(255, 255, 255, .56);
+    font-size: .59rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.medtrack-sidebar__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 12px 22px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .20) transparent;
+}
+
+.medtrack-sidebar__body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.medtrack-sidebar__body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .20);
+}
+
+.medtrack-sidebar__menu,
+.medtrack-sidebar__submenu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.medtrack-sidebar__section {
+    margin: 19px 10px 7px;
+    color: rgba(255, 255, 255, .40);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.medtrack-sidebar__item {
+    margin: 3px 0;
+}
+
+.medtrack-sidebar__link {
+    position: relative;
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, .72);
+    font-size: .82rem;
+    font-weight: 600;
+    transition: .2s ease;
+}
+
+.medtrack-sidebar__link:hover {
+    background: rgba(20, 184, 166, .13);
+    color: #fff;
+    transform: translateX(2px);
+}
+
+.medtrack-sidebar__link > i:first-child {
+    width: 20px;
+    flex: 0 0 20px;
+    color: rgba(255, 255, 255, .48);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.medtrack-sidebar__link:hover > i:first-child,
+.medtrack-sidebar__link.is-active > i:first-child,
+.medtrack-sidebar__link[aria-expanded="true"] > i:first-child {
+    color: var(--mt-turquoise-light);
+}
+
+.medtrack-sidebar__link.is-active {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(20, 184, 166, .24),
+            rgba(20, 184, 166, .12)
+        );
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--mt-turquoise);
+}
+
+.medtrack-sidebar__link[aria-expanded="true"] {
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+}
+
+.medtrack-sidebar__chevron {
+    margin-left: auto;
+    font-size: .72rem;
+    transition: transform .2s ease;
+}
+
+.medtrack-sidebar__link[aria-expanded="true"] .medtrack-sidebar__chevron {
+    transform: rotate(90deg);
+}
+
+.medtrack-sidebar__submenu {
+    padding: 5px 0 6px 30px;
+}
+
+.medtrack-sidebar__submenu .medtrack-sidebar__link {
+    min-height: 38px;
+    padding: 8px 10px;
+    color: rgba(255, 255, 255, .60);
+    font-size: .77rem;
+    font-weight: 500;
+}
+
+.medtrack-sidebar__submenu .medtrack-sidebar__link::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    flex: 0 0 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .28);
+}
+
+.medtrack-sidebar__submenu .medtrack-sidebar__link.is-active {
+    background: rgba(20, 184, 166, .12);
+    box-shadow: none;
+    color: #fff;
+}
+
+.medtrack-sidebar__submenu .medtrack-sidebar__link.is-active::before {
+    background: var(--mt-turquoise);
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, .10);
+}
+
+.medtrack-sidebar__link.is-disabled {
+    opacity: .42;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.medtrack-sidebar__badge {
+    margin-left: auto;
+    padding: 4px 7px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .07);
+    color: rgba(255, 255, 255, .62);
+    font-size: .58rem;
+    font-weight: 700;
+}
+
+.medtrack-sidebar__footer {
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+}
+
+.medtrack-sidebar__footer-card {
+    padding: 11px 12px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .045);
+}
+
+.medtrack-sidebar__footer-card small,
+.medtrack-sidebar__footer-card strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.medtrack-sidebar__footer-card small {
+    color: rgba(255, 255, 255, .45);
+    font-size: .58rem;
+}
+
+.medtrack-sidebar__footer-card strong {
+    margin-top: 3px;
+    color: rgba(255, 255, 255, .82);
+    font-size: .68rem;
+}
+
+/* ==========================================================================
+   Main shell
+   ========================================================================== */
+
+.medtrack-main {
+    min-height: 100vh;
+    margin-left: var(--mt-sidebar-width);
+    padding-top: var(--mt-header-height);
+    transition: margin-left .25s ease;
+}
+
+.medtrack-page {
+    width: 100%;
+    padding: 26px 28px 36px;
+}
+
+.medtrack-page__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.medtrack-page__title {
+    margin: 0;
+    color: var(--mt-navy);
+    font-size: clamp(1.45rem, 2vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.medtrack-breadcrumb .breadcrumb {
+    margin-bottom: 7px;
+    font-size: .73rem;
+}
+
+.medtrack-breadcrumb .breadcrumb-item,
+.medtrack-breadcrumb .breadcrumb-item a {
+    color: var(--mt-muted);
+}
+
+.medtrack-breadcrumb .breadcrumb-item.active {
+    color: var(--mt-navy);
+    font-weight: 600;
+}
+
+.medtrack-page__content {
+    min-width: 0;
+}
+
+/* ==========================================================================
+   Bootstrap / shared components
+   ========================================================================== */
+
+.card {
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius);
+    background: var(--mt-surface);
+    box-shadow: var(--mt-shadow-sm);
+}
+
+.card-header,
+.card-footer {
+    border-color: var(--mt-border);
+    background: var(--mt-surface);
+}
+
+.card-title {
+    color: var(--mt-navy);
+    font-weight: 700;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--mt-navy);
+    --bs-btn-border-color: var(--mt-navy);
+    --bs-btn-hover-bg: var(--mt-navy-light);
+    --bs-btn-hover-border-color: var(--mt-navy-light);
+    --bs-btn-active-bg: var(--mt-navy-dark);
+    --bs-btn-active-border-color: var(--mt-navy-dark);
+    --bs-btn-focus-shadow-rgb: 20, 184, 166;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--mt-navy);
+    --bs-btn-border-color: var(--mt-navy);
+    --bs-btn-hover-bg: var(--mt-navy);
+    --bs-btn-hover-border-color: var(--mt-navy);
+    --bs-btn-focus-shadow-rgb: 20, 184, 166;
+}
+
+.form-label {
+    color: var(--mt-navy);
+    font-weight: 600;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-color: var(--mt-border);
+    border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--mt-turquoise);
+    box-shadow: 0 0 0 .2rem rgba(20, 184, 166, .12);
+}
+
+.form-check-input:checked {
+    border-color: var(--mt-turquoise);
+    background-color: var(--mt-turquoise);
+}
+
+.table {
+    --bs-table-color: var(--mt-text);
+    --bs-table-border-color: var(--mt-border);
+}
+
+.table thead th {
+    color: var(--mt-navy);
+    background: #f4f8fa;
+}
+
+.table-hover > tbody > tr:hover > * {
+    --bs-table-bg-state: rgba(20, 184, 166, .035);
+}
+
+.pagination {
+    --bs-pagination-color: var(--mt-navy);
+    --bs-pagination-hover-color: var(--mt-navy);
+    --bs-pagination-hover-bg: var(--mt-turquoise-soft);
+    --bs-pagination-hover-border-color: var(--mt-turquoise);
+    --bs-pagination-active-bg: var(--mt-navy);
+    --bs-pagination-active-border-color: var(--mt-navy);
+}
+
+.dropdown-menu {
+    border: 1px solid var(--mt-border);
+    border-radius: 13px;
+    box-shadow: var(--mt-shadow);
+}
+
+.badge.text-bg-primary,
+.bg-primary {
+    background-color: var(--mt-navy) !important;
+}
+
+.text-primary {
+    color: var(--mt-navy) !important;
+}
+
+.text-info {
+    color: var(--mt-turquoise-dark) !important;
+}
+
+.bg-info {
+    background-color: var(--mt-turquoise) !important;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.medtrack-footer {
+    margin-left: var(--mt-sidebar-width);
+    padding: 18px 28px;
+    border-top: 1px solid var(--mt-border);
+    background: rgba(255, 255, 255, .82);
+    color: var(--mt-muted);
+    transition: margin-left .25s ease;
+}
+
+.medtrack-footer__brand {
+    color: var(--mt-navy);
+    font-weight: 800;
+}
+
+.medtrack-footer__accent {
+    color: var(--mt-turquoise-dark);
+    font-weight: 800;
+}
+
+/* ==========================================================================
+   Temporary compatibility with current NiceAdmin toggle behavior
+   ========================================================================== */
+
+@media (min-width: 1200px) {
+    body.toggle-sidebar .medtrack-sidebar {
+        width: var(--mt-sidebar-collapsed-width);
+    }
+
+    body.toggle-sidebar .medtrack-main,
+    body.toggle-sidebar .medtrack-footer {
+        margin-left: var(--mt-sidebar-collapsed-width);
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__brand-copy,
+    body.toggle-sidebar .medtrack-sidebar__section,
+    body.toggle-sidebar .medtrack-sidebar__link span:not(.medtrack-sidebar__badge),
+    body.toggle-sidebar .medtrack-sidebar__chevron,
+    body.toggle-sidebar .medtrack-sidebar__footer-card {
+        display: none;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__brand {
+        padding-inline: 10px;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__brand-link {
+        justify-content: center;
+        padding-inline: 8px;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__body {
+        padding-inline: 10px;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__link {
+        justify-content: center;
+        padding-inline: 10px;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__link > i:first-child {
+        width: auto;
+        flex-basis: auto;
+    }
+
+    body.toggle-sidebar .medtrack-sidebar__submenu {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 1199.98px) {
+    .medtrack-header {
+        padding: 0 16px;
+    }
+
+    .medtrack-header__brand {
+        min-width: auto;
+    }
+
+    .medtrack-sidebar {
+        transform: translateX(-100%);
+    }
+
+    body.toggle-sidebar .medtrack-sidebar,
+    body.medtrack-sidebar-open .medtrack-sidebar {
+        transform: translateX(0);
+    }
+
+    .medtrack-main,
+    .medtrack-footer {
+        margin-left: 0;
+    }
+
+    body.toggle-sidebar::before,
+    body.medtrack-sidebar-open::before {
+        content: "";
+        position: fixed;
+        inset: var(--mt-header-height) 0 0 0;
+        z-index: 1020;
+        background: rgba(7, 23, 44, .42);
+        backdrop-filter: blur(2px);
+    }
+}
+
+@media (max-width: 767.98px) {
+    :root {
+        --mt-header-height: 64px;
+    }
+
+    .medtrack-header {
+        padding: 0 11px;
+    }
+
+    .medtrack-header__logo-wrap {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+    }
+
+    .medtrack-header__logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .medtrack-header__toggle {
+        width: 38px;
+        height: 38px;
+        margin-left: 7px;
+    }
+
+    .medtrack-page {
+        padding: 20px 16px 30px;
+    }
+
+    .medtrack-page__header {
+        margin-bottom: 18px;
+    }
+
+    .medtrack-footer {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .medtrack-sidebar {
+        width: min(88vw, 300px);
+    }
+
+    .medtrack-page__title {
+        font-size: 1.45rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+
+@media (min-width: 1200px) {
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar {
+        width:
+            var(--mt-sidebar-collapsed-width);
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-main,
+    body.medtrack-sidebar-collapsed
+    .medtrack-footer {
+        margin-left:
+            var(--mt-sidebar-collapsed-width);
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__brand-copy,
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__section,
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__link
+    span:not(
+        .medtrack-sidebar__badge
+    ),
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__chevron,
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__footer-card {
+        display: none;
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__brand {
+        padding-inline: 10px;
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__brand-link {
+        justify-content: center;
+        padding-inline: 8px;
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__body {
+        padding-inline: 10px;
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__link {
+        justify-content: center;
+        padding-inline: 10px;
+    }
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-sidebar__submenu {
+        display: none !important;
+    }
+
+}
+
+
+/* ==========================================================================
+   MedTrack Footer
+   ========================================================================== */
+
+.medtrack-footer {
+    margin-left:
+        var(--mt-sidebar-width);
+
+    padding:
+        18px 28px;
+
+    border-top:
+        1px solid var(--mt-border);
+
+    background:
+        rgba(255, 255, 255, .88);
+
+    color:
+        var(--mt-muted);
+
+    transition:
+        margin-left .25s ease;
+
+    backdrop-filter:
+        blur(12px);
+}
+
+.medtrack-footer__inner {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    max-width:
+        100%;
+}
+
+.medtrack-footer__copyright {
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    font-size:
+        .72rem;
+}
+
+.medtrack-footer__brand {
+    color:
+        var(--mt-navy);
+
+    font-weight:
+        800;
+}
+
+.medtrack-footer__accent {
+    color:
+        var(--mt-turquoise-dark);
+
+    font-weight:
+        800;
+}
+
+.medtrack-footer__separator {
+    color:
+        var(--mt-soft);
+
+    font-size:
+        .62rem;
+}
+
+.medtrack-footer__credits {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    color:
+        var(--mt-muted);
+
+    font-size:
+        .69rem;
+
+    text-align:
+        right;
+}
+
+.medtrack-footer__credits i {
+    color:
+        var(--mt-turquoise-dark);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Sidebar collapsed
+|--------------------------------------------------------------------------
+*/
+
+@media (min-width: 1200px) {
+
+    body.medtrack-sidebar-collapsed
+    .medtrack-footer {
+        margin-left:
+            var(--mt-sidebar-collapsed-width);
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Tablet / mobile
+|--------------------------------------------------------------------------
+*/
+
+@media (max-width: 1199.98px) {
+
+    .medtrack-footer {
+        margin-left:
+            0;
+    }
+
+}
+
+
+@media (max-width: 767.98px) {
+
+    .medtrack-footer {
+        padding:
+            16px;
+    }
+
+    .medtrack-footer__inner {
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap:
+            8px;
+    }
+
+    .medtrack-footer__credits {
+        text-align:
+            left;
+    }
+
+}

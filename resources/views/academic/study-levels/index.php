@@ -2,10 +2,21 @@
 
 declare(strict_types=1);
 
-$studyLevels = $studyLevels ?? [];
-$statistics = $statistics ?? [];
+/**
+ * Variables fournies par StudyLevelController::index().
+ *
+ * @var array<int, array<string, mixed>> $studyLevels
+ * @var array<string, mixed> $statistics
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var bool $isReadOnly
+ */
 
-$total = (int) ($statistics['total'] ?? count($studyLevels));
+$total = (int) (
+    $statistics['total']
+    ?? count($studyLevels)
+);
+
 ?>
 
 <div class="container-fluid px-0">
@@ -30,25 +41,53 @@ $total = (int) ($statistics['total'] ?? count($studyLevels));
             </h4>
 
             <p class="text-muted mb-0">
-                Gérez les niveaux académiques utilisés
-                dans les inscriptions des étudiants.
+                <?php if ($isReadOnly): ?>
+                    Consultez le référentiel des niveaux d’études
+                    défini par l’administration MedTrack.
+                <?php else: ?>
+                    Gérez le référentiel global des niveaux d’études
+                    utilisé par les établissements.
+                <?php endif; ?>
             </p>
 
         </div>
 
 
-        <div>
+        <?php if ($isPlatform): ?>
 
-            <a
-                href="/study-levels/create"
-                class="btn btn-primary"
-            >
-                <i class="bi bi-plus-lg me-1"></i>
+            <div>
 
-                Nouveau niveau
-            </a>
+                <a
+                    href="/study-levels/create"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-plus-lg me-1"></i>
 
-        </div>
+                    Nouveau niveau
+                </a>
+
+            </div>
+
+        <?php elseif ($isUniversityContext): ?>
+
+            <div>
+
+                <span
+                    class="badge
+                           bg-light
+                           text-secondary
+                           border
+                           rounded-pill
+                           px-3 py-2"
+                >
+                    <i class="bi bi-lock me-1"></i>
+
+                    Référentiel MedTrack — lecture seule
+                </span>
+
+            </div>
+
+        <?php endif; ?>
 
     </div>
 
@@ -210,26 +249,37 @@ $total = (int) ($statistics['total'] ?? count($studyLevels));
                     </h5>
 
 
-                    <p
-                        class="text-muted
-                               mb-4"
-                    >
-                        Commencez par créer les niveaux
-                        académiques utilisés par votre
-                        établissement.
-                    </p>
+                    <?php if ($isPlatform): ?>
 
+                        <p class="text-muted mb-4">
+                            Commencez par créer les niveaux d’études
+                            du référentiel global MedTrack.
+                        </p>
 
-                    <a
-                        href="/study-levels/create"
-                        class="btn btn-primary"
-                    >
+                        <a
+                            href="/study-levels/create"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
 
-                        <i class="bi bi-plus-lg me-1"></i>
+                            Créer le premier niveau
+                        </a>
 
-                        Créer le premier niveau
+                    <?php else: ?>
 
-                    </a>
+                        <p class="text-muted mb-0">
+                            Aucun niveau d’études n’est actuellement
+                            disponible dans le référentiel MedTrack.
+                        </p>
+
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+
+                            Ce référentiel est administré par
+                            l’administration centrale MedTrack.
+                        </div>
+
+                    <?php endif; ?>
 
                 </div>
 
@@ -385,14 +435,18 @@ $total = (int) ($statistics['total'] ?? count($studyLevels));
                                             </a>
 
 
-                                            <a
-                                                href="/study-levels/<?= $id ?>/edit"
-                                                class="btn
-                                                       btn-outline-primary"
-                                                title="Modifier"
-                                            >
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                                            <?php if ($isPlatform): ?>
+
+                                                <a
+                                                    href="/study-levels/<?= $id ?>/edit"
+                                                    class="btn
+                                                           btn-outline-primary"
+                                                    title="Modifier"
+                                                >
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+
+                                            <?php endif; ?>
 
                                         </div>
 

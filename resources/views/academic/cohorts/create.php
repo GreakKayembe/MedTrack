@@ -3,12 +3,27 @@
 declare(strict_types=1);
 
 /**
- * @var array $academicPrograms
- * @var array $academicYears
+ * @var array<int, array<string, mixed>> $academicPrograms
+ * @var array<int, array<string, mixed>> $academicYears
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
-$academicPrograms = $academicPrograms ?? [];
-$academicYears = $academicYears ?? [];
+$academicPrograms =
+    $academicPrograms ?? [];
+
+$academicYears =
+    $academicYears ?? [];
+
+$isPlatform =
+    $isPlatform ?? false;
+
+$isUniversityContext =
+    $isUniversityContext ?? false;
+
+$activeUniversityId =
+    $activeUniversityId ?? null;
 ?>
 
 <div class="row justify-content-center">
@@ -38,8 +53,19 @@ $academicYears = $academicYears ?? [];
                         </h5>
 
                         <p class="text-muted small mb-0">
-                            Associez un programme académique à une
-                            année académique et définissez la cohorte.
+
+                            <?php if ($isUniversityContext): ?>
+
+                                Créez une cohorte pour l’un des programmes
+                                académiques de votre université.
+
+                            <?php else: ?>
+
+                                Associez un programme académique à une
+                                année académique et définissez la cohorte.
+
+                            <?php endif; ?>
+
                         </p>
 
                     </div>
@@ -115,59 +141,83 @@ $academicYears = $academicYears ?? [];
                                 id="academic_program_id"
                                 name="academic_program_id"
                                 required
+                                <?= $academicPrograms === []
+                                    ? 'disabled'
+                                    : '' ?>
                             >
 
                                 <option value="">
-                                    Sélectionnez un programme académique
+
+                                    <?php if ($academicPrograms === []): ?>
+
+                                        Aucun programme académique disponible
+
+                                    <?php else: ?>
+
+                                        Sélectionnez un programme académique
+
+                                    <?php endif; ?>
+
                                 </option>
 
                                 <?php foreach ($academicPrograms as $program): ?>
 
                                     <?php
-                                    $programId = (int) (
-                                        $program['id']
-                                        ?? 0
-                                    );
+                                    $programId =
+                                        (int) (
+                                            $program['id']
+                                            ?? 0
+                                        );
 
-                                    $programCode = (string) (
-                                        $program['code']
-                                        ?? ''
-                                    );
+                                    $programCode =
+                                        (string) (
+                                            $program['code']
+                                            ?? ''
+                                        );
 
-                                    $programName = (string) (
-                                        $program['name']
-                                        ?? ''
-                                    );
+                                    $programName =
+                                        (string) (
+                                            $program['name']
+                                            ?? ''
+                                        );
 
-                                    $universityName = (string) (
-                                        $program['university_name']
-                                        ?? ''
-                                    );
+                                    $universityName =
+                                        (string) (
+                                            $program['university_name']
+                                            ?? ''
+                                        );
 
-                                    $facultyName = (string) (
-                                        $program['faculty_name']
-                                        ?? ''
-                                    );
+                                    $facultyName =
+                                        (string) (
+                                            $program['faculty_name']
+                                            ?? ''
+                                        );
                                     ?>
 
-                                    <option
-                                        value="<?= $programId ?>"
-                                    >
-                                        <?= htmlspecialchars(
-                                            $universityName !== ''
-                                                ? $universityName . ' — '
-                                                : '',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+                                    <option value="<?= $programId ?>">
 
-                                        <?= htmlspecialchars(
-                                            $programCode !== ''
-                                                ? $programCode . ' — '
-                                                : '',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+                                        <?php if (
+                                            $isPlatform
+                                            && $universityName !== ''
+                                        ): ?>
+
+                                            <?= htmlspecialchars(
+                                                $universityName . ' — ',
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+
+                                        <?php endif; ?>
+
+                                        <?php if ($programCode !== ''): ?>
+
+                                            <?= htmlspecialchars(
+                                                $programCode . ' — ',
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+
+                                        <?php endif; ?>
 
                                         <?= htmlspecialchars(
                                             $programName,
@@ -176,22 +226,51 @@ $academicYears = $academicYears ?? [];
                                         ) ?>
 
                                         <?php if ($facultyName !== ''): ?>
+
                                             <?= htmlspecialchars(
                                                 ' (' . $facultyName . ')',
                                                 ENT_QUOTES,
                                                 'UTF-8'
                                             ) ?>
+
                                         <?php endif; ?>
+
                                     </option>
 
                                 <?php endforeach; ?>
 
                             </select>
 
-                            <div class="form-text">
-                                Sélectionnez le programme auquel
-                                cette cohorte sera rattachée.
-                            </div>
+                            <?php if ($academicPrograms === []): ?>
+
+                                <div class="alert alert-warning mt-3 mb-0">
+
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+
+                                    <?php if ($isUniversityContext): ?>
+
+                                        Aucun programme académique n'est disponible
+                                        pour votre université. Créez d'abord un programme
+                                        académique avant de créer une cohorte.
+
+                                    <?php else: ?>
+
+                                        Aucun programme académique n'est disponible.
+                                        Un programme doit exister avant de créer
+                                        une cohorte.
+
+                                    <?php endif; ?>
+
+                                </div>
+
+                            <?php else: ?>
+
+                                <div class="form-text">
+                                    Sélectionnez le programme auquel
+                                    cette cohorte sera rattachée.
+                                </div>
+
+                            <?php endif; ?>
 
                             <div class="invalid-feedback">
                                 Veuillez sélectionner un programme
@@ -487,6 +566,9 @@ $academicYears = $academicYears ?? [];
                             type="submit"
                             class="btn btn-primary"
                             id="cohortSubmitButton"
+                            <?= $academicPrograms === []
+                                ? 'disabled'
+                                : '' ?>
                         >
 
                             <span id="cohortSubmitIcon">

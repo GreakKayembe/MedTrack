@@ -1,285 +1,492 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form =
-        document.getElementById('cohortForm');
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+        const form =
+            document.getElementById(
+                'cohortForm'
+            );
 
-    if (!form) {
-        return;
-    }
-
-    const nameInput =
-        document.getElementById('name');
-
-    const programSelect =
-        document.getElementById(
-            'academic_program_id'
-        );
-
-    const yearSelect =
-        document.getElementById(
-            'academic_year_id'
-        );
-
-    const alertBox =
-        document.getElementById(
-            'cohortFormAlert'
-        );
-
-    const submitButton =
-        document.getElementById(
-            'cohortSubmitButton'
-        );
-
-    const submitText =
-        document.getElementById(
-            'cohortSubmitText'
-        );
-
-    const submitIcon =
-        document.getElementById(
-            'cohortSubmitIcon'
-        );
+        if (!form) {
+            return;
+        }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Original submit text
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Elements
+        |--------------------------------------------------------------------------
+        */
 
-    const originalSubmitText =
-        submitText
-            ? submitText.textContent.trim()
-            : 'Enregistrer';
+        const nameInput =
+            document.getElementById(
+                'name'
+            );
+
+        const programSelect =
+            document.getElementById(
+                'academic_program_id'
+            );
+
+        const yearSelect =
+            document.getElementById(
+                'academic_year_id'
+            );
+
+        const alertBox =
+            document.getElementById(
+                'cohortFormAlert'
+            );
+
+        const submitButton =
+            document.getElementById(
+                'cohortSubmitButton'
+            );
+
+        const submitText =
+            document.getElementById(
+                'cohortSubmitText'
+            );
+
+        const submitIcon =
+            document.getElementById(
+                'cohortSubmitIcon'
+            );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Name
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Initial states
+        |--------------------------------------------------------------------------
+        |
+        | On mémorise l'état initial.
+        |
+        | C'est important car, par exemple,
+        | academic_program_id peut être volontairement
+        | disabled lorsque l'université ne possède
+        | encore aucun programme.
+        |--------------------------------------------------------------------------
+        */
 
-    if (nameInput) {
-        nameInput.addEventListener(
-            'blur',
-            () => {
-                nameInput.value =
-                    nameInput.value.trim();
+        const initialProgramDisabled =
+            programSelect
+                ? programSelect.disabled
+                : false;
+
+        const initialYearDisabled =
+            yearSelect
+                ? yearSelect.disabled
+                : false;
+
+        const initialNameDisabled =
+            nameInput
+                ? nameInput.disabled
+                : false;
+
+        const initialSubmitDisabled =
+            submitButton
+                ? submitButton.disabled
+                : false;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Original submit text
+        |--------------------------------------------------------------------------
+        */
+
+        const originalSubmitText =
+            submitText
+                ? submitText.textContent.trim()
+                : 'Enregistrer';
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Name normalization
+        |--------------------------------------------------------------------------
+        */
+
+        const normalizeName = () => {
+            if (!nameInput) {
+                return;
             }
-        );
-    }
 
+            nameInput.value =
+                nameInput.value.trim();
+        };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Alerts
-    |--------------------------------------------------------------------------
-    */
-
-    const hideAlert = () => {
-        if (!alertBox) {
-            return;
-        }
-
-        alertBox.className =
-            'alert d-none';
-
-        alertBox.textContent = '';
-    };
-
-
-    const showAlert = (
-        type,
-        message
-    ) => {
-        if (!alertBox) {
-            return;
-        }
-
-        alertBox.className =
-            `alert alert-${type}`;
-
-        alertBox.textContent =
-            message;
-
-        alertBox.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-        });
-    };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Loading
-    |--------------------------------------------------------------------------
-    */
-
-    const setLoading = (loading) => {
-        if (!submitButton) {
-            return;
-        }
-
-        submitButton.disabled =
-            loading;
-
-        if (programSelect) {
-            programSelect.disabled =
-                loading;
-        }
-
-        if (yearSelect) {
-            yearSelect.disabled =
-                loading;
-        }
 
         if (nameInput) {
-            nameInput.disabled =
-                loading;
+            nameInput.addEventListener(
+                'blur',
+                normalizeName
+            );
         }
 
-        if (submitText) {
-            submitText.textContent =
-                loading
-                    ? 'Enregistrement...'
-                    : originalSubmitText;
-        }
 
-        if (submitIcon) {
-            submitIcon.innerHTML =
-                loading
-                    ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>'
-                    : '<i class="bi bi-check-lg me-1"></i>';
-        }
-    };
+        /*
+        |--------------------------------------------------------------------------
+        | Alerts
+        |--------------------------------------------------------------------------
+        */
 
+        const hideAlert = () => {
+            if (!alertBox) {
+                return;
+            }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
+            alertBox.className =
+                'alert d-none';
 
-    form.addEventListener(
-        'submit',
-        async (event) => {
-            event.preventDefault();
-
-            hideAlert();
+            alertBox.textContent =
+                '';
+        };
 
 
-            /*
-             * Normalize
-             */
+        const showAlert = (
+            type,
+            message
+        ) => {
+            if (!alertBox) {
+                return;
+            }
+
+            alertBox.className =
+                `alert alert-${type}`;
+
+            alertBox.textContent =
+                message;
+
+            alertBox.scrollIntoView({
+                behavior:
+                    'smooth',
+
+                block:
+                    'center',
+            });
+        };
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Loading state
+        |--------------------------------------------------------------------------
+        */
+
+        const setLoading = (
+            loading
+        ) => {
+            if (submitButton) {
+                submitButton.disabled =
+                    loading
+                        ? true
+                        : initialSubmitDisabled;
+            }
+
+            if (programSelect) {
+                programSelect.disabled =
+                    loading
+                        ? true
+                        : initialProgramDisabled;
+            }
+
+            if (yearSelect) {
+                yearSelect.disabled =
+                    loading
+                        ? true
+                        : initialYearDisabled;
+            }
 
             if (nameInput) {
-                nameInput.value =
-                    nameInput.value.trim();
+                nameInput.disabled =
+                    loading
+                        ? true
+                        : initialNameDisabled;
             }
 
 
-            /*
-             * Native validation
-             */
+            if (submitText) {
+                submitText.textContent =
+                    loading
+                        ? 'Enregistrement...'
+                        : originalSubmitText;
+            }
 
-            if (!form.checkValidity()) {
+
+            if (submitIcon) {
+                submitIcon.innerHTML =
+                    loading
+                        ? (
+                            '<span '
+                            + 'class="spinner-border '
+                            + 'spinner-border-sm me-2" '
+                            + 'aria-hidden="true">'
+                            + '</span>'
+                        )
+                        : (
+                            '<i class="bi '
+                            + 'bi-check-lg me-1">'
+                            + '</i>'
+                        );
+            }
+        };
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submit
+        |--------------------------------------------------------------------------
+        */
+
+        form.addEventListener(
+            'submit',
+            async (event) => {
+                event.preventDefault();
+
+                hideAlert();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Normalize
+                |--------------------------------------------------------------------------
+                */
+
+                normalizeName();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Native validation
+                |--------------------------------------------------------------------------
+                */
+
                 form.classList.add(
                     'was-validated'
                 );
 
-                return;
-            }
+                if (
+                    !form.checkValidity()
+                ) {
+                    showAlert(
+                        'warning',
+                        'Veuillez compléter correctement '
+                        + 'les champs obligatoires.'
+                    );
 
-            form.classList.remove(
-                'was-validated'
-            );
-
-
-            /*
-             * Important:
-             * FormData must be created BEFORE
-             * disabling the fields.
-             */
-
-            const formData =
-                new FormData(form);
-
-            setLoading(true);
+                    return;
+                }
 
 
-            try {
-                const response =
-                    await fetch(
-                        form.action,
-                        {
-                            method: 'POST',
+                /*
+                |--------------------------------------------------------------------------
+                | FormData
+                |--------------------------------------------------------------------------
+                |
+                | IMPORTANT :
+                | FormData doit être construit AVANT
+                | de désactiver les champs.
+                |--------------------------------------------------------------------------
+                */
 
-                            body: formData,
-
-                            headers: {
-                                'Accept':
-                                    'application/json',
-
-                                'X-Requested-With':
-                                    'XMLHttpRequest',
-                            },
-
-                            credentials:
-                                'same-origin',
-                        }
+                const formData =
+                    new FormData(
+                        form
                     );
 
 
-                let data;
+                /*
+                 * Sécurité supplémentaire.
+                 *
+                 * Normalement ce cas ne se produit pas
+                 * puisque le bouton est lui-même disabled
+                 * lorsqu'aucun programme n'existe.
+                 */
+                const academicProgramId =
+                    String(
+                        formData.get(
+                            'academic_program_id'
+                        )
+                        ?? ''
+                    ).trim();
+
+                if (
+                    academicProgramId === ''
+                ) {
+                    showAlert(
+                        'warning',
+                        'Veuillez sélectionner '
+                        + 'un programme académique.'
+                    );
+
+                    return;
+                }
+
+
+                const academicYearId =
+                    String(
+                        formData.get(
+                            'academic_year_id'
+                        )
+                        ?? ''
+                    ).trim();
+
+                if (
+                    academicYearId === ''
+                ) {
+                    showAlert(
+                        'warning',
+                        'Veuillez sélectionner '
+                        + 'une année académique.'
+                    );
+
+                    return;
+                }
+
+
+                setLoading(
+                    true
+                );
+
 
                 try {
-                    data =
-                        await response.json();
-                } catch {
-                    throw new Error(
-                        'Le serveur a retourné '
-                        + 'une réponse invalide.'
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Request
+                    |--------------------------------------------------------------------------
+                    */
+
+                    const response =
+                        await fetch(
+                            form.action,
+                            {
+                                method:
+                                    form.method
+                                        .toUpperCase(),
+
+                                body:
+                                    formData,
+
+                                headers: {
+                                    'Accept':
+                                        'application/json',
+
+                                    'X-Requested-With':
+                                        'XMLHttpRequest',
+                                },
+
+                                credentials:
+                                    'same-origin',
+                            }
+                        );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | JSON response
+                    |--------------------------------------------------------------------------
+                    */
+
+                    let data;
+
+                    try {
+                        data =
+                            await response
+                                .json();
+                    } catch {
+                        throw new Error(
+                            'Le serveur a retourné '
+                            + 'une réponse invalide.'
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HTTP error
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data?.message
+                            || (
+                                'Impossible d’enregistrer '
+                                + 'la cohorte.'
+                            )
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Application error
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        data?.status !==
+                        'success'
+                    ) {
+                        throw new Error(
+                            data?.message
+                            || (
+                                'L’enregistrement '
+                                + 'de la cohorte a échoué.'
+                            )
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Success
+                    |--------------------------------------------------------------------------
+                    */
+
+                    showAlert(
+                        'success',
+
+                        data?.message
+                        || (
+                            'Cohorte enregistrée '
+                            + 'avec succès.'
+                        )
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Redirect
+                    |--------------------------------------------------------------------------
+                    */
+
+                    window.setTimeout(
+                        () => {
+                            window.location.href =
+                                data?.redirect
+                                || '/cohorts';
+                        },
+                        700
+                    );
+
+                } catch (error) {
+                    showAlert(
+                        'danger',
+
+                        error instanceof Error
+                            ? error.message
+                            : (
+                                'Une erreur '
+                                + 'est survenue.'
+                            )
+                    );
+
+                    setLoading(
+                        false
                     );
                 }
-
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message
-                        || 'Impossible d’enregistrer '
-                        + 'la cohorte.'
-                    );
-                }
-
-
-                showAlert(
-                    'success',
-
-                    data.message
-                    || 'Cohorte enregistrée '
-                    + 'avec succès.'
-                );
-
-
-                window.setTimeout(
-                    () => {
-                        window.location.href =
-                            data.redirect
-                            || '/cohorts';
-                    },
-                    700
-                );
-
-            } catch (error) {
-                showAlert(
-                    'danger',
-
-                    error instanceof Error
-                        ? error.message
-                        : 'Une erreur est survenue.'
-                );
-
-                setLoading(false);
             }
-        }
-    );
-});
+        );
+    }
+);

@@ -452,7 +452,7 @@ $location = array_filter([
                         <div>
 
                             <h5 class="fw-bold mb-0">
-                                Coordonnées
+                                Coordonnées institutionnelles
                             </h5>
 
                         </div>
@@ -469,7 +469,7 @@ $location = array_filter([
                         <div>
 
                             <div class="small text-muted">
-                                Adresse e-mail
+                                E-mail institutionnel
                             </div>
 
                             <?php if ($email !== ''): ?>
@@ -627,6 +627,68 @@ $location = array_filter([
 
                     </div>
 
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         Institutional access
+         ========================================================= -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-column flex-lg-row
+                        justify-content-between
+                        align-items-lg-center
+                        gap-3">
+
+                <div class="d-flex align-items-start gap-3">
+
+                    <div
+                        class="rounded-circle
+                               bg-primary-subtle
+                               text-primary
+                               d-flex align-items-center
+                               justify-content-center
+                               flex-shrink-0"
+                        style="width: 52px; height: 52px;"
+                    >
+                        <i class="bi bi-person-lock fs-4"></i>
+                    </div>
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            Accès institutionnel
+                        </h5>
+
+                        <p class="text-muted mb-2">
+                            L’administrateur principal de cette université
+                            est géré séparément des informations institutionnelles.
+                        </p>
+
+                        <div class="small text-muted">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Rôle attendu :
+                            <strong class="text-body">UNIVERSITY_ADMIN</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div>
+                    <span class="badge text-bg-light border px-3 py-2">
+                        <i class="bi bi-key me-1"></i>
+                        Compte administrateur séparé
+                    </span>
                 </div>
 
             </div>

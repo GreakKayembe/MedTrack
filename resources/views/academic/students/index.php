@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 /**
  * @var array $students
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
  */
 
 $students = $students ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
 
 $statusLabels = [
     'ACTIVE' => 'Actif',
@@ -43,19 +48,40 @@ $genderLabels = [
             </h1>
 
             <p class="text-muted mb-0">
-                Gérez les étudiants enregistrés dans MedTrack.
+                <?php if ($isUniversityContext): ?>
+                    Consultez les étudiants rattachés
+                    à votre université.
+                <?php else: ?>
+                    Gérez les identités étudiantes
+                    enregistrées dans MedTrack.
+                <?php endif; ?>
             </p>
         </div>
 
         <div>
-            <a
-                href="/students/create"
-                class="btn btn-primary"
-            >
-                <i class="bi bi-person-plus me-1"></i>
+            <?php if ($isUniversityContext): ?>
 
-                Nouvel étudiant
-            </a>
+                <a
+                    href="/academic-enrollments/create"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-person-check me-1"></i>
+
+                    Inscrire un étudiant
+                </a>
+
+            <?php elseif ($isPlatform): ?>
+
+                <a
+                    href="/students/create"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-person-plus me-1"></i>
+
+                    Nouvel étudiant
+                </a>
+
+            <?php endif; ?>
         </div>
     </div>
 
@@ -81,18 +107,38 @@ $genderLabels = [
                     </h2>
 
                     <p class="text-muted mb-4">
-                        Aucun étudiant n'est encore enregistré
-                        dans MedTrack.
+                        <?php if ($isUniversityContext): ?>
+                            Aucun étudiant n'est actuellement
+                            rattaché à votre université.
+                        <?php else: ?>
+                            Aucun étudiant n'est encore enregistré
+                            dans MedTrack.
+                        <?php endif; ?>
                     </p>
 
-                    <a
-                        href="/students/create"
-                        class="btn btn-primary"
-                    >
-                        <i class="bi bi-person-plus me-1"></i>
+                    <?php if ($isUniversityContext): ?>
 
-                        Ajouter un étudiant
-                    </a>
+                        <a
+                            href="/academic-enrollments/create"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-person-check me-1"></i>
+
+                            Inscrire un étudiant
+                        </a>
+
+                    <?php elseif ($isPlatform): ?>
+
+                        <a
+                            href="/students/create"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-person-plus me-1"></i>
+
+                            Ajouter un étudiant
+                        </a>
+
+                    <?php endif; ?>
                 </div>
 
             <?php else: ?>
@@ -379,13 +425,17 @@ $genderLabels = [
                                             <i class="bi bi-eye"></i>
                                         </a>
 
-                                        <a
-                                            href="/students/<?= $studentId ?>/edit"
-                                            class="btn btn-outline-primary"
-                                            title="Modifier"
-                                        >
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                        <?php if ($isPlatform): ?>
+
+                                            <a
+                                                href="/students/<?= $studentId ?>/edit"
+                                                class="btn btn-outline-primary"
+                                                title="Modifier l'identité"
+                                            >
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                        <?php endif; ?>
                                     </div>
 
                                 </td>

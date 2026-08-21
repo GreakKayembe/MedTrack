@@ -1786,6 +1786,235 @@ return static function (
         $csrfProtection
     );
 
+        /*
+    |--------------------------------------------------------------------------
+    | Academic - Academic Programs
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    * Liste des programmes académiques.
+    */
+    $router->get(
+        '/academic-programs',
+        [$academicProgramController, 'index']
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs',
+        $authProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs',
+        $permissionMiddleware->require(
+            'academic_programs.view'
+        )
+    );
+
+
+    /*
+    * Formulaire de création.
+    */
+    $router->get(
+        '/academic-programs/create',
+        [$academicProgramController, 'create']
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/create',
+        $authProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/create',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/create',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/create',
+        $permissionMiddleware->require(
+            'academic_programs.create'
+        )
+    );
+
+
+    /*
+    * Enregistrement d'un programme académique.
+    */
+    $router->post(
+        '/academic-programs',
+        [$academicProgramController, 'store']
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs',
+        $authProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs',
+        $permissionMiddleware->require(
+            'academic_programs.create'
+        )
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs',
+        $csrfProtection
+    );
+
+
+    /*
+    * Consultation d'un programme académique.
+    */
+    $router->get(
+        '/academic-programs/{id}',
+        [$academicProgramController, 'show']
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}',
+        $authProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}',
+        $permissionMiddleware->require(
+            'academic_programs.view'
+        )
+    );
+
+
+    /*
+    * Formulaire de modification.
+    */
+    $router->get(
+        '/academic-programs/{id}/edit',
+        [$academicProgramController, 'edit']
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}/edit',
+        $authProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}/edit',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}/edit',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/academic-programs/{id}/edit',
+        $permissionMiddleware->require(
+            'academic_programs.update'
+        )
+    );
+
+
+    /*
+    * Mise à jour d'un programme académique.
+    */
+    $router->post(
+        '/academic-programs/{id}',
+        [$academicProgramController, 'update']
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs/{id}',
+        $authProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs/{id}',
+        $passwordChangeProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs/{id}',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs/{id}',
+        $permissionMiddleware->require(
+            'academic_programs.update'
+        )
+    );
+
+    $router->middleware(
+        'POST',
+        '/academic-programs/{id}',
+        $csrfProtection
+    );
+
+        
+
 
 
     /*
@@ -1931,7 +2160,6 @@ return static function (
         $csrfProtection
     );
 
-
         /*
     |--------------------------------------------------------------------------
     | Academic - Study Levels
@@ -1939,8 +2167,14 @@ return static function (
     */
 
     /*
-     * Liste des niveaux d'études.
-     */
+    * Liste des niveaux d'études.
+    *
+    * PLATFORM :
+    * lecture.
+    *
+    * UNIVERSITY :
+    * lecture seule.
+    */
     $router->get(
         '/study-levels',
         [$studyLevelController, 'index']
@@ -1958,10 +2192,26 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/study-levels',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/study-levels',
+        $permissionMiddleware->require(
+            'study_levels.view'
+        )
+    );
+
 
     /*
-     * Formulaire de création.
-     */
+    * Formulaire de création.
+    *
+    * Réservé à PLATFORM.
+    */
     $router->get(
         '/study-levels/create',
         [$studyLevelController, 'create']
@@ -1979,10 +2229,26 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/study-levels/create',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/study-levels/create',
+        $permissionMiddleware->require(
+            'study_levels.create'
+        )
+    );
+
 
     /*
-     * Enregistrement d'un niveau d'études.
-     */
+    * Enregistrement d'un niveau d'études.
+    *
+    * Réservé à PLATFORM.
+    */
     $router->post(
         '/study-levels',
         [$studyLevelController, 'store']
@@ -2003,13 +2269,33 @@ return static function (
     $router->middleware(
         'POST',
         '/study-levels',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/study-levels',
+        $permissionMiddleware->require(
+            'study_levels.create'
+        )
+    );
+
+    $router->middleware(
+        'POST',
+        '/study-levels',
         $csrfProtection
     );
 
 
     /*
-     * Consultation d'un niveau d'études.
-     */
+    * Consultation d'un niveau d'études.
+    *
+    * PLATFORM :
+    * lecture.
+    *
+    * UNIVERSITY :
+    * lecture seule.
+    */
     $router->get(
         '/study-levels/{id}',
         [$studyLevelController, 'show']
@@ -2027,10 +2313,26 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/study-levels/{id}',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/study-levels/{id}',
+        $permissionMiddleware->require(
+            'study_levels.view'
+        )
+    );
+
 
     /*
-     * Formulaire de modification.
-     */
+    * Formulaire de modification.
+    *
+    * Réservé à PLATFORM.
+    */
     $router->get(
         '/study-levels/{id}/edit',
         [$studyLevelController, 'edit']
@@ -2048,10 +2350,26 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/study-levels/{id}/edit',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/study-levels/{id}/edit',
+        $permissionMiddleware->require(
+            'study_levels.update'
+        )
+    );
+
 
     /*
-     * Mise à jour d'un niveau d'études.
-     */
+    * Mise à jour d'un niveau d'études.
+    *
+    * Réservé à PLATFORM.
+    */
     $router->post(
         '/study-levels/{id}',
         [$studyLevelController, 'update']
@@ -2072,9 +2390,22 @@ return static function (
     $router->middleware(
         'POST',
         '/study-levels/{id}',
-        $csrfProtection
+        $accessContextProtection
     );
 
+    $router->middleware(
+        'POST',
+        '/study-levels/{id}',
+        $permissionMiddleware->require(
+            'study_levels.update'
+        )
+    );
+
+    $router->middleware(
+        'POST',
+        '/study-levels/{id}',
+        $csrfProtection
+    );
 
         /*
     |--------------------------------------------------------------------------
@@ -2083,8 +2414,8 @@ return static function (
     */
 
     /*
-     * Liste des cohortes.
-     */
+    * Liste des cohortes.
+    */
     $router->get(
         '/cohorts',
         [$cohortController, 'index']
@@ -2102,10 +2433,24 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/cohorts',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/cohorts',
+        $permissionMiddleware->require(
+            'cohorts.view'
+        )
+    );
+
 
     /*
-     * Formulaire de création.
-     */
+    * Formulaire de création.
+    */
     $router->get(
         '/cohorts/create',
         [$cohortController, 'create']
@@ -2123,10 +2468,27 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/cohorts/create',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/cohorts/create',
+        $permissionMiddleware->requireAny(
+            [
+                'cohorts.manage',
+                'cohorts.create',
+            ]
+        )
+    );
+
 
     /*
-     * Enregistrement d'une cohorte.
-     */
+    * Enregistrement d'une cohorte.
+    */
     $router->post(
         '/cohorts',
         [$cohortController, 'store']
@@ -2147,13 +2509,30 @@ return static function (
     $router->middleware(
         'POST',
         '/cohorts',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'POST',
+        '/cohorts',
+        $permissionMiddleware->requireAny(
+            [
+                'cohorts.manage',
+                'cohorts.create',
+            ]
+        )
+    );
+
+    $router->middleware(
+        'POST',
+        '/cohorts',
         $csrfProtection
     );
 
 
     /*
-     * Consultation d'une cohorte.
-     */
+    * Consultation d'une cohorte.
+    */
     $router->get(
         '/cohorts/{id}',
         [$cohortController, 'show']
@@ -2171,10 +2550,24 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/cohorts/{id}',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/cohorts/{id}',
+        $permissionMiddleware->require(
+            'cohorts.view'
+        )
+    );
+
 
     /*
-     * Formulaire de modification.
-     */
+    * Formulaire de modification.
+    */
     $router->get(
         '/cohorts/{id}/edit',
         [$cohortController, 'edit']
@@ -2192,10 +2585,27 @@ return static function (
         $passwordChangeProtection
     );
 
+    $router->middleware(
+        'GET',
+        '/cohorts/{id}/edit',
+        $accessContextProtection
+    );
+
+    $router->middleware(
+        'GET',
+        '/cohorts/{id}/edit',
+        $permissionMiddleware->requireAny(
+            [
+                'cohorts.manage',
+                'cohorts.update',
+            ]
+        )
+    );
+
 
     /*
-     * Mise à jour d'une cohorte.
-     */
+    * Mise à jour d'une cohorte.
+    */
     $router->post(
         '/cohorts/{id}',
         [$cohortController, 'update']
@@ -2216,323 +2626,595 @@ return static function (
     $router->middleware(
         'POST',
         '/cohorts/{id}',
-        $csrfProtection
-    );
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | Academic - Students
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-     * Liste des étudiants.
-     */
-    $router->get(
-        '/students',
-        [$studentController, 'index']
-    );
-
-    $router->middleware(
-        'GET',
-        '/students',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students',
-        $passwordChangeProtection
-    );
-
-        $router->middleware(
-        'GET',
-        '/students',
-        $accessContextProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students',
-        $permissionMiddleware->require(
-            'students.view'
-        )
-    );
-
-
-    /*
-     * Formulaire de création.
-     */
-    $router->get(
-        '/students/create',
-        [$studentController, 'create']
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/create',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/create',
-        $passwordChangeProtection
-    );
-
-        $router->middleware(
-        'GET',
-        '/students/create',
-        $accessContextProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/create',
-        $permissionMiddleware->require(
-            'students.create'
-        )
-    );
-
-
-    /*
-     * Enregistrement d'un étudiant.
-     */
-    $router->post(
-        '/students',
-        [$studentController, 'store']
-    );
-
-    $router->middleware(
-        'POST',
-        '/students',
-        $authProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/students',
-        $passwordChangeProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/students',
-        $csrfProtection
-    );
-
-
-        $router->middleware(
-        'POST',
-        '/students',
         $accessContextProtection
     );
 
     $router->middleware(
         'POST',
-        '/students',
-        $permissionMiddleware->require(
-            'students.create'
+        '/cohorts/{id}',
+        $permissionMiddleware->requireAny(
+            [
+                'cohorts.manage',
+                'cohorts.update',
+            ]
         )
     );
 
-
-    /*
-     * Consultation d'un étudiant.
-     */
-    $router->get(
-        '/students/{id}',
-        [$studentController, 'show']
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/{id}',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/{id}',
-        $passwordChangeProtection
-    );
-
-
-    /*
-     * Formulaire de modification.
-     */
-    $router->get(
-        '/students/{id}/edit',
-        [$studentController, 'edit']
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/{id}/edit',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/students/{id}/edit',
-        $passwordChangeProtection
-    );
-
-
-    /*
-     * Mise à jour d'un étudiant.
-     */
-    $router->post(
-        '/students/{id}',
-        [$studentController, 'update']
-    );
-
     $router->middleware(
         'POST',
-        '/students/{id}',
-        $authProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/students/{id}',
-        $passwordChangeProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/students/{id}',
-        $csrfProtection
-    );
-
-     
-
-        /*
-    |--------------------------------------------------------------------------
-    | Academic - Enrollments
-    |--------------------------------------------------------------------------
-    */
-
-    $router->get(
-        '/academic-enrollments',
-        [$academicEnrollmentController, 'index']
-    );
-
-    $router->middleware(
-        'GET',
-        '/academic-enrollments',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/academic-enrollments',
-        $passwordChangeProtection
-    );
-
-
-    $router->get(
-        '/academic-enrollments/create',
-        [$academicEnrollmentController, 'create']
-    );
-
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/create',
-        $authProtection
-    );
-
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/create',
-        $passwordChangeProtection
-    );
-
-
-    $router->post(
-        '/academic-enrollments',
-        [$academicEnrollmentController, 'store']
-    );
-
-    $router->middleware(
-        'POST',
-        '/academic-enrollments',
-        $authProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/academic-enrollments',
-        $passwordChangeProtection
-    );
-
-    $router->middleware(
-        'POST',
-        '/academic-enrollments',
+        '/cohorts/{id}',
         $csrfProtection
     );
 
 
-    $router->get(
-        '/academic-enrollments/{id}',
-        [$academicEnrollmentController, 'show']
-    );
 
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/{id}',
-        $authProtection
-    );
+    /*
+|--------------------------------------------------------------------------
+| Academic - Students
+|--------------------------------------------------------------------------
+*/
 
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/{id}',
-        $passwordChangeProtection
-    );
+/*
+ * Liste des étudiants.
+ *
+ * PLATFORM :
+ * tous les étudiants.
+ *
+ * UNIVERSITY :
+ * uniquement les étudiants ayant une inscription
+ * académique dans l'université active.
+ */
+$router->get(
+    '/students',
+    [$studentController, 'index']
+);
+
+$router->middleware(
+    'GET',
+    '/students',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students',
+    $permissionMiddleware->require(
+        'students.view'
+    )
+);
 
 
-    $router->get(
-        '/academic-enrollments/{id}/edit',
-        [$academicEnrollmentController, 'edit']
-    );
+/*
+ * Création de l'identité globale d'un étudiant.
+ *
+ * PLATFORM uniquement.
+ *
+ * Les rôles UNIVERSITY ne possèdent plus
+ * students.create.
+ */
+$router->get(
+    '/students/create',
+    [$studentController, 'create']
+);
 
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/{id}/edit',
-        $authProtection
-    );
+$router->middleware(
+    'GET',
+    '/students/create',
+    $authProtection
+);
 
-    $router->middleware(
-        'GET',
-        '/academic-enrollments/{id}/edit',
-        $passwordChangeProtection
-    );
+$router->middleware(
+    'GET',
+    '/students/create',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/create',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/create',
+    $permissionMiddleware->require(
+        'students.create'
+    )
+);
 
 
-    $router->post(
-        '/academic-enrollments/{id}',
-        [$academicEnrollmentController, 'update']
-    );
+/*
+ * Enregistrement de l'identité globale.
+ *
+ * PLATFORM uniquement.
+ */
+$router->post(
+    '/students',
+    [$studentController, 'store']
+);
 
-    $router->middleware(
-        'POST',
-        '/academic-enrollments/{id}',
-        $authProtection
-    );
+$router->middleware(
+    'POST',
+    '/students',
+    $authProtection
+);
 
-    $router->middleware(
-        'POST',
-        '/academic-enrollments/{id}',
-        $passwordChangeProtection
-    );
+$router->middleware(
+    'POST',
+    '/students',
+    $passwordChangeProtection
+);
 
-    $router->middleware(
-        'POST',
-        '/academic-enrollments/{id}',
-        $csrfProtection
-    );
+$router->middleware(
+    'POST',
+    '/students',
+    $accessContextProtection
+);
 
+$router->middleware(
+    'POST',
+    '/students',
+    $permissionMiddleware->require(
+        'students.create'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/students',
+    $csrfProtection
+);
+
+
+/*
+ * Consultation d'un étudiant.
+ *
+ * PLATFORM :
+ * accès global.
+ *
+ * UNIVERSITY :
+ * StudentController vérifie que l'étudiant
+ * possède une inscription dans l'université active.
+ */
+$router->get(
+    '/students/{id}',
+    [$studentController, 'show']
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}',
+    $permissionMiddleware->require(
+        'students.view'
+    )
+);
+
+
+/*
+ * Modification de l'identité globale.
+ *
+ * PLATFORM uniquement.
+ */
+$router->get(
+    '/students/{id}/edit',
+    [$studentController, 'edit']
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}/edit',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}/edit',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}/edit',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/students/{id}/edit',
+    $permissionMiddleware->require(
+        'students.update'
+    )
+);
+
+
+/*
+ * Mise à jour de l'identité globale.
+ *
+ * PLATFORM uniquement.
+ */
+$router->post(
+    '/students/{id}',
+    [$studentController, 'update']
+);
+
+$router->middleware(
+    'POST',
+    '/students/{id}',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/students/{id}',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/students/{id}',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/students/{id}',
+    $permissionMiddleware->require(
+        'students.update'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/students/{id}',
+    $csrfProtection
+);
+
+/*
+|--------------------------------------------------------------------------
+| Academic - Academic Enrollments
+|--------------------------------------------------------------------------
+*/
+
+/*
+ * Liste des inscriptions académiques.
+ */
+$router->get(
+    '/academic-enrollments',
+    [$academicEnrollmentController, 'index']
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments',
+    $permissionMiddleware->require(
+        'academic_enrollments.view'
+    )
+);
+
+
+/*
+ * Formulaire de création.
+ */
+$router->get(
+    '/academic-enrollments/create',
+    [$academicEnrollmentController, 'create']
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/create',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/create',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/create',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/create',
+    $permissionMiddleware->require(
+        'academic_enrollments.create'
+    )
+);
+
+
+/*
+ * Recherche contrôlée d'un étudiant
+ * pour une nouvelle inscription.
+ *
+ * IMPORTANT :
+ * cette route doit être déclarée avant
+ * /academic-enrollments/{id}.
+ */
+$router->get(
+    '/academic-enrollments/student-search',
+    [$academicEnrollmentController, 'studentSearch']
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/student-search',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/student-search',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/student-search',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/student-search',
+    $permissionMiddleware->require(
+        'academic_enrollments.create'
+    )
+);
+
+
+/*
+ * Création d'une identité étudiante
+ * depuis le workflow d'inscription académique.
+ *
+ * IMPORTANT :
+ * cette route doit être déclarée avant
+ * /academic-enrollments/{id}.
+ */
+$router->post(
+    '/academic-enrollments/student-identities',
+    [
+        $academicEnrollmentController,
+        'createStudentIdentity',
+    ]
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/student-identities',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/student-identities',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/student-identities',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/student-identities',
+    $permissionMiddleware->require(
+        'academic_enrollments.create'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/student-identities',
+    $csrfProtection
+);
+
+
+/*
+ * Enregistrement d'une inscription académique.
+ */
+$router->post(
+    '/academic-enrollments',
+    [$academicEnrollmentController, 'store']
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments',
+    $permissionMiddleware->require(
+        'academic_enrollments.create'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments',
+    $csrfProtection
+);
+
+
+/*
+ * Consultation d'une inscription académique.
+ */
+$router->get(
+    '/academic-enrollments/{id}',
+    [$academicEnrollmentController, 'show']
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}',
+    $permissionMiddleware->require(
+        'academic_enrollments.view'
+    )
+);
+
+
+/*
+ * Formulaire de modification.
+ */
+$router->get(
+    '/academic-enrollments/{id}/edit',
+    [$academicEnrollmentController, 'edit']
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}/edit',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}/edit',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}/edit',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/academic-enrollments/{id}/edit',
+    $permissionMiddleware->require(
+        'academic_enrollments.update'
+    )
+);
+
+
+/*
+ * Mise à jour d'une inscription académique.
+ */
+$router->post(
+    '/academic-enrollments/{id}',
+    [$academicEnrollmentController, 'update']
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/{id}',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/{id}',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/{id}',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/{id}',
+    $permissionMiddleware->require(
+        'academic_enrollments.update'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/academic-enrollments/{id}',
+    $csrfProtection
+);
 
     /*
 |--------------------------------------------------------------------------

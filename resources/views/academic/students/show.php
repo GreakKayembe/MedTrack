@@ -5,10 +5,15 @@ declare(strict_types=1);
 /**
  * @var array $student
  * @var array $academicEnrollments
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
  */
 
 $student = $student ?? [];
 $academicEnrollments = $academicEnrollments ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
 
 $studentId =
     (int) ($student['id'] ?? 0);
@@ -290,20 +295,27 @@ $formatDateTime =
         <div
             class="d-flex flex-wrap gap-2"
         >
-            <a
-                href="/students/<?= $studentId ?>/edit"
-                class="btn btn-outline-primary"
-            >
-                <i class="bi bi-pencil me-1"></i>
-                Modifier
-            </a>
+            <?php if ($isPlatform): ?>
+
+                <a
+                    href="/students/<?= $studentId ?>/edit"
+                    class="btn btn-outline-primary"
+                >
+                    <i class="bi bi-pencil me-1"></i>
+                    Modifier l'identité
+                </a>
+
+            <?php endif; ?>
 
             <a
                 href="/academic-enrollments/create?student_id=<?= $studentId ?>"
                 class="btn btn-primary"
             >
                 <i class="bi bi-mortarboard me-1"></i>
-                Nouvelle inscription
+
+                <?= $isUniversityContext
+                    ? 'Nouvelle inscription'
+                    : 'Ajouter une inscription' ?>
             </a>
         </div>
 
@@ -596,7 +608,9 @@ $formatDateTime =
                     <div class="d-flex align-items-center gap-2">
                         <h2 class="h5 mb-0">
                             <i class="bi bi-mortarboard me-2"></i>
-                            Parcours académique
+                            <?= $isUniversityContext
+                                ? 'Parcours dans votre université'
+                                : 'Parcours académique' ?>
                         </h2>
 
                         <span class="badge text-bg-secondary">
@@ -649,7 +663,11 @@ $formatDateTime =
                                 <thead>
                                     <tr>
                                         <th>Année</th>
-                                        <th>Université / programme</th>
+                                        <th>
+                                            <?= $isUniversityContext
+                                                ? 'Programme'
+                                                : 'Université / programme' ?>
+                                        </th>
                                         <th>Niveau / cohorte</th>
                                         <th>Matricule</th>
                                         <th>Statut</th>
@@ -738,27 +756,31 @@ $formatDateTime =
 
 
                                         <td>
-                                            <div class="fw-semibold">
-                                                <?= htmlspecialchars(
-                                                    $universityName !== ''
-                                                        ? $universityName
-                                                        : '—',
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>
-                                            </div>
+                                            <?php if ($isPlatform): ?>
 
-                                            <?php if ($universityCode !== ''): ?>
-                                                <div class="small text-muted">
+                                                <div class="fw-semibold">
                                                     <?= htmlspecialchars(
-                                                        $universityCode,
+                                                        $universityName !== ''
+                                                            ? $universityName
+                                                            : '—',
                                                         ENT_QUOTES,
                                                         'UTF-8'
                                                     ) ?>
                                                 </div>
+
+                                                <?php if ($universityCode !== ''): ?>
+                                                    <div class="small text-muted">
+                                                        <?= htmlspecialchars(
+                                                            $universityCode,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </div>
+                                                <?php endif; ?>
+
                                             <?php endif; ?>
 
-                                            <div class="mt-2">
+                                            <div class="<?= $isPlatform ? 'mt-2' : 'fw-semibold' ?>">
                                                 <?= htmlspecialchars(
                                                     $programName !== ''
                                                         ? $programName
@@ -887,6 +909,8 @@ $formatDateTime =
         <!-- Sidebar -->
 
         <div class="col-xl-4">
+
+            <?php if ($isPlatform): ?>
 
             <!-- Student record -->
 
@@ -1048,6 +1072,70 @@ $formatDateTime =
                 </div>
             </div>
 
+
+            <?php else: ?>
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-header bg-transparent py-3">
+                        <h2 class="h5 mb-0">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Identité MedTrack
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p class="text-muted small mb-3">
+                            Cette identité est gérée au niveau
+                            de la plateforme MedTrack.
+                        </p>
+
+                        <div class="mb-3">
+                            <div class="small text-muted mb-1">
+                                Compte étudiant
+                            </div>
+
+                            <?php if ($userId !== null): ?>
+
+                                <span class="badge text-bg-success">
+                                    Compte associé
+                                </span>
+
+                            <?php else: ?>
+
+                                <span class="badge text-bg-secondary">
+                                    Aucun compte activé
+                                </span>
+
+                            <?php endif; ?>
+                        </div>
+
+                        <div>
+                            <div class="small text-muted mb-1">
+                                Statut de l'identité
+                            </div>
+
+                            <span
+                                class="badge text-bg-<?= htmlspecialchars(
+                                    $statusClass,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                            >
+                                <?= htmlspecialchars(
+                                    $statusLabel,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <?php endif; ?>
         </div>
 
     </div>

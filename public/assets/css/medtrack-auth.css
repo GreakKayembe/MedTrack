@@ -1,23 +1,23 @@
 :root {
-    --mt-blue: #6f2dbd;
-    --mt-blue-dark: #4c1d95;
-    --mt-navy: #32134f;
-    --mt-navy-light: #5f2695;
+    --mt-blue: #0b1f3a;
+    --mt-blue-dark: #07172c;
+    --mt-navy: #07172c;
+    --mt-navy-light: #163a5f;
 
-    --mt-cyan: #f2ca52;
-    --mt-gold: #d4a017;
-    --mt-gold-dark: #a97800;
-    --mt-gold-soft: #fff8df;
+    --mt-cyan: #2dd4bf;
+    --mt-gold: #14b8a6;
+    --mt-gold-dark: #0f8f83;
+    --mt-gold-soft: #e8f8f6;
 
     --mt-white: #ffffff;
-    --mt-text: #271a38;
-    --mt-muted: #756b83;
-    --mt-soft: #9d93a9;
+    --mt-text: #172033;
+    --mt-muted: #667085;
+    --mt-soft: #98a2b3;
 
-    --mt-border: #e9e1f2;
+    --mt-border: #dce5ea;
     --mt-danger: #d92d20;
-    --mt-purple-soft: #f5effd;
-    --mt-purple-soft-2: #eee5fb;
+    --mt-purple-soft: #eef3f7;
+    --mt-purple-soft-2: #e4edf3;
 
     --mt-radius: 14px;
 }
@@ -52,14 +52,14 @@
     background:
         radial-gradient(
             circle at 80% 25%,
-            rgba(45, 193, 255, .24),
+            rgba(45, 212, 191, .24),
             transparent 30%
         ),
         linear-gradient(
             145deg,
-            #06162c,
-            #082c59 52%,
-            #075cca
+            #07172c,
+            #0b2948 52%,
+            #0f766e
         );
 }
 
@@ -129,8 +129,8 @@
     background:
         linear-gradient(
             135deg,
-            #27c5ff,
-            #1476ef
+            #2dd4bf,
+            #0f8f83
         );
 
     box-shadow:
@@ -294,9 +294,9 @@
     background:
         linear-gradient(
             90deg,
-            rgba(66,212,255,.15),
-            rgba(66,212,255,.65),
-            rgba(66,212,255,.15)
+            rgba(45,212,191,.15),
+            rgba(45,212,191,.65),
+            rgba(45,212,191,.15)
         );
 }
 
@@ -376,7 +376,7 @@
     right: -150px;
     top: 18%;
 
-    background: rgba(27,180,255,.18);
+    background: rgba(20,184,166,.18);
 
     animation: mtFloat 9s ease-in-out infinite;
 }
@@ -388,7 +388,7 @@
     left: -120px;
     bottom: 10%;
 
-    background: rgba(103,82,255,.15);
+    background: rgba(22,58,95,.15);
 
     animation: mtFloat 11s ease-in-out infinite reverse;
 }
@@ -517,7 +517,7 @@
     border-color: var(--mt-blue);
 
     box-shadow:
-        0 0 0 4px rgba(19,103,232,.08);
+        0 0 0 4px rgba(20,184,166,.08);
 
     transform: translateY(-1px);
 }
@@ -662,14 +662,14 @@
     background:
         linear-gradient(
             135deg,
-            #1474ef,
-            #0754bd
+            #14b8a6,
+            #0f8f83
         );
 
     color: white;
 
     box-shadow:
-        0 13px 28px rgba(19,103,232,.22);
+        0 13px 28px rgba(20,184,166,.22);
 
     cursor: pointer;
 
@@ -685,7 +685,7 @@
     transform: translateY(-2px);
 
     box-shadow:
-        0 18px 35px rgba(19,103,232,.28);
+        0 18px 35px rgba(20,184,166,.28);
 }
 
 .mt-login-button:disabled {
@@ -1010,7 +1010,7 @@
     margin-bottom: 20px;
     border-radius: 16px;
     color: var(--mt-blue);
-    background: rgba(19, 103, 232, .08);
+    background: rgba(20, 184, 166, .08);
     font-size: 22px;
 }
 
@@ -1040,7 +1040,7 @@
     flex-shrink: 0;
     border-radius: 9px;
     color: var(--mt-cyan);
-    background: rgba(66,212,255,.10);
+    background: rgba(45,212,191,.10);
     font-size: 11px;
     font-weight: 700;
 }
@@ -1251,8 +1251,8 @@
     background:
         linear-gradient(
             135deg,
-            #1474ef,
-            #0754bd
+            #14b8a6,
+            #0f8f83
         );
 
     color: white;
@@ -1263,7 +1263,7 @@
     font-weight: 600;
 
     box-shadow:
-        0 12px 26px rgba(19,103,232,.20);
+        0 12px 26px rgba(20,184,166,.20);
 
     transition: .2s ease;
 }
@@ -1274,7 +1274,7 @@
     transform: translateY(-2px);
 
     box-shadow:
-        0 16px 30px rgba(19,103,232,.27);
+        0 16px 30px rgba(20,184,166,.27);
 }
 
 @media (max-width: 480px) {
@@ -1287,11 +1287,11 @@
 
 
 /* ========================================
-   MEDTRACK BRAND — MAUVE & JAUNE DORÉ
+   MEDTRACK BRAND — NAVY & TURQUOISE
 ======================================== */
 
 .mt-auth-body {
-    background: #fbf9fe;
+    background: #f5f8fa;
 }
 
 .mt-auth-brand-panel {
@@ -1308,9 +1308,9 @@
         ),
         linear-gradient(
             145deg,
-            #32134f,
-            #552181 52%,
-            #7a35b5
+            #07172c,
+            #0b2948 52%,
+            #0f766e
         );
 }
 
@@ -1319,14 +1319,14 @@
         linear-gradient(
             180deg,
             #ffffff 0%,
-            #fcfaff 100%
+            #f8fbfc 100%
         );
 }
 
 .mt-brand-symbol {
     overflow: hidden;
     padding: 6px;
-    border: 1px solid rgba(242,202,82,.28);
+    border: 1px solid rgba(20,184,166,.28);
     background:
         linear-gradient(
             145deg,
@@ -1334,7 +1334,7 @@
             rgba(255,248,223,.12)
         );
     box-shadow:
-        0 12px 30px rgba(47, 15, 75, .22);
+        0 12px 30px rgba(7, 23, 44, .22);
 }
 
 .mt-brand-logo {
@@ -1343,7 +1343,7 @@
     height: 100%;
     object-fit: contain;
     filter:
-        drop-shadow(0 6px 12px rgba(39, 10, 61, .14));
+        drop-shadow(0 6px 12px rgba(7, 23, 44, .14));
 }
 
 .mt-auth-illustration {
@@ -1378,7 +1378,7 @@
     max-height: 62vh;
     object-fit: contain;
     filter:
-        drop-shadow(0 24px 52px rgba(34, 9, 54, .24));
+        drop-shadow(0 24px 52px rgba(7, 23, 44, .24));
 }
 
 .mt-auth-presentation {
@@ -1387,14 +1387,14 @@
 }
 
 .mt-auth-badge {
-    border-color: rgba(242,202,82,.22);
+    border-color: rgba(20,184,166,.22);
     background: rgba(255,255,255,.08);
 }
 
 .mt-auth-status-dot {
     background: var(--mt-cyan);
     box-shadow:
-        0 0 0 5px rgba(242,202,82,.11);
+        0 0 0 5px rgba(20,184,166,.11);
 }
 
 .mt-auth-presentation h1 span,
@@ -1408,9 +1408,9 @@
     background:
         linear-gradient(
             90deg,
-            rgba(242,202,82,.15),
-            rgba(242,202,82,.72),
-            rgba(242,202,82,.15)
+            rgba(20,184,166,.15),
+            rgba(20,184,166,.72),
+            rgba(20,184,166,.15)
         );
 }
 
@@ -1434,7 +1434,7 @@
 .mt-input-wrapper:focus-within {
     border-color: var(--mt-blue);
     box-shadow:
-        0 0 0 4px rgba(111,45,189,.09);
+        0 0 0 4px rgba(11,31,58,.09);
 }
 
 .mt-input-wrapper:focus-within .mt-input-icon,
@@ -1459,17 +1459,17 @@
     background:
         linear-gradient(
             135deg,
-            #7c3fc1,
-            #5b2494
+            #14b8a6,
+            #0f8f83
         );
     box-shadow:
-        0 13px 28px rgba(76,29,149,.22);
+        0 13px 28px rgba(7,23,44,.22);
 }
 
 .mt-login-button:hover:not(:disabled),
 .mt-primary-link-button:hover {
     box-shadow:
-        0 18px 35px rgba(76,29,149,.28);
+        0 18px 35px rgba(7,23,44,.28);
 }
 
 .mt-login-button.mt-success {
@@ -1477,12 +1477,12 @@
 }
 
 .mt-security-info {
-    border: 1px solid rgba(111,45,189,.08);
+    border: 1px solid rgba(11,31,58,.08);
     background:
         linear-gradient(
             135deg,
-            #fbf9fe,
-            #fffdf5
+            #f5f8fa,
+            #f3fbfa
         );
 }
 
@@ -1498,12 +1498,12 @@
 }
 
 .mt-password-rules {
-    border: 1px solid rgba(111,45,189,.07);
+    border: 1px solid rgba(11,31,58,.07);
     background:
         linear-gradient(
             135deg,
-            #fbf9fe,
-            #fffdf7
+            #f5f8fa,
+            #f5fbfa
         );
 }
 
@@ -1512,12 +1512,12 @@
         linear-gradient(
             90deg,
             var(--mt-blue),
-            #a56ad8
+            #5eead4
         );
 }
 
 .mt-mobile-brand .mt-brand-symbol {
-    border: 1px solid rgba(111,45,189,.10);
+    border: 1px solid rgba(11,31,58,.10);
     background:
         linear-gradient(
             135deg,
@@ -1525,7 +1525,7 @@
             var(--mt-purple-soft)
         );
     box-shadow:
-        0 8px 20px rgba(76,29,149,.10);
+        0 8px 20px rgba(7,23,44,.10);
 }
 
 .mt-mobile-brand strong {
@@ -1547,4 +1547,199 @@
     .mt-auth-illustration {
         display: none;
     }
+}
+
+
+/* ========================================
+   MEDTRACK FINAL — NAVY & TURQUOISE
+======================================== */
+
+:root {
+    --mt-blue: #0b1f3a;
+    --mt-blue-dark: #07172c;
+    --mt-navy: #07172c;
+    --mt-navy-light: #163a5f;
+    --mt-cyan: #2dd4bf;
+    --mt-gold: #14b8a6;
+    --mt-gold-dark: #0f8f83;
+    --mt-gold-soft: #e8f8f6;
+    --mt-text: #172033;
+    --mt-muted: #667085;
+    --mt-soft: #98a2b3;
+    --mt-border: #dce5ea;
+    --mt-purple-soft: #eef3f7;
+    --mt-purple-soft-2: #e4edf3;
+}
+
+.mt-auth-body {
+    background: #f5f8fa;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+}
+
+.mt-auth-brand-panel {
+    background:
+        radial-gradient(
+            circle at 82% 18%,
+            rgba(45, 212, 191, .24),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 18% 78%,
+            rgba(255,255,255,.06),
+            transparent 30%
+        ),
+        linear-gradient(
+            145deg,
+            #07172c,
+            #0b2948 52%,
+            #0f766e
+        );
+}
+
+.mt-auth-form-panel {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fbfc 100%
+        );
+}
+
+.mt-brand-symbol {
+    border-color: rgba(94,234,212,.28);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.22),
+            rgba(45,212,191,.12)
+        );
+    box-shadow: 0 12px 30px rgba(7,23,44,.22);
+}
+
+.mt-auth-presentation h1 span,
+.mt-ecosystem-icon,
+.mt-institution-row i,
+.mt-recovery-step > span {
+    color: #2dd4bf;
+}
+
+.mt-auth-badge {
+    border-color: rgba(94,234,212,.22);
+}
+
+.mt-auth-status-dot {
+    background: #2dd4bf;
+    box-shadow: 0 0 0 5px rgba(45,212,191,.11);
+}
+
+.mt-ecosystem-line {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(45,212,191,.15),
+            rgba(45,212,191,.72),
+            rgba(45,212,191,.15)
+        );
+}
+
+.mt-section-label,
+.mt-forgot-link,
+.mt-login-help a,
+.mt-back-link:hover,
+.mt-recovery-success a {
+    color: #0f8f83;
+}
+
+.mt-input-wrapper:focus-within {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 4px rgba(20,184,166,.10);
+}
+
+.mt-input-wrapper:focus-within .mt-input-icon,
+.mt-password-toggle:hover {
+    color: #14b8a6;
+}
+
+.mt-remember input:checked + .mt-checkbox {
+    border-color: #14b8a6;
+    background: linear-gradient(135deg, #14b8a6, #0f8f83);
+}
+
+.mt-login-button,
+.mt-primary-link-button {
+    background:
+        linear-gradient(
+            135deg,
+            #14b8a6,
+            #0f8f83
+        );
+    box-shadow: 0 13px 28px rgba(20,184,166,.22);
+}
+
+.mt-login-button:hover:not(:disabled),
+.mt-primary-link-button:hover {
+    box-shadow: 0 18px 35px rgba(20,184,166,.28);
+}
+
+.mt-security-info {
+    border-color: rgba(11,31,58,.08);
+    background:
+        linear-gradient(
+            135deg,
+            #f7fafb,
+            #f0fbf9
+        );
+}
+
+.mt-security-icon,
+.mt-recovery-icon {
+    color: #0f8f83;
+    background:
+        linear-gradient(
+            135deg,
+            #eef3f7,
+            #e8f8f6
+        );
+}
+
+.mt-password-rules {
+    border-color: rgba(11,31,58,.07);
+    background:
+        linear-gradient(
+            135deg,
+            #f7fafb,
+            #f0fbf9
+        );
+}
+
+.mt-strength-bars span.mt-active {
+    background:
+        linear-gradient(
+            90deg,
+            #0b1f3a,
+            #14b8a6
+        );
+}
+
+.mt-mobile-brand .mt-brand-symbol {
+    border-color: rgba(20,184,166,.16);
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #e8f8f6
+        );
+    box-shadow: 0 8px 20px rgba(11,31,58,.10);
+}
+
+.mt-mobile-brand strong {
+    color: #07172c;
 }

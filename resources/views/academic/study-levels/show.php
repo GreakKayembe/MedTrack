@@ -2,6 +2,22 @@
 
 declare(strict_types=1);
 
+/**
+ * @var array<string, mixed> $studyLevel
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var bool $isReadOnly
+ */
+
+$isPlatform =
+    (bool) ($isPlatform ?? false);
+
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+
+$isReadOnly =
+    (bool) ($isReadOnly ?? !$isPlatform);
+
 $id = (int) ($studyLevel['id'] ?? 0);
 
 $code = (string) (
@@ -86,13 +102,27 @@ $ordinal =
                         Retour
                     </a>
 
-                    <a
-                        href="/study-levels/<?= $id ?>/edit"
-                        class="btn btn-primary"
-                    >
-                        <i class="bi bi-pencil me-1"></i>
-                        Modifier
-                    </a>
+                    <?php if ($isPlatform): ?>
+
+                        <a
+                            href="/study-levels/<?= $id ?>/edit"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-pencil me-1"></i>
+                            Modifier
+                        </a>
+
+                    <?php elseif ($isUniversityContext): ?>
+
+                        <span
+                            class="btn btn-light border disabled"
+                            aria-disabled="true"
+                        >
+                            <i class="bi bi-lock me-1"></i>
+                            Lecture seule
+                        </span>
+
+                    <?php endif; ?>
 
                 </div>
 
@@ -413,9 +443,20 @@ $ordinal =
 
                         <div class="small text-muted mt-1">
                             Ce niveau fait partie du référentiel
-                            académique global. Il pourra être utilisé
+                            académique global MedTrack et peut être utilisé
                             lors des inscriptions académiques afin
                             d’indiquer le niveau d’études de l’étudiant.
+
+                            <?php if ($isReadOnly): ?>
+                                <br>
+
+                                <span class="d-inline-block mt-1">
+                                    <i class="bi bi-lock me-1"></i>
+                                    Dans votre espace Université,
+                                    ce référentiel est disponible
+                                    uniquement en consultation.
+                                </span>
+                            <?php endif; ?>
                         </div>
 
                     </div>

@@ -4,27 +4,121 @@ declare(strict_types=1);
 
 /**
  * @var array $enrollment
- * @var array $students
  * @var array $universities
  * @var array $academicPrograms
  * @var array $academicYears
  * @var array $studyLevels
  * @var array $cohorts
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
 $enrollment = $enrollment ?? [];
-$students = $students ?? [];
 $universities = $universities ?? [];
 $academicPrograms = $academicPrograms ?? [];
 $academicYears = $academicYears ?? [];
 $studyLevels = $studyLevels ?? [];
 $cohorts = $cohorts ?? [];
+$isPlatform = (bool) ($isPlatform ?? false);
+$isUniversityContext =
+    (bool) ($isUniversityContext ?? false);
+$activeUniversityId =
+    isset($activeUniversityId)
+        ? (int) $activeUniversityId
+        : null;
 
 $selectedStudentId =
     (int) (
         $enrollment['student_id']
         ?? 0
     );
+
+$selectedUniversityId =
+    $isUniversityContext
+        ? (int) ($activeUniversityId ?? 0)
+        : (int) (
+            $enrollment['university_id']
+            ?? 0
+        );
+
+$selectedAcademicProgramId =
+    (int) (
+        $enrollment['academic_program_id']
+        ?? 0
+    );
+
+$selectedAcademicYearId =
+    (int) (
+        $enrollment['academic_year_id']
+        ?? 0
+    );
+
+$selectedStudyLevelId =
+    (int) (
+        $enrollment['study_level_id']
+        ?? 0
+    );
+
+$selectedCohortId =
+    (int) (
+        $enrollment['cohort_id']
+        ?? 0
+    );
+
+$selectedRegistrationNumber =
+    trim(
+        (string) (
+            $enrollment['registration_number']
+            ?? ''
+        )
+    );
+
+$selectedEnrolledAt =
+    trim(
+        (string) (
+            $enrollment['enrolled_at']
+            ?? ''
+        )
+    );
+
+$selectedStatus =
+    strtoupper(
+        trim(
+            (string) (
+                $enrollment['status']
+                ?? 'ACTIVE'
+            )
+        )
+    );
+
+$activeUniversityName = '';
+
+if (
+    $isUniversityContext
+    && $selectedUniversityId > 0
+) {
+    foreach ($academicPrograms as $program) {
+        if (
+            (int) ($program['university_id'] ?? 0)
+            !== $selectedUniversityId
+        ) {
+            continue;
+        }
+
+        $activeUniversityName =
+            trim(
+                (string) (
+                    $program['university_name']
+                    ?? ''
+                )
+            );
+
+        if ($activeUniversityName !== '') {
+            break;
+        }
+    }
+}
 ?>
 
 <div class="container-fluid py-4">
@@ -78,10 +172,18 @@ $selectedStudentId =
                 </div>
 
                 <div class="small">
-                    Les programmes proposés dépendent de
-                    l'université sélectionnée. Les cohortes
-                    dépendent ensuite du programme et de
-                    l'année académique.
+                    <?php if ($isUniversityContext): ?>
+                        L'université est imposée par votre
+                        contexte actif. Les programmes proposés
+                        appartiennent à cette université. Les
+                        cohortes dépendent ensuite du programme
+                        et de l'année académique.
+                    <?php else: ?>
+                        Les programmes proposés dépendent de
+                        l'université sélectionnée. Les cohortes
+                        dépendent ensuite du programme et de
+                        l'année académique.
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -136,7 +238,7 @@ $selectedStudentId =
                     >
                         <h2 class="h5 mb-0">
                             <i
-                                class="bi bi-person
+                                class="bi bi-person-search
                                        me-2"
                             ></i>
 
@@ -146,121 +248,470 @@ $selectedStudentId =
 
                     <div class="card-body">
 
-                        <label
-                            for="student_id"
-                            class="form-label"
-                        >
-                            Étudiant
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <select
-                            class="form-select"
+                        <input
+                            type="hidden"
                             id="student_id"
                             name="student_id"
+                            value="<?= $selectedStudentId > 0
+                                ? $selectedStudentId
+                                : '' ?>"
                             required
                         >
 
-                            <option value="">
-                                Sélectionnez un étudiant
-                            </option>
+                        <div
+                            id="selectedStudentCard"
+                            class="<?= $selectedStudentId > 0
+                                ? ''
+                                : 'd-none' ?>"
+                        >
+                            <?php
+                            $selectedStudentName =
+                                $selectedStudentId > 0
+                                    ? 'Étudiant sélectionné'
+                                    : '';
+                            ?>
 
-                            <?php foreach ($students as $student): ?>
-
-                                <?php
-                                $studentId =
-                                    (int) (
-                                        $student['id']
-                                        ?? 0
-                                    );
-
-                                $firstName =
-                                    trim(
-                                        (string) (
-                                            $student['first_name']
-                                            ?? ''
-                                        )
-                                    );
-
-                                $middleName =
-                                    trim(
-                                        (string) (
-                                            $student['middle_name']
-                                            ?? ''
-                                        )
-                                    );
-
-                                $lastName =
-                                    trim(
-                                        (string) (
-                                            $student['last_name']
-                                            ?? ''
-                                        )
-                                    );
-
-                                $fullName =
-                                    trim(
-                                        implode(
-                                            ' ',
-                                            array_filter(
-                                                [
-                                                    $firstName,
-                                                    $middleName,
-                                                    $lastName,
-                                                ],
-                                                static fn (
-                                                    string $value
-                                                ): bool =>
-                                                    $value !== ''
-                                            )
-                                        )
-                                    );
-
-                                $nationalNumber =
-                                    trim(
-                                        (string) (
-                                            $student[
-                                                'national_student_number'
-                                            ]
-                                            ?? ''
-                                        )
-                                    );
-                                ?>
-
-                                <option
-                                    value="<?= $studentId ?>"
-                                    <?= $studentId === $selectedStudentId
-                                        ? 'selected'
-                                        : '' ?>
+                            <div
+                                class="alert alert-success
+                                       border-0 mb-3"
+                            >
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-start gap-3"
                                 >
-                                    <?= htmlspecialchars(
-                                        $fullName !== ''
-                                            ? $fullName
-                                            : 'Étudiant #' . $studentId,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
+                                    <div>
+                                        <div
+                                            class="small text-muted mb-1"
+                                        >
+                                            Étudiant sélectionné
+                                        </div>
 
-                                    <?php if (
-                                        $nationalNumber !== ''
-                                    ): ?>
+                                        <div
+                                            class="fw-semibold"
+                                            id="selectedStudentName"
+                                        >
+                                            <?= htmlspecialchars(
+                                                $selectedStudentName,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        </div>
 
-                                        <?= htmlspecialchars(
-                                            ' — ' . $nationalNumber,
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+                                        <div
+                                            class="small text-muted"
+                                            id="selectedStudentDetails"
+                                        ></div>
+                                    </div>
 
-                                    <?php endif; ?>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm
+                                               btn-outline-secondary"
+                                        id="changeStudentButton"
+                                    >
+                                        Changer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
-                                </option>
+                        <div
+                            id="studentSearchPanel"
+                            class="<?= $selectedStudentId > 0
+                                ? 'd-none'
+                                : '' ?>"
+                        >
 
-                            <?php endforeach; ?>
+                            <label
+                                for="studentSearchInput"
+                                class="form-label"
+                            >
+                                Rechercher un étudiant
+                            </label>
 
-                        </select>
+                            <div class="input-group">
 
-                        <div class="invalid-feedback">
-                            Veuillez sélectionner un étudiant.
+                                <input
+                                    type="search"
+                                    class="form-control"
+                                    id="studentSearchInput"
+                                    maxlength="190"
+                                    autocomplete="off"
+                                    placeholder="N° national, nom, prénom, email ou téléphone"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    id="studentSearchButton"
+                                >
+                                    <i
+                                        class="bi bi-search me-1"
+                                    ></i>
+
+                                    Rechercher
+                                </button>
+
+                            </div>
+
+                            <div class="form-text">
+                                Saisissez au moins 3 caractères.
+                                MedTrack recherche d'abord une
+                                identité existante afin d'éviter
+                                les doublons.
+                            </div>
+
+                            <div
+                                id="studentSearchAlert"
+                                class="alert d-none mt-3 mb-0"
+                                role="alert"
+                            ></div>
+
+                            <div
+                                id="studentSearchLoading"
+                                class="d-none text-center py-4"
+                            >
+                                <div
+                                    class="spinner-border
+                                           spinner-border-sm"
+                                    role="status"
+                                ></div>
+
+                                <span class="ms-2">
+                                    Recherche...
+                                </span>
+                            </div>
+
+                            <div
+                                id="studentSearchResults"
+                                class="list-group mt-3"
+                            ></div>
+
+                            <div
+                                id="studentNotFoundActions"
+                                class="d-none mt-3"
+                            >
+                                <div class="alert alert-light border mb-0">
+
+                                    <div class="fw-semibold mb-1">
+                                        Étudiant introuvable ?
+                                    </div>
+
+                                    <div class="small text-muted mb-3">
+                                        Vérifiez les informations recherchées
+                                        avant de créer une nouvelle identité.
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary btn-sm"
+                                        id="createStudentIdentityButton"
+                                    >
+                                        <i class="bi bi-person-plus me-1"></i>
+                                        Créer une nouvelle identité
+                                    </button>
+
+                                </div>
+                            </div>
+
+
+                            <!--
+                            |--------------------------------------------------------------------------
+                            | Création rapide d'une identité étudiante
+                            |--------------------------------------------------------------------------
+                            -->
+
+                            <div
+                                id="studentIdentityCreationPanel"
+                                class="d-none mt-4"
+                                data-endpoint="/academic-enrollments/student-identities"
+                            >
+                                <div class="card border-primary">
+
+                                    <div class="card-header bg-transparent">
+
+                                        <div
+                                            class="d-flex justify-content-between
+                                                   align-items-center gap-3"
+                                        >
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    <i class="bi bi-person-plus me-2"></i>
+                                                    Nouvelle identité étudiante
+                                                </div>
+
+                                                <div class="small text-muted mt-1">
+                                                    Créez uniquement l'identité.
+                                                    L'inscription académique sera
+                                                    enregistrée ensuite.
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                class="btn-close"
+                                                id="cancelStudentIdentityButton"
+                                                aria-label="Fermer"
+                                            ></button>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="card-body">
+
+                                        <div
+                                            id="studentIdentityAlert"
+                                            class="alert d-none"
+                                            role="alert"
+                                        ></div>
+
+                                        <div class="row g-3">
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityFirstName"
+                                                    class="form-label"
+                                                >
+                                                    Prénom
+                                                    <span class="text-danger">*</span>
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityFirstName"
+                                                    maxlength="150"
+                                                    autocomplete="given-name"
+                                                >
+
+                                                <div class="invalid-feedback">
+                                                    Le prénom est obligatoire.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityMiddleName"
+                                                    class="form-label"
+                                                >
+                                                    Postnom
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityMiddleName"
+                                                    maxlength="150"
+                                                    autocomplete="additional-name"
+                                                >
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityLastName"
+                                                    class="form-label"
+                                                >
+                                                    Nom
+                                                    <span class="text-danger">*</span>
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityLastName"
+                                                    maxlength="150"
+                                                    autocomplete="family-name"
+                                                >
+
+                                                <div class="invalid-feedback">
+                                                    Le nom est obligatoire.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityGender"
+                                                    class="form-label"
+                                                >
+                                                    Sexe
+                                                </label>
+
+                                                <select
+                                                    class="form-select"
+                                                    id="studentIdentityGender"
+                                                >
+                                                    <option value="">
+                                                        Non renseigné
+                                                    </option>
+
+                                                    <option value="M">
+                                                        Masculin
+                                                    </option>
+
+                                                    <option value="F">
+                                                        Féminin
+                                                    </option>
+
+                                                    <option value="OTHER">
+                                                        Autre
+                                                    </option>
+
+                                                    <option value="UNSPECIFIED">
+                                                        Non spécifié
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityBirthDate"
+                                                    class="form-label"
+                                                >
+                                                    Date de naissance
+                                                    <span class="text-danger">*</span>
+                                                </label>
+
+                                                <input
+                                                    type="date"
+                                                    class="form-control"
+                                                    id="studentIdentityBirthDate"
+                                                >
+
+                                                <div class="invalid-feedback">
+                                                    La date de naissance est obligatoire.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityBirthPlace"
+                                                    class="form-label"
+                                                >
+                                                    Lieu de naissance
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityBirthPlace"
+                                                    maxlength="150"
+                                                >
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityNationality"
+                                                    class="form-label"
+                                                >
+                                                    Nationalité
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityNationality"
+                                                    maxlength="100"
+                                                >
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityNationalNumber"
+                                                    class="form-label"
+                                                >
+                                                    N° étudiant national
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="studentIdentityNationalNumber"
+                                                    maxlength="80"
+                                                    autocomplete="off"
+                                                >
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityEmail"
+                                                    class="form-label"
+                                                >
+                                                    Adresse email
+                                                </label>
+
+                                                <input
+                                                    type="email"
+                                                    class="form-control"
+                                                    id="studentIdentityEmail"
+                                                    maxlength="190"
+                                                    autocomplete="email"
+                                                >
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label
+                                                    for="studentIdentityPhone"
+                                                    class="form-label"
+                                                >
+                                                    Téléphone
+                                                </label>
+
+                                                <input
+                                                    type="tel"
+                                                    class="form-control"
+                                                    id="studentIdentityPhone"
+                                                    maxlength="30"
+                                                    autocomplete="tel"
+                                                >
+                                            </div>
+
+                                        </div>
+
+                                        <div
+                                            class="d-flex justify-content-end
+                                                   gap-2 mt-4"
+                                        >
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary"
+                                                id="cancelStudentIdentityCreationButton"
+                                            >
+                                                Annuler
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-primary"
+                                                id="saveStudentIdentityButton"
+                                            >
+                                                <span
+                                                    id="saveStudentIdentityIcon"
+                                                >
+                                                    <i class="bi bi-person-check me-1"></i>
+                                                </span>
+
+                                                <span
+                                                    id="saveStudentIdentityText"
+                                                >
+                                                    Créer l'identité
+                                                </span>
+                                            </button>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="invalid-feedback"
+                            id="studentSelectionFeedback"
+                        >
+                            Veuillez rechercher puis sélectionner
+                            un étudiant.
                         </div>
 
                     </div>
@@ -307,83 +758,119 @@ $selectedStudentId =
                                     </span>
                                 </label>
 
-                                <select
-                                    class="form-select"
-                                    id="university_id"
-                                    name="university_id"
-                                    required
-                                >
+                                <?php if ($isUniversityContext): ?>
 
-                                    <option value="">
-                                        Sélectionnez une université
-                                    </option>
+                                    <input
+                                        type="hidden"
+                                        id="university_id"
+                                        name="university_id"
+                                        value="<?= $selectedUniversityId ?>"
+                                    >
 
-                                    <?php foreach (
-                                        $universities
-                                        as $university
-                                    ): ?>
-
-                                        <?php
-                                        $universityId =
-                                            (int) (
-                                                $university[
-                                                    'organization_id'
-                                                ]
-                                                ?? $university['id']
-                                                ?? 0
-                                            );
-
-                                        $universityCode =
-                                            trim(
-                                                (string) (
-                                                    $university['code']
-                                                    ?? ''
-                                                )
-                                            );
-
-                                        $universityName =
-                                            trim(
-                                                (string) (
-                                                    $university['name']
-                                                    ?? ''
-                                                )
-                                            );
-                                        ?>
-
-                                        <option
-                                            value="<?= $universityId ?>"
-                                        >
+                                    <div
+                                        class="form-control bg-body-tertiary"
+                                        aria-readonly="true"
+                                    >
+                                        <div class="fw-semibold">
                                             <?= htmlspecialchars(
-                                                $universityName !== ''
-                                                    ? $universityName
-                                                    : 'Université #'
-                                                        . $universityId,
+                                                $activeUniversityName !== ''
+                                                    ? $activeUniversityName
+                                                    : 'Université active',
                                                 ENT_QUOTES,
                                                 'UTF-8'
                                             ) ?>
+                                        </div>
 
-                                            <?php if (
-                                                $universityCode !== ''
-                                            ): ?>
+                                        <small class="text-muted">
+                                            Contexte universitaire imposé
+                                            par MedTrack
+                                        </small>
+                                    </div>
 
+                                <?php else: ?>
+
+                                    <select
+                                        class="form-select"
+                                        id="university_id"
+                                        name="university_id"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Sélectionnez une université
+                                        </option>
+
+                                        <?php foreach (
+                                            $universities
+                                            as $university
+                                        ): ?>
+
+                                            <?php
+                                            $universityId =
+                                                (int) (
+                                                    $university[
+                                                        'organization_id'
+                                                    ]
+                                                    ?? $university['id']
+                                                    ?? 0
+                                                );
+
+                                            $universityCode =
+                                                trim(
+                                                    (string) (
+                                                        $university['code']
+                                                        ?? ''
+                                                    )
+                                                );
+
+                                            $universityName =
+                                                trim(
+                                                    (string) (
+                                                        $university['name']
+                                                        ?? ''
+                                                    )
+                                                );
+                                            ?>
+
+                                            <option
+                                                value="<?= $universityId ?>"
+                                                <?= $universityId === $selectedUniversityId
+                                                    ? 'selected'
+                                                    : '' ?>
+                                            >
                                                 <?= htmlspecialchars(
-                                                    ' — '
-                                                    . $universityCode,
+                                                    $universityName !== ''
+                                                        ? $universityName
+                                                        : 'Université #'
+                                                            . $universityId,
                                                     ENT_QUOTES,
                                                     'UTF-8'
                                                 ) ?>
 
-                                            <?php endif; ?>
+                                                <?php if (
+                                                    $universityCode !== ''
+                                                ): ?>
 
-                                        </option>
+                                                    <?= htmlspecialchars(
+                                                        ' — '
+                                                        . $universityCode,
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>
 
-                                    <?php endforeach; ?>
+                                                <?php endif; ?>
 
-                                </select>
+                                            </option>
 
-                                <div class="invalid-feedback">
-                                    Veuillez sélectionner une université.
-                                </div>
+                                        <?php endforeach; ?>
+
+                                    </select>
+
+                                    <div class="invalid-feedback">
+                                        Veuillez sélectionner une université.
+                                    </div>
+
+                                <?php endif; ?>
 
                             </div>
 
@@ -444,6 +931,9 @@ $selectedStudentId =
 
                                         <option
                                             value="<?= $yearId ?>"
+                                            <?= $yearId === $selectedAcademicYearId
+                                                ? 'selected'
+                                                : '' ?>
                                         >
                                             <?= htmlspecialchars(
                                                 $yearLabel,
@@ -543,6 +1033,9 @@ $selectedStudentId =
                                         <option
                                             value="<?= $programId ?>"
                                             data-university-id="<?= $programUniversityId ?>"
+                                            <?= $programId === $selectedAcademicProgramId
+                                                ? 'selected'
+                                                : '' ?>
                                         >
                                             <?= htmlspecialchars(
                                                 $programCode !== ''
@@ -622,6 +1115,9 @@ $selectedStudentId =
 
                                         <option
                                             value="<?= $levelId ?>"
+                                            <?= $levelId === $selectedStudyLevelId
+                                                ? 'selected'
+                                                : '' ?>
                                         >
                                             <?= htmlspecialchars(
                                                 $levelCode !== ''
@@ -709,6 +1205,9 @@ $selectedStudentId =
                                             value="<?= $cohortId ?>"
                                             data-program-id="<?= $cohortProgramId ?>"
                                             data-academic-year-id="<?= $cohortAcademicYearId ?>"
+                                            <?= $cohortId === $selectedCohortId
+                                                ? 'selected'
+                                                : '' ?>
                                         >
                                             <?= htmlspecialchars(
                                                 $cohortName,
@@ -781,6 +1280,11 @@ $selectedStudentId =
                                     name="registration_number"
                                     maxlength="80"
                                     autocomplete="off"
+                                    value="<?= htmlspecialchars(
+                                        $selectedRegistrationNumber,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
                                     required
                                 >
 
@@ -812,6 +1316,11 @@ $selectedStudentId =
                                     class="form-control"
                                     id="enrolled_at"
                                     name="enrolled_at"
+                                    value="<?= htmlspecialchars(
+                                        $selectedEnrolledAt,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
                                 >
 
                             </div>
@@ -866,26 +1375,48 @@ $selectedStudentId =
                             required
                         >
 
-                            <option value="PENDING">
+                            <option
+                                value="PENDING"
+                                <?= $selectedStatus === 'PENDING'
+                                    ? 'selected'
+                                    : '' ?>
+                            >
                                 En attente
                             </option>
 
                             <option
                                 value="ACTIVE"
-                                selected
+                                <?= $selectedStatus === 'ACTIVE'
+                                    ? 'selected'
+                                    : '' ?>
                             >
                                 Active
                             </option>
 
-                            <option value="SUSPENDED">
+                            <option
+                                value="SUSPENDED"
+                                <?= $selectedStatus === 'SUSPENDED'
+                                    ? 'selected'
+                                    : '' ?>
+                            >
                                 Suspendue
                             </option>
 
-                            <option value="COMPLETED">
+                            <option
+                                value="COMPLETED"
+                                <?= $selectedStatus === 'COMPLETED'
+                                    ? 'selected'
+                                    : '' ?>
+                            >
                                 Terminée
                             </option>
 
-                            <option value="CANCELLED">
+                            <option
+                                value="CANCELLED"
+                                <?= $selectedStatus === 'CANCELLED'
+                                    ? 'selected'
+                                    : '' ?>
+                            >
                                 Annulée
                             </option>
 
@@ -926,8 +1457,9 @@ $selectedStudentId =
                                     Université
                                 </strong>
                                 <br>
-                                détermine les programmes
-                                disponibles.
+                                <?= $isUniversityContext
+                                    ? 'est imposée par le contexte actif.'
+                                    : 'détermine les programmes disponibles.' ?>
                             </div>
 
                             <div class="mb-3">

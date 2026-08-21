@@ -3,14 +3,31 @@
 declare(strict_types=1);
 
 /**
- * @var array $cohort
- * @var array $academicPrograms
- * @var array $academicYears
+ * @var array<string, mixed> $cohort
+ * @var array<int, array<string, mixed>> $academicPrograms
+ * @var array<int, array<string, mixed>> $academicYears
+ * @var bool $isPlatform
+ * @var bool $isUniversityContext
+ * @var int|null $activeUniversityId
  */
 
-$cohort = $cohort ?? [];
-$academicPrograms = $academicPrograms ?? [];
-$academicYears = $academicYears ?? [];
+$cohort =
+    $cohort ?? [];
+
+$academicPrograms =
+    $academicPrograms ?? [];
+
+$academicYears =
+    $academicYears ?? [];
+
+$isPlatform =
+    $isPlatform ?? false;
+
+$isUniversityContext =
+    $isUniversityContext ?? false;
+
+$activeUniversityId =
+    $activeUniversityId ?? null;
 
 $id = (int) (
     $cohort['id']
@@ -60,8 +77,19 @@ $currentName = (string) (
                         </h5>
 
                         <p class="text-muted small mb-0">
-                            Modifiez le programme, l'année académique
-                            ou le nom de la cohorte.
+
+                            <?php if ($isUniversityContext): ?>
+
+                                Modifiez cette cohorte dans le périmètre
+                                académique de votre université.
+
+                            <?php else: ?>
+
+                                Modifiez le programme, l'année académique
+                                ou le nom de la cohorte.
+
+                            <?php endif; ?>
+
                         </p>
 
                     </div>
@@ -154,57 +182,83 @@ $currentName = (string) (
                                 </option>
 
 
+                                <?php
+                                $currentProgramAvailable =
+                                    false;
+                                ?>
+
                                 <?php foreach ($academicPrograms as $program): ?>
 
                                     <?php
-                                    $programId = (int) (
-                                        $program['id']
-                                        ?? 0
-                                    );
+                                    $programId =
+                                        (int) (
+                                            $program['id']
+                                            ?? 0
+                                        );
 
-                                    $programCode = (string) (
-                                        $program['code']
-                                        ?? ''
-                                    );
+                                    $programCode =
+                                        (string) (
+                                            $program['code']
+                                            ?? ''
+                                        );
 
-                                    $programName = (string) (
-                                        $program['name']
-                                        ?? ''
-                                    );
+                                    $programName =
+                                        (string) (
+                                            $program['name']
+                                            ?? ''
+                                        );
 
-                                    $universityName = (string) (
-                                        $program['university_name']
-                                        ?? ''
-                                    );
+                                    $universityName =
+                                        (string) (
+                                            $program['university_name']
+                                            ?? ''
+                                        );
 
-                                    $facultyName = (string) (
-                                        $program['faculty_name']
-                                        ?? ''
-                                    );
+                                    $facultyName =
+                                        (string) (
+                                            $program['faculty_name']
+                                            ?? ''
+                                        );
 
                                     $selected =
-                                        $programId === $currentProgramId;
+                                        $programId
+                                        === $currentProgramId;
+
+                                    if ($selected) {
+                                        $currentProgramAvailable =
+                                            true;
+                                    }
                                     ?>
 
                                     <option
                                         value="<?= $programId ?>"
-                                        <?= $selected ? 'selected' : '' ?>
+                                        <?= $selected
+                                            ? 'selected'
+                                            : '' ?>
                                     >
-                                        <?= htmlspecialchars(
-                                            $universityName !== ''
-                                                ? $universityName . ' — '
-                                                : '',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
 
-                                        <?= htmlspecialchars(
-                                            $programCode !== ''
-                                                ? $programCode . ' — '
-                                                : '',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+                                        <?php if (
+                                            $isPlatform
+                                            && $universityName !== ''
+                                        ): ?>
+
+                                            <?= htmlspecialchars(
+                                                $universityName . ' — ',
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+
+                                        <?php endif; ?>
+
+                                        <?php if ($programCode !== ''): ?>
+
+                                            <?= htmlspecialchars(
+                                                $programCode . ' — ',
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+
+                                        <?php endif; ?>
 
                                         <?= htmlspecialchars(
                                             $programName,
@@ -226,13 +280,49 @@ $currentName = (string) (
 
                                 <?php endforeach; ?>
 
+                                <?php if (
+                                    !$currentProgramAvailable
+                                    && $currentProgramId > 0
+                                ): ?>
+
+                                    <option
+                                        value="<?= $currentProgramId ?>"
+                                        selected
+                                        disabled
+                                    >
+                                        Programme actuel indisponible
+                                    </option>
+
+                                <?php endif; ?>
+
                             </select>
 
 
                             <div class="form-text">
                                 Programme académique auquel
                                 appartient cette cohorte.
+
+                                <?php if ($isUniversityContext): ?>
+                                    Seuls les programmes de votre
+                                    université sont disponibles.
+                                <?php endif; ?>
                             </div>
+
+                            <?php if (
+                                isset($currentProgramAvailable)
+                                && !$currentProgramAvailable
+                                && $currentProgramId > 0
+                            ): ?>
+
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Le programme actuellement associé
+                                    n’est plus disponible dans votre
+                                    périmètre. Sélectionnez un programme
+                                    valide avant d’enregistrer.
+                                </div>
+
+                            <?php endif; ?>
 
                             <div class="invalid-feedback">
                                 Veuillez sélectionner un programme
@@ -442,6 +532,12 @@ $currentName = (string) (
                                     Modifier le programme ou l'année
                                     académique change le rattachement
                                     académique de cette cohorte.
+
+                                    <?php if ($isUniversityContext): ?>
+                                        Le programme sélectionné doit
+                                        obligatoirement appartenir
+                                        à votre université.
+                                    <?php endif; ?>
                                 </div>
 
                             </div>
