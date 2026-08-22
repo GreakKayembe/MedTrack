@@ -1,14 +1,40 @@
-<footer id="footer" class="footer">
+<footer
+    id="medtrackFooter"
+    class="medtrack-footer"
+>
 
-    <div class="copyright">
-        &copy; <?= date('Y') ?>
-        <strong>
-            <span>MedTrack By Groupe SNADARPE</span>
-        </strong>
-    </div>
+    <div class="medtrack-footer__inner">
 
-    <div class="credits">
-        Plateforme de gestion des stages en sciences de la santé
+        <div class="medtrack-footer__copyright">
+
+            <span>
+                &copy;
+                <?= date('Y') ?>
+            </span>
+
+            <strong class="medtrack-footer__brand">
+                MedTrack
+            </strong>
+
+            <span class="medtrack-footer__separator">
+                •
+            </span>
+
+            <span>
+                Développé par
+            </span>
+
+            <strong class="medtrack-footer__accent">
+                Groupe SNADARPE
+            </strong>
+
+        </div>
+
+
+        <div class="medtrack-footer__credits">
+
+        </div>
+
     </div>
 
 </footer>
