@@ -28,6 +28,7 @@ use MedTrack\Modules\Academic\Controllers\CohortController;
 use MedTrack\Modules\Academic\Controllers\FacultyController;
 use MedTrack\Modules\Academic\Controllers\StudentController;
 use MedTrack\Modules\Academic\Controllers\StudyLevelController;
+use MedTrack\Modules\Academic\Controllers\StudentImportController;
 use MedTrack\Modules\Academic\Controllers\UniversityController;
 use MedTrack\Modules\Academic\Controllers\HospitalController;
 
@@ -58,6 +59,7 @@ return static function (
     StudyLevelController $studyLevelController,
     CohortController $cohortController,
     StudentController $studentController,
+    StudentImportController $studentImportController,
 
     InternshipController $internshipController,
     PaymentController $paymentController,
@@ -2899,6 +2901,171 @@ $router->middleware(
     '/students/{id}',
     $csrfProtection
 );
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Academic - Student Imports
+|--------------------------------------------------------------------------
+*/
+
+/*
+ * Formulaire d'import massif des étudiants.
+ *
+ * UNIVERSITY uniquement.
+ */
+$router->get(
+    '/student-imports/create',
+    [$studentImportController, 'create']
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/create',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/create',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/create',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/create',
+    $permissionMiddleware->require(
+        'students.import'
+    )
+);
+
+
+/*
+ * Upload et prévalidation du fichier Excel.
+ */
+$router->post(
+    '/student-imports',
+    [$studentImportController, 'store']
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports',
+    $permissionMiddleware->require(
+        'students.import'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports',
+    $csrfProtection
+);
+
+
+/*
+ * Prévisualisation d'un import.
+ */
+$router->get(
+    '/student-imports/{id}',
+    [$studentImportController, 'show']
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/{id}',
+    $authProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/{id}',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/{id}',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'GET',
+    '/student-imports/{id}',
+    $permissionMiddleware->require(
+        'students.import'
+    )
+);
+
+/*
+ * Confirmation définitive d'un import étudiant.
+ *
+ * UNIVERSITY uniquement.
+ */
+$router->post(
+    '/student-imports/{id}/confirm',
+    [$studentImportController, 'confirm']
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports/{id}/confirm',
+    $authProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports/{id}/confirm',
+    $passwordChangeProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports/{id}/confirm',
+    $accessContextProtection
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports/{id}/confirm',
+    $permissionMiddleware->require(
+        'students.import'
+    )
+);
+
+$router->middleware(
+    'POST',
+    '/student-imports/{id}/confirm',
+    $csrfProtection
+);
+
+
 
 /*
 |--------------------------------------------------------------------------

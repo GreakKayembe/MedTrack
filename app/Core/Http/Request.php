@@ -13,7 +13,8 @@ final class Request
         private readonly string $path,
         private readonly array $query,
         private readonly array $body,
-        private readonly array $server
+        private readonly array $server,
+        private readonly array $files = []
     ) {
     }
 
@@ -33,7 +34,8 @@ final class Request
             '/' . trim($path, '/'),
             $_GET,
             $_POST,
-            $_SERVER
+            $_SERVER,
+            $_FILES
         );
     }
 
@@ -70,12 +72,80 @@ final class Request
         return $this->body;
     }
 
+    /**
+     * Retourne un fichier envoyé via multipart/form-data.
+     *
+     * Structure retournée :
+     *
+     * [
+     *     'name' => 'students.xlsx',
+     *     'full_path' => 'students.xlsx',
+     *     'type' => '...',
+     *     'tmp_name' => '/tmp/php...',
+     *     'error' => UPLOAD_ERR_OK,
+     *     'size' => 12345,
+     * ]
+     */
+    public function file(
+        string $key
+    ): ?array {
+        $file =
+            $this->files[$key]
+            ?? null;
+
+        if (!is_array($file)) {
+            return null;
+        }
+
+        return $file;
+    }
+
+    /**
+     * Indique si un fichier a réellement été envoyé
+     * sans erreur d'upload PHP.
+     */
+    public function hasFile(
+        string $key
+    ): bool {
+        $file =
+            $this->file($key);
+
+        if ($file === null) {
+            return false;
+        }
+
+        $tmpName =
+            $file['tmp_name']
+            ?? null;
+
+        $error =
+            $file['error']
+            ?? UPLOAD_ERR_NO_FILE;
+
+        return $error === UPLOAD_ERR_OK
+            && is_string($tmpName)
+            && $tmpName !== ''
+            && is_uploaded_file($tmpName);
+    }
+
+    /**
+     * Retourne tous les fichiers de la requête.
+     */
+    public function files(): array
+    {
+        return $this->files;
+    }
+
     public function header(
         string $name,
         mixed $default = null
     ): mixed {
         $key = 'HTTP_' . strtoupper(
-            str_replace('-', '_', $name)
+            str_replace(
+                '-',
+                '_',
+                $name
+            )
         );
 
         return $this->server[$key]
@@ -84,7 +154,8 @@ final class Request
 
     public function ip(): string
     {
-        $ip = $this->server['REMOTE_ADDR']
+        $ip =
+            $this->server['REMOTE_ADDR']
             ?? '0.0.0.0';
 
         return is_string($ip)
@@ -130,7 +201,8 @@ final class Request
     public function setRouteAttributes(
         array $attributes
     ): void {
-        $this->attributes = $attributes;
+        $this->attributes =
+            $attributes;
     }
 
     /**

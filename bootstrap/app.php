@@ -33,6 +33,7 @@ use MedTrack\Modules\Academic\Controllers\CohortController;
 use MedTrack\Modules\Academic\Controllers\FacultyController;
 use MedTrack\Modules\Academic\Controllers\StudentController;
 use MedTrack\Modules\Academic\Controllers\StudyLevelController;
+use MedTrack\Modules\Academic\Controllers\StudentImportController;
 use MedTrack\Modules\Academic\Controllers\UniversityController;
 use MedTrack\Modules\Academic\Controllers\MinistryController;
 use MedTrack\Modules\Academic\Controllers\ProfessionalOrderController;
@@ -45,6 +46,8 @@ use MedTrack\Modules\Academic\Repositories\CohortRepository;
 use MedTrack\Modules\Academic\Repositories\FacultyRepository;
 use MedTrack\Modules\Academic\Repositories\StudentRepository;
 use MedTrack\Modules\Academic\Repositories\StudyLevelRepository;
+use MedTrack\Modules\Academic\Repositories\StudentImport\StudentImportRepository;
+use MedTrack\Modules\Academic\Repositories\StudentImport\StudentImportRowRepository;
 use MedTrack\Modules\Academic\Repositories\UniversityRepository;
 use MedTrack\Modules\Academic\Repositories\ProfessionalOrderRepository;
 use MedTrack\Modules\Academic\Repositories\MinistryRepository;
@@ -67,6 +70,10 @@ use MedTrack\Modules\Academic\Services\CohortService;
 use MedTrack\Modules\Academic\Services\FacultyService;
 use MedTrack\Modules\Academic\Services\StudentService;
 use MedTrack\Modules\Academic\Services\StudyLevelService;
+use MedTrack\Modules\Academic\Services\StudentImport\StudentImportParser;
+use MedTrack\Modules\Academic\Services\StudentImport\StudentImportReferenceResolver;
+use MedTrack\Modules\Academic\Services\StudentImport\StudentImportValidator;
+use MedTrack\Modules\Academic\Services\StudentImport\StudentImportService;
 use MedTrack\Modules\Academic\Services\UniversityService;
 use MedTrack\Modules\Academic\Controllers\HospitalController;
 use MedTrack\Modules\Academic\Repositories\HospitalRepository;
@@ -978,6 +985,50 @@ $cohortController =
         $view
     );
 
+    /*
+|--------------------------------------------------------------------------
+| Student Import
+|--------------------------------------------------------------------------
+*/
+
+$studentImportRepository =
+    new StudentImportRepository(
+        $database->connection()
+    );
+
+$studentImportRowRepository =
+    new StudentImportRowRepository(
+        $database->connection()
+    );
+
+$studentImportParser =
+    new StudentImportParser();
+
+$studentImportReferenceResolver =
+    new StudentImportReferenceResolver(
+        $database->connection()
+    );
+
+$studentImportValidator =
+    new StudentImportValidator(
+        $studentImportReferenceResolver
+    );
+
+$studentImportService =
+    new StudentImportService(
+        $database->connection(),
+        $studentImportParser,
+        $studentImportValidator,
+        $studentImportRepository,
+        $studentImportRowRepository
+    );
+
+$studentImportController =
+    new StudentImportController(
+        $studentImportService,
+        $accessContextResolver,
+        $view
+    );
     
 $studentController =
     new StudentController(
@@ -1164,6 +1215,7 @@ $registerRoutes(
     $studyLevelController,
     $cohortController,
     $studentController,
+    $studentImportController,
 
     $internshipController,
     $paymentController,
