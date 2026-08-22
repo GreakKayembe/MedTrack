@@ -228,6 +228,156 @@ final class StudentImportRepository
         );
     }
 
+
+    /**
+ * Démarre l'import définitif.
+ */
+public function markProcessing(
+    int $id,
+    int $universityId,
+    int $confirmedByUserId
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                UPDATE student_imports
+
+                SET status = 'PROCESSING',
+                    confirmed_by_user_id = :confirmed_by_user_id,
+                    confirmed_at = CURRENT_TIMESTAMP,
+                    processing_started_at = CURRENT_TIMESTAMP
+
+                WHERE id = :id
+                  AND university_id = :university_id
+                  AND status = 'READY'
+            SQL
+        );
+
+    $statement->execute([
+        'confirmed_by_user_id' =>
+            $confirmedByUserId,
+
+        'id' =>
+            $id,
+
+        'university_id' =>
+            $universityId,
+    ]);
+
+    if ($statement->rowCount() < 1) {
+        throw new RuntimeException(
+            'Cet import n’est pas disponible '
+            . 'pour confirmation.'
+        );
+    }
+}
+
+
+/**
+ * Termine un import.
+ */
+public function markCompleted(
+    int $id,
+    int $universityId,
+    bool $withErrors
+): void {
+    $status =
+        $withErrors
+            ? 'COMPLETED_WITH_ERRORS'
+            : 'COMPLETED';
+
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                UPDATE student_imports
+
+                SET status = :status,
+                    completed_at = CURRENT_TIMESTAMP
+
+                WHERE id = :id
+                  AND university_id = :university_id
+                  AND status = 'PROCESSING'
+            SQL
+        );
+
+    $statement->execute([
+        'status' =>
+            $status,
+
+        'id' =>
+            $id,
+
+        'university_id' =>
+            $universityId,
+    ]);
+
+    if ($statement->rowCount() < 1) {
+        throw new RuntimeException(
+            'Impossible de terminer cet import.'
+        );
+    }
+}
+
+
+/**
+ * Met à jour les compteurs d'exécution.
+ */
+public function updateImportStatistics(
+    int $id,
+    int $universityId,
+    int $importedRows,
+    int $failedRows,
+    int $skippedRows,
+    int $createdUsers,
+    int $createdStudents,
+    int $createdEnrollments
+): void {
+    $statement =
+        $this->pdo->prepare(
+            <<<'SQL'
+                UPDATE student_imports
+
+                SET imported_rows = :imported_rows,
+                    failed_rows = :failed_rows,
+                    skipped_rows = :skipped_rows,
+                    created_users = :created_users,
+                    created_students = :created_students,
+                    created_enrollments = :created_enrollments
+
+                WHERE id = :id
+                  AND university_id = :university_id
+            SQL
+        );
+
+    $statement->execute([
+        'imported_rows' =>
+            $importedRows,
+
+        'failed_rows' =>
+            $failedRows,
+
+        'skipped_rows' =>
+            $skippedRows,
+
+        'created_users' =>
+            $createdUsers,
+
+        'created_students' =>
+            $createdStudents,
+
+        'created_enrollments' =>
+            $createdEnrollments,
+
+        'id' =>
+            $id,
+
+        'university_id' =>
+            $universityId,
+    ]);
+}
+
+
+
     private function changeStatus(
         int $id,
         int $universityId,

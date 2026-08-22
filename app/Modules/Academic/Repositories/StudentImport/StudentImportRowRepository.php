@@ -366,6 +366,133 @@ final class StudentImportRowRepository
         return $statistics;
     }
 
+
+        /**
+     * Marque une ligne comme importée.
+     */
+    public function markImported(
+        int $rowId,
+        ?int $createdUserId,
+        ?int $createdStudentId,
+        ?int $createdEnrollmentId
+    ): void {
+        $statement =
+            $this->pdo->prepare(
+                <<<'SQL'
+                    UPDATE student_import_rows
+
+                    SET status = 'IMPORTED',
+                        created_user_id = :created_user_id,
+                        created_student_id = :created_student_id,
+                        created_enrollment_id = :created_enrollment_id,
+                        processed_at = CURRENT_TIMESTAMP
+
+                    WHERE id = :id
+                SQL
+            );
+
+        $statement->execute([
+            'created_user_id' =>
+                $createdUserId,
+
+            'created_student_id' =>
+                $createdStudentId,
+
+            'created_enrollment_id' =>
+                $createdEnrollmentId,
+
+            'id' =>
+                $rowId,
+        ]);
+
+        if ($statement->rowCount() < 1) {
+            throw new RuntimeException(
+                sprintf(
+                    'Impossible de marquer la ligne %d comme importée.',
+                    $rowId
+                )
+            );
+        }
+    }
+
+
+    /**
+     * Marque une ligne comme échouée.
+     *
+     * @param list<string> $errors
+     */
+    public function markFailed(
+        int $rowId,
+        array $errors
+    ): void {
+        $statement =
+            $this->pdo->prepare(
+                <<<'SQL'
+                    UPDATE student_import_rows
+
+                    SET status = 'FAILED',
+                        errors_json = :errors_json,
+                        processed_at = CURRENT_TIMESTAMP
+
+                    WHERE id = :id
+                SQL
+            );
+
+        $statement->execute([
+            'errors_json' =>
+                $this->encodeJson(
+                    $errors
+                ),
+
+            'id' =>
+                $rowId,
+        ]);
+
+        if ($statement->rowCount() < 1) {
+            throw new RuntimeException(
+                sprintf(
+                    'Impossible de marquer la ligne %d comme échouée.',
+                    $rowId
+                )
+            );
+        }
+    }
+
+
+    /**
+     * Marque une ligne comme ignorée.
+     */
+    public function markSkipped(
+        int $rowId
+    ): void {
+        $statement =
+            $this->pdo->prepare(
+                <<<'SQL'
+                    UPDATE student_import_rows
+
+                    SET status = 'SKIPPED',
+                        processed_at = CURRENT_TIMESTAMP
+
+                    WHERE id = :id
+                SQL
+            );
+
+        $statement->execute([
+            'id' =>
+                $rowId,
+        ]);
+
+        if ($statement->rowCount() < 1) {
+            throw new RuntimeException(
+                sprintf(
+                    'Impossible de marquer la ligne %d comme ignorée.',
+                    $rowId
+                )
+            );
+        }
+    }
+
+
     public function deleteForImport(
         int $studentImportId
     ): void {

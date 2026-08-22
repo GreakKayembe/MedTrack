@@ -481,174 +481,68 @@ final class StudentImportController
         Request $request
     ): never {
         try {
-            $context =
-                $this->universityContext();
+            $context = $this->universityContext();
+            $importId = $this->routeId($request);
+            $universityId = $context->organizationId();
+            $userId = $context->userId();
 
-            $importId =
-                $this->routeId(
-                    $request
-                );
+            if ($userId <= 0) {
+                throw new RuntimeException('Utilisateur actif introuvable.');
+            }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Retrieve import
-            |--------------------------------------------------------------------------
-            */
+            $result = $this->imports->confirm(
+                $importId,
+                $universityId,
+                $userId
+            );
 
-            $preview =
-                $this->imports->preview(
-                    $importId,
-                    $context->organizationId()
-                );
+            $importedRows = (int) ($result['imported_rows'] ?? 0);
+            $existingRows = (int) ($result['existing_rows'] ?? 0);
+            $failedRows = (int) ($result['failed_rows'] ?? 0);
 
-            if ($preview === null) {
-                Response::json(
-                    [
-                        'status' =>
-                            'error',
+            $message = sprintf(
+                '%d étudiant(s) importé(s) avec succès.',
+                $importedRows
+            );
 
-                        'code' =>
-                            'STUDENT_IMPORT_NOT_FOUND',
-
-                        'message' =>
-                            'Import étudiant introuvable.',
-                    ],
-                    404
+            if ($existingRows > 0) {
+                $message .= sprintf(
+                    ' %d ligne(s) déjà existante(s) ignorée(s).',
+                    $existingRows
                 );
             }
 
-            $import =
-                $preview['import'];
-
-            /*
-            |--------------------------------------------------------------------------
-            | Status
-            |--------------------------------------------------------------------------
-            */
-
-            $status =
-                strtoupper(
-                    (string) (
-                        $import['status']
-                        ?? ''
-                    )
-                );
-
-            if ($status !== 'READY') {
-                throw new RuntimeException(
-                    'Cet import n’est pas prêt '
-                    . 'à être confirmé.'
+            if ($failedRows > 0) {
+                $message .= sprintf(
+                    ' %d ligne(s) n’ont pas pu être importée(s).',
+                    $failedRows
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Errors
-            |--------------------------------------------------------------------------
-            */
-
-            $errorRows =
-                (int) (
-                    $import['error_rows']
-                    ?? 0
-                );
-
-            if ($errorRows > 0) {
-                throw new RuntimeException(
-                    'Cet import contient encore '
-                    . 'des lignes en erreur.'
-                );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Importable rows
-            |--------------------------------------------------------------------------
-            */
-
-            $validRows =
-                (int) (
-                    $import['valid_rows']
-                    ?? 0
-                );
-
-            $warningRows =
-                (int) (
-                    $import['warning_rows']
-                    ?? 0
-                );
-
-            if (
-                $validRows <= 0
-                && $warningRows <= 0
-            ) {
-                throw new RuntimeException(
-                    'Aucune ligne importable '
-                    . 'n’a été trouvée.'
-                );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Temporary response
-            |--------------------------------------------------------------------------
-            |
-            | La route fonctionne maintenant réellement.
-            |
-            | La prochaine étape sera de remplacer cette
-            | réponse par :
-            |
-            | $result = $this->imports->confirm(...)
-            |
-            | après création du StudentOnboardingService.
-            |--------------------------------------------------------------------------
-            */
 
             Response::json(
                 [
-                    'status' =>
-                        'error',
-
-                    'code' =>
-                        'STUDENT_IMPORT_CONFIRMATION_NOT_IMPLEMENTED',
-
-                    'message' =>
-                        'Le fichier est prêt à être importé, '
-                        . 'mais la création définitive '
-                        . 'des comptes étudiants et des '
-                        . 'inscriptions académiques '
-                        . 'n’est pas encore implémentée.',
+                    'status' => 'success',
+                    'message' => $message,
+                    'import' => $result,
+                    'redirect' => '/students',
                 ],
-                409
+                200
             );
-
         } catch (RuntimeException $exception) {
             Response::json(
                 [
-                    'status' =>
-                        'error',
-
-                    'code' =>
-                        'STUDENT_IMPORT_CONFIRMATION_ERROR',
-
-                    'message' =>
-                        $exception->getMessage(),
+                    'status' => 'error',
+                    'code' => 'STUDENT_IMPORT_CONFIRMATION_ERROR',
+                    'message' => $exception->getMessage(),
                 ],
                 422
             );
-
         } catch (Throwable $exception) {
             Response::json(
                 [
-                    'status' =>
-                        'error',
-
-                    'code' =>
-                        'STUDENT_IMPORT_CONFIRMATION_FAILED',
-
-                    'message' =>
-                        'Impossible de confirmer '
-                        . 'l’import pour le moment.',
+                    'status' => 'error',
+                    'code' => 'STUDENT_IMPORT_CONFIRMATION_FAILED',
+                    'message' => 'Impossible de confirmer l’import pour le moment.',
                 ],
                 500
             );

@@ -70,6 +70,7 @@ use MedTrack\Modules\Academic\Services\CohortService;
 use MedTrack\Modules\Academic\Services\FacultyService;
 use MedTrack\Modules\Academic\Services\StudentService;
 use MedTrack\Modules\Academic\Services\StudyLevelService;
+use MedTrack\Modules\Academic\Services\StudentImport\StudentOnboardingService;
 use MedTrack\Modules\Academic\Services\StudentImport\StudentImportParser;
 use MedTrack\Modules\Academic\Services\StudentImport\StudentImportReferenceResolver;
 use MedTrack\Modules\Academic\Services\StudentImport\StudentImportValidator;
@@ -985,7 +986,43 @@ $cohortController =
         $view
     );
 
+
     /*
+|--------------------------------------------------------------------------
+| Student Controller
+|--------------------------------------------------------------------------
+*/
+
+$studentController =
+    new StudentController(
+        $studentService,
+        $academicEnrollmentService,
+        $accessContextResolver,
+        $view
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| Academic Enrollment Controller
+|--------------------------------------------------------------------------
+*/
+
+$academicEnrollmentController =
+    new AcademicEnrollmentController(
+        $academicEnrollmentService,
+        $studentService,
+        $universityService,
+        $academicProgramService,
+        $academicYearService,
+        $studyLevelService,
+        $cohortService,
+        $accessContextResolver,
+        $view
+    );
+
+
+/*
 |--------------------------------------------------------------------------
 | Student Import
 |--------------------------------------------------------------------------
@@ -1014,39 +1051,47 @@ $studentImportValidator =
         $studentImportReferenceResolver
     );
 
+/*
+|--------------------------------------------------------------------------
+| Student onboarding
+|--------------------------------------------------------------------------
+|
+| Ce service réalise la création définitive :
+|
+| User
+|   -> User profile
+|   -> Student
+|   -> Academic enrollment
+|
+*/
+
+$studentOnboardingService =
+    new StudentOnboardingService(
+        $database->connection(),
+        $organizationOnboardingRepository,
+        $studentService,
+        $academicEnrollmentService
+    );
+
+/*
+|--------------------------------------------------------------------------
+| Student import service
+|--------------------------------------------------------------------------
+*/
+
 $studentImportService =
     new StudentImportService(
         $database->connection(),
         $studentImportParser,
         $studentImportValidator,
         $studentImportRepository,
-        $studentImportRowRepository
+        $studentImportRowRepository,
+        $studentOnboardingService
     );
 
 $studentImportController =
     new StudentImportController(
         $studentImportService,
-        $accessContextResolver,
-        $view
-    );
-    
-$studentController =
-    new StudentController(
-        $studentService,
-        $academicEnrollmentService,
-        $accessContextResolver,
-        $view
-    );
-
-    $academicEnrollmentController =
-    new AcademicEnrollmentController(
-        $academicEnrollmentService,
-        $studentService,
-        $universityService,
-        $academicProgramService,
-        $academicYearService,
-        $studyLevelService,
-        $cohortService,
         $accessContextResolver,
         $view
     );

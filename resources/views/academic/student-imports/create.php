@@ -5,12 +5,6 @@ declare(strict_types=1);
 
 <div class="container-fluid py-4">
 
-    <!--
-    |--------------------------------------------------------------------------
-    | Header
-    |--------------------------------------------------------------------------
-    -->
-
     <div
         class="d-flex flex-column flex-md-row
                align-items-md-center justify-content-between
@@ -39,7 +33,6 @@ declare(strict_types=1);
 
         </div>
 
-
         <div>
             <a
                 href="/assets/templates/medtrack_student_import_template.xlsx"
@@ -50,18 +43,13 @@ declare(strict_types=1);
                 Télécharger le modèle
             </a>
         </div>
-
     </div>
 
 
-    <!--
-    |--------------------------------------------------------------------------
-    | Information
-    |--------------------------------------------------------------------------
-    -->
-
-    <div class="alert alert-info border-0 shadow-sm mb-4">
-
+    <div
+        class="alert alert-info
+               border-0 shadow-sm mb-4"
+    >
         <div class="d-flex gap-3">
 
             <div>
@@ -83,15 +71,8 @@ declare(strict_types=1);
             </div>
 
         </div>
-
     </div>
 
-
-    <!--
-    |--------------------------------------------------------------------------
-    | Form
-    |--------------------------------------------------------------------------
-    -->
 
     <form
         id="studentImportForm"
@@ -112,8 +93,6 @@ declare(strict_types=1);
         >
 
 
-        <!-- AJAX alert -->
-
         <div
             id="studentImportAlert"
             class="alert d-none"
@@ -123,23 +102,23 @@ declare(strict_types=1);
 
         <div class="row g-4">
 
-            <!--
-            |--------------------------------------------------------------------------
-            | Upload
-            |--------------------------------------------------------------------------
-            -->
-
             <div class="col-xl-8">
 
                 <div class="card border-0 shadow-sm">
 
-                    <div class="card-header bg-transparent py-3">
-
+                    <div
+                        class="card-header
+                               bg-transparent py-3"
+                    >
                         <h2 class="h5 mb-0">
-                            <i class="bi bi-file-earmark-excel me-2"></i>
-                            Fichier Excel
-                        </h2>
 
+                            <i
+                                class="bi bi-file-earmark-excel me-2"
+                            ></i>
+
+                            Fichier Excel
+
+                        </h2>
                     </div>
 
 
@@ -179,12 +158,20 @@ declare(strict_types=1);
 
                         <div
                             id="studentImportFileInfo"
-                            class="alert alert-light border d-none mb-0"
+                            class="alert alert-light
+                                   border d-none mb-0"
                         >
-                            <div class="d-flex align-items-center gap-3">
+                            <div
+                                class="d-flex
+                                       align-items-center
+                                       gap-3"
+                            >
 
                                 <div class="fs-3 text-success">
-                                    <i class="bi bi-file-earmark-excel"></i>
+                                    <i
+                                        class="bi
+                                               bi-file-earmark-excel"
+                                    ></i>
                                 </div>
 
                                 <div class="flex-grow-1">
@@ -211,26 +198,28 @@ declare(strict_types=1);
             </div>
 
 
-            <!--
-            |--------------------------------------------------------------------------
-            | Sidebar
-            |--------------------------------------------------------------------------
-            -->
-
             <div class="col-xl-4">
 
-                <!-- Rules -->
+                <div
+                    class="card border-0
+                           shadow-sm mb-4"
+                >
 
-                <div class="card border-0 shadow-sm mb-4">
-
-                    <div class="card-header bg-transparent py-3">
-
+                    <div
+                        class="card-header
+                               bg-transparent py-3"
+                    >
                         <h2 class="h5 mb-0">
-                            <i class="bi bi-list-check me-2"></i>
-                            Règles d'import
-                        </h2>
 
+                            <i
+                                class="bi bi-list-check me-2"
+                            ></i>
+
+                            Règles d'import
+
+                        </h2>
                     </div>
+
 
                     <div class="card-body">
 
@@ -252,13 +241,23 @@ declare(strict_types=1);
                             </li>
 
                             <li class="mb-2">
+                                Les niveaux d'études doivent
+                                déjà exister dans MedTrack.
+                            </li>
+
+                            <li class="mb-2">
+                                La cohorte est facultative.
+                            </li>
+
+                            <li class="mb-2">
                                 Les doublons seront détectés
                                 automatiquement.
                             </li>
 
                             <li>
-                                La confirmation définitive intervient
-                                après la prévisualisation.
+                                La création définitive intervient
+                                uniquement après prévisualisation
+                                et confirmation.
                             </li>
 
                         </ul>
@@ -267,8 +266,6 @@ declare(strict_types=1);
 
                 </div>
 
-
-                <!-- Actions -->
 
                 <div class="card border-0 shadow-sm">
 
@@ -281,11 +278,17 @@ declare(strict_types=1);
                                 class="btn btn-primary"
                                 id="studentImportSubmitButton"
                             >
-                                <span id="studentImportSubmitIcon">
-                                    <i class="bi bi-search me-1"></i>
+                                <span
+                                    id="studentImportSubmitIcon"
+                                >
+                                    <i
+                                        class="bi bi-search me-1"
+                                    ></i>
                                 </span>
 
-                                <span id="studentImportSubmitText">
+                                <span
+                                    id="studentImportSubmitText"
+                                >
                                     Analyser le fichier
                                 </span>
                             </button>
